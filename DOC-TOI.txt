@@ -1,0 +1,77 @@
+Chỉnh lại keyword SEO picture trong SEO_config.py
+fallback của img nên đổi theo dự án
+SEO trang bằng schema
+đổi từng type schema cho từng dự án
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+✅ Các trang cần SEO (tối ưu on-page + hình ảnh)
+index.html (Trang chủ)-------------------------------------------------------
+SEO hình ảnh: logo, banner, sản phẩm nổi bật.
+Tối ưu từ khóa chính & thương hiệu.
+products.html (Danh sách sản phẩm)-------------------------------------------
+SEO: tiêu đề danh mục, hình ảnh từng sản phẩm (alt/title).
+Từ khóa phụ, từ khóa mở rộng.
+product_detail.html (Chi tiết sản phẩm)------------------------------------
+Trang SEO quan trọng nhất cho từ khóa sản phẩm.
+SEO hình ảnh: alt/title chuẩn SEO, tên file ảnh chuẩn.
+Nội dung chi tiết, mô tả sản phẩm.
+blog.html (Danh sách blog)--------------------------------------------------
+SEO tiêu đề & meta description cho danh mục bài viết.
+Hình ảnh bài viết có alt/title.
+blog_detail.html (Chi tiết blog)----------------------------------------------
+SEO: từ khóa dài, nội dung bài viết.
+SEO hình ảnh: alt/title, caption nếu có.
+about.html (Giới thiệu công ty)------------------------------------------------
+SEO thương hiệu, ảnh công ty/đội ngũ.
+contact.html (Liên hệ)--------------------------------------------------------
+SEO địa chỉ, map, số điện thoại (có thể index vào Local SEO).
+

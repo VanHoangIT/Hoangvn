@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block title %}Chính sách - {{ site_name }}{% endblock %}
+
+{% block content %}
+<div class="page-header bg-light py-4">
+    <div class="container">
+        <h1 class="fw-bold">Chính sách</h1>
+    </div>
+</div>
+
+<section class="py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-3 mb-4">
+                <div class="list-group">
+                    <a href="#shipping" class="list-group-item list-group-item-action">
+                        <i class="bi bi-truck"></i> Chính sách vận chuyển
+                    </a>
+                    <a href="#return" class="list-group-item list-group-item-action">
+                        <i class="bi bi-arrow-repeat"></i> Chính sách đổi trả
+                    </a>
+                    <a href="#warranty" class="list-group-item list-group-item-action">
+                        <i class="bi bi-shield-check"></i> Chính sách bảo hành
+                    </a>
+                    <a href="#privacy" class="list-group-item list-group-item-action">
+                        <i class="bi bi-lock"></i> Chính sách bảo mật
+                    </a>
+                </div>
+            </div>
+            
+            <div class="col-lg-9">
+                <div class="card mb-4" id="shipping">
+                    <div class="card-body">
+                        <h3><i class="bi bi-truck text-warning"></i> Chính sách vận chuyển</h3>
+                        <hr>
+                        <p>Chúng tôi cung cấp dịch vụ vận chuyển toàn quốc với các hình thức:</p>
+                        <ul>
+                            <li>Giao hàng tiêu chuẩn: 3-5 ngày</li>
+                            <li>Giao hàng nhanh: 1-2 ngày</li>
+                            <li>Miễn phí vận chuyển cho đơn hàng trên 500.000đ</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="card mb-4" id="return">
+                    <div class="card-body">
+                        <h3><i class="bi bi-arrow-repeat text-warning"></i> Chính sách đổi trả</h3>
+                        <hr>
+                        <p>Khách hàng có thể đổi trả sản phẩm trong vòng 7 ngày nếu:</p>
+                        <ul>
+                            <li>Sản phẩm còn nguyên tem, hộp, phụ kiện</li>
+                            <li>Không có dấu hiệu sử dụng</li>
+                            <li>Có hóa đơn mua hàng</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="card mb-4" id="warranty">
+                    <div class="card-body">
+                        <h3><i class="bi bi-shield-check text-warning"></i> Chính sách bảo hành</h3>
+                        <hr>
+                        <p>Tất cả sản phẩm đều được bảo hành chính hãng:</p>
+                        <ul>
+                            <li>Bảo hành 12 tháng cho lỗi nhà sản xuất</li>
+                            <li>Hỗ trợ kỹ thuật miễn phí trọn đời</li>
+                            <li>Đổi mới trong 30 ngày đầu nếu có lỗi</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="card" id="privacy">
+                    <div class="card-body">
+                        <h3><i class="bi bi-lock text-warning"></i> Chính sách bảo mật</h3>
+                        <hr>
+                        <p>Chúng tôi cam kết bảo mật thông tin khách hàng:</p>
+                        <ul>
+                            <li>Không chia sẻ thông tin cho bên thứ ba</li>
+                            <li>Mã hóa dữ liệu thanh toán</li>
+                            <li>Bảo vệ quyền riêng tư tuyệt đối</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

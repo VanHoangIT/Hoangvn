@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+
+{% block title %}{{ blog.title }} - {{ site_name }}{% endblock %}
+
+{% block content %}
+<div class="page-header bg-light py-4">
+    <div class="container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="{{ url_for('main.index') }}">Trang chủ</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('main.blog') }}">Tin tức</a></li>
+                <li class="breadcrumb-item active">{{ blog.title }}</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<section class="py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8">
+                <article>
+                    <h1 class="fw-bold mb-3">{{ blog.title }}</h1>
+                    
+                    <div class="mb-4">
+                        <span class="text-muted">
+                            <i class="bi bi-calendar"></i> {{ blog.created_at.strftime('%d/%m/%Y') }}
+                        </span>
+                        <span class="text-muted ms-3">
+                            <i class="bi bi-eye"></i> {{ blog.views }} lượt xem
+                        </span>
+                        {% if blog.author %}
+                        <span class="text-muted ms-3">
+                            <i class="bi bi-person"></i> {{ blog.author }}
+                        </span>
+                        {% endif %}
+                    </div>
+                    
+                    {% if blog.image %}
+                    {% set media_info = blog.get_media_seo_info() %}
+
+                    <img src="{{ blog.image }}"
+                         class="img-fluid rounded mb-4"
+                         alt="{{ media_info.alt_text if media_info and media_info.alt_text else blog.title }}"
+                         title="{{ media_info.title if media_info and media_info.title else blog.title }}"
+                         loading="lazy">
+
+                    {# Hiển thị Caption cho SEO nhưng ẩn đi #}
+                    {% if media_info and media_info.caption %}
+                    <div class="visually-hidden">
+                        {{ media_info.caption }}
+                    </div>
+                    {% endif %}
+                    {% endif %}
+
+                    <div class="blog-content-detail">
+                        {{ blog.content|safe }}
+                    </div>
+                </article>
+
+                <!-- Related Blogs -->
+                {% if related_blogs %}
+                <div class="mt-5">
+                    <h4 class="fw-bold mb-4">Bài viết liên quan</h4>
+                    <div class="row g-3">
+                        {% for rb in related_blogs %}
+                        <div class="col-md-4">
+                            <div class="card h-100">
+                                {% set rb_media_info = rb.get_media_seo_info() if rb.image else None %}
+
+                                <img src="{{ rb.image if rb.image else 'https://via.placeholder.com/300x200' }}"
+                                     class="card-img-top"
+                                     alt="{{ rb_media_info.alt_text if rb_media_info and rb_media_info.alt_text else rb.title }}"
+                                     title="{{ rb_media_info.title if rb_media_info and rb_media_info.title else rb.title }}"
+                                     loading="lazy">
+
+                                {# Hiển thị Caption cho SEO nhưng ẩn đi #}
+                                {% if rb_media_info and rb_media_info.caption %}
+                                <div class="visually-hidden">
+                                    {{ rb_media_info.caption }}
+                                </div>
+                                {% endif %}
+
+                                <div class="card-body">
+                                    <h6>{{ rb.title }}</h6>
+                                    <a href="{{ url_for('main.blog_detail', slug=rb.slug) }}" class="btn btn-warning btn-sm">
+                                        Đọc thêm
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-lg-4">
+                <div class="card mb-4 sticky-top" style="top: 220px;">
+                    <div class="card-body">
+                        <h5 class="fw-bold mb-3">Liên hệ</h5>
+                        <p>Bạn cần tư vấn thêm? Liên hệ ngay với chúng tôi!</p>
+                        <a href="/contact" class="btn btn-warning w-100">
+                            Liên hệ ngay
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

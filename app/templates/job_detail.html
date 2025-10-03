@@ -1,0 +1,280 @@
+{% extends "base.html" %}
+
+{% block title %}{{ job.title }} - Tuyển dụng - {{ config.SITE_NAME }}{% endblock %}
+
+{% block content %}
+<!-- Breadcrumb -->
+<section class="breadcrumb-section py-4 bg-light">
+    <div class="container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="{{ url_for('main.index') }}">Trang chủ</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('main.careers') }}">Tuyển dụng</a></li>
+                <li class="breadcrumb-item active">{{ job.title }}</li>
+            </ol>
+        </nav>
+    </div>
+</section>
+
+<!-- Job Detail -->
+<section class="job-detail py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8">
+                <!-- Job Header -->
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div>
+                                <h1 class="h2 mb-2">{{ job.title }}</h1>
+                                {% if job.is_urgent %}
+                                <span class="badge bg-danger mb-2">
+                                    <i class="bi bi-lightning-fill"></i> Tuyển gấp
+                                </span>
+                                {% endif %}
+                            </div>
+                            {% if not job.is_expired() %}
+                            <span class="badge bg-success">Đang tuyển</span>
+                            {% else %}
+                            <span class="badge bg-secondary">Đã đóng</span>
+                            {% endif %}
+                        </div>
+
+                        <div class="row g-3 mb-4">
+                            {% if job.department %}
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-briefcase text-warning fs-4 me-3"></i>
+                                    <div>
+                                        <small class="text-muted d-block">Phòng ban</small>
+                                        <strong>{{ job.department }}</strong>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-geo-alt text-warning fs-4 me-3"></i>
+                                    <div>
+                                        <small class="text-muted d-block">Địa điểm</small>
+                                        <strong>{{ job.location }}</strong>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-clock text-warning fs-4 me-3"></i>
+                                    <div>
+                                        <small class="text-muted d-block">Hình thức</small>
+                                        <strong>{{ job.job_type }}</strong>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-bar-chart text-warning fs-4 me-3"></i>
+                                    <div>
+                                        <small class="text-muted d-block">Cấp bậc</small>
+                                        <strong>{{ job.level }}</strong>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-cash-stack text-warning fs-4 me-3"></i>
+                                    <div>
+                                        <small class="text-muted d-block">Mức lương</small>
+                                        <strong class="text-success">{{ job.salary }}</strong>
+                                    </div>
+                                </div>
+                            </div>
+                            {% if job.experience %}
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-award text-warning fs-4 me-3"></i>
+                                    <div>
+                                        <small class="text-muted d-block">Kinh nghiệm</small>
+                                        <strong>{{ job.experience }}</strong>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        {% if job.deadline and not job.is_expired() %}
+                        <div class="alert alert-warning">
+                            <i class="bi bi-calendar-event"></i> 
+                            <strong>Hạn nộp hồ sơ:</strong> {{ job.deadline.strftime('%d/%m/%Y') }}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Job Description -->
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">
+                            <i class="bi bi-file-text"></i> Mô tả công việc
+                        </h5>
+                        <div class="job-description">
+                            {{ job.description|safe }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Requirements -->
+                {% if job.requirements %}
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">
+                            <i class="bi bi-check2-square"></i> Yêu cầu ứng viên
+                        </h5>
+                        <div class="requirements">
+                            {{ job.requirements|safe }}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Benefits -->
+                {% if job.benefits %}
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">
+                            <i class="bi bi-gift"></i> Quyền lợi
+                        </h5>
+                        <div class="benefits">
+                            {{ job.benefits|safe }}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Apply CTA -->
+                {% if not job.is_expired() %}
+                <div class="card border-0 shadow-sm bg-warning">
+                    <div class="card-body text-center py-4">
+                        <h4 class="mb-3">Bạn quan tâm đến vị trí này?</h4>
+                        <p class="mb-4">Hãy gửi CV của bạn cho chúng tôi ngay hôm nay!</p>
+                        <a href="mailto:{{ job.contact_email }}?subject=Ứng tuyển {{ job.title }}" 
+                           class="btn btn-dark btn-lg">
+                            <i class="bi bi-envelope"></i> Gửi CV ngay
+                        </a>
+                        <p class="small text-muted mt-3 mb-0">
+                            Email: {{ job.contact_email }}
+                        </p>
+                    </div>
+                </div>
+                {% else %}
+                <div class="alert alert-secondary text-center">
+                    <i class="bi bi-info-circle"></i> Vị trí này đã hết hạn nộp hồ sơ
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-lg-4">
+                <!-- Quick Apply -->
+                {% if not job.is_expired() %}
+                <div class="card border-0 shadow-sm mb-4 sticky-top" style="top: 200px;">
+                    <div class="card-header bg-warning">
+                        <h5 class="mb-0"><i class="bi bi-send"></i> Ứng tuyển nhanh</h5>
+                    </div>
+                    <div class="card-body">
+                        <form action="mailto:{{ job.contact_email }}" method="get" enctype="text/plain">
+                            <input type="hidden" name="subject" value="Ứng tuyển {{ job.title }}">
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Họ tên *</label>
+                                <input type="text" class="form-control" required>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Email *</label>
+                                <input type="email" class="form-control" required>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Số điện thoại *</label>
+                                <input type="tel" class="form-control" required>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">CV đính kèm</label>
+                                <input type="file" class="form-control" accept=".pdf,.doc,.docx">
+                                <small class="text-muted">PDF, DOC, DOCX (Max 5MB)</small>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-warning w-100">
+                                <i class="bi bi-send"></i> Gửi hồ sơ
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Other Jobs -->
+                {% if other_jobs %}
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-light">
+                        <h6 class="mb-0"><i class="bi bi-briefcase"></i> Vị trí khác</h6>
+                    </div>
+                    <div class="list-group list-group-flush">
+                        {% for other in other_jobs %}
+                        <a href="{{ url_for('main.job_detail', slug=other.slug) }}" 
+                           class="list-group-item list-group-item-action">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="flex-grow-1">
+                                    <strong class="d-block">{{ other.title }}</strong>
+                                    <small class="text-muted">
+                                        <i class="bi bi-geo-alt"></i> {{ other.location }}
+                                    </small>
+                                </div>
+                                {% if other.is_urgent %}
+                                <span class="badge bg-danger">Gấp</span>
+                                {% endif %}
+                            </div>
+                        </a>
+                        {% endfor %}
+                    </div>
+                    <div class="card-footer bg-white">
+                        <a href="{{ url_for('main.careers') }}" class="btn btn-outline-warning w-100">
+                            Xem tất cả <i class="bi bi-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.job-description ul,
+.requirements ul,
+.benefits ul {
+    list-style: none;
+    padding-left: 0;
+}
+
+.job-description ul li,
+.requirements ul li,
+.benefits ul li {
+    padding-left: 1.5em;
+    position: relative;
+    margin-bottom: 0.5rem;
+}
+
+.job-description ul li:before,
+.requirements ul li:before,
+.benefits ul li:before {
+    content: "\F26B";
+    font-family: "bootstrap-icons";
+    color: #ffc107;
+    position: absolute;
+    left: 0;
+}
+</style>
+{% endblock %}

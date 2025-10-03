@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block title %}FAQ - {{ site_name }}{% endblock %}
+
+{% block content %}
+<div class="page-header bg-light py-4">
+    <div class="container">
+        <h1 class="fw-bold">Câu hỏi thường gặp</h1>
+    </div>
+</div>
+
+<section class="py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="accordion" id="faqAccordion">
+                    {% for faq in faqs %}
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button {% if not loop.first %}collapsed{% endif %}" 
+                                    type="button" 
+                                    data-bs-toggle="collapse" 
+                                    data-bs-target="#faq{{ faq.id }}">
+                                <i class="bi bi-question-circle text-warning me-2"></i>
+                                {{ faq.question }}
+                            </button>
+                        </h2>
+                        <div id="faq{{ faq.id }}" 
+                             class="accordion-collapse collapse {% if loop.first %}show{% endif %}" 
+                             data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                {{ faq.answer|safe }}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <div class="text-center mt-5">
+                    <p class="lead">Không tìm thấy câu trả lời?</p>
+                    <a href="{{ url_for('main.contact') }}" class="btn btn-warning">
+                        Liên hệ với chúng tôi
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
