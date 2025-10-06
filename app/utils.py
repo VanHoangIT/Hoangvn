@@ -5,6 +5,7 @@ from PIL import Image
 from werkzeug.utils import secure_filename
 from flask import current_app
 from app import db
+import cloudinary.uploader
 
 
 def allowed_file(filename):
@@ -153,15 +154,15 @@ def get_image_from_form(form_image_field, field_name, folder='uploads'):
 
 
 
+import cloudinary.uploader
+
 def save_upload_file(file, folder='general', album=None, alt_text=None, optimize=True):
     """
-    Lưu file upload với đầy đủ tính năng SEO:
-    - folder: thư mục đích (products, banners, blogs)
-    - album: tên album/thư mục con tùy chỉnh
-    - alt_text: Alt text cho tên file SEO-friendly
-    - optimize: có tối ưu ảnh không
-
-    Returns: (relative_path, file_info_dict) or (None, None)
+    Upload file lên Cloudinary thay vì lưu cục bộ.
+    - folder: thư mục (products, banners, blogs, ...)
+    - album: tên album (sẽ được thêm vào folder nếu có)
+    - alt_text: dùng để tạo tên file SEO-friendly
+    Returns: (image_url, file_info_dict) hoặc (None, None)
     """
     if not file or not hasattr(file, 'filename') or not allowed_file(file.filename):
         return None, None
@@ -169,88 +170,86 @@ def save_upload_file(file, folder='general', album=None, alt_text=None, optimize
     # Tạo tên file SEO-friendly
     filename = generate_seo_filename(file.filename, alt_text)
 
-    # Xác định đường dẫn lưu
+    # Tạo đường dẫn thư mục trên Cloudinary
+    cloud_folder = f"enterprise/{folder}"
     if album:
-        upload_folder = os.path.join(
-            current_app.config['UPLOAD_FOLDER'],
-            'albums',
-            secure_filename(album)
+        cloud_folder = f"{cloud_folder}/{secure_filename(album)}"
+
+    try:
+        # Upload lên Cloudinary
+        upload_result = cloudinary.uploader.upload(
+            file,
+            folder=cloud_folder,
+            public_id=os.path.splitext(filename)[0],
+            overwrite=True,
+            resource_type="image",
+            use_filename=True,
+            unique_filename=False
         )
-    else:
-        year_month = datetime.now().strftime('%Y-%m')
-        upload_folder = os.path.join(
-            current_app.config['UPLOAD_FOLDER'],
-            folder,
-            year_month
-        )
 
-    # Tạo thư mục nếu chưa có
-    os.makedirs(upload_folder, exist_ok=True)
+        image_url = upload_result.get("secure_url")
+        width = upload_result.get("width", 0)
+        height = upload_result.get("height", 0)
+        file_size = upload_result.get("bytes", 0)
+        file_type = upload_result.get("format", "unknown")
 
-    # Lưu file
-    filepath = os.path.join(upload_folder, filename)
-    file.save(filepath)
-
-    # Lấy kích thước và tối ưu ảnh
-    width, height = 0, 0
-    if optimize and file.content_type and file.content_type.startswith('image/'):
-        max_widths = {
-            'banners': 1920,
-            'products': 800,
-            'blogs': 1200,
-            'categories': 600,
-            'general': 1920
+        file_info = {
+            'filename': filename,
+            'original_filename': file.filename,
+            'filepath': image_url,  # URL Cloudinary
+            'file_type': file_type,
+            'file_size': file_size,
+            'width': width,
+            'height': height,
+            'album': album
         }
-        max_width = max_widths.get(folder, 1920)
 
-        result = optimize_image(filepath, max_width=max_width)
-        if result:
-            width = result['width']
-            height = result['height']
-    else:
-        width, height = get_image_dimensions(filepath)
+        return image_url, file_info
 
-    file_size = os.path.getsize(filepath)
+    except Exception as e:
+        print(f"[Cloudinary upload error]: {e}")
+        return None, None
 
-    # Tạo relative path để serve qua /static/
-    relative_path = filepath.replace(
-        current_app.config['UPLOAD_FOLDER'],
-        '/static/uploads'
-    ).replace('\\', '/')
 
-    file_info = {
-        'filename': filename,
-        'original_filename': file.filename,
-        'filepath': relative_path,
-        'file_type': file.content_type,
-        'file_size': file_size,
-        'width': width,
-        'height': height,
-        'album': album
-    }
 
-    return relative_path, file_info
+import os
+import cloudinary.uploader
 
+import os
+import cloudinary.uploader
 
 def delete_file(filepath):
-    """Xóa file khỏi server"""
+    """Xóa file khỏi Cloudinary hoặc local"""
     try:
-        # Convert relative path to absolute
-        if filepath.startswith('/static/'):
-            filepath = filepath.replace('/static/', '')
+        if "res.cloudinary.com" in filepath:
+            parts = filepath.split("/upload/")[-1]
+            # Loại bỏ phần version (vd: v1759744420/)
+            if parts.startswith("v") and "/" in parts:
+                parts = "/".join(parts.split("/")[1:])
+            # Bỏ phần mở rộng .jpg/.png
+            public_id = os.path.splitext(parts)[0]
 
-        full_path = os.path.join(
-            current_app.config['UPLOAD_FOLDER'],
-            '..',
-            filepath
-        )
+            result = cloudinary.uploader.destroy(public_id)
+            print(f"[Cloudinary delete]: {public_id} -> {result}")
+            return result.get("result") == "ok"
 
-        if os.path.exists(full_path):
-            os.remove(full_path)
-            return True
+        # Nếu là file local
+        elif filepath.startswith('/static/'):
+            file_path = filepath.replace('/static/', '')
+            full_path = os.path.join(
+                os.path.dirname(__file__), 'static', file_path
+            )
+            abs_path = os.path.abspath(full_path)
+            if os.path.exists(abs_path):
+                os.remove(abs_path)
+                print(f"[Local delete]: {abs_path}")
+                return True
+
     except Exception as e:
-        print(f"Error deleting file: {e}")
+        print(f"[Delete Error]: {e}")
     return False
+
+
 
 
 def get_albums():

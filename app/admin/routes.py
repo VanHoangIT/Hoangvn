@@ -1300,36 +1300,46 @@ def create_album():
 @admin_bp.route('/media/delete/<int:id>')
 @login_required
 def delete_media(id):
-    """Xóa media file"""
+    """Xóa media file (Cloudinary + local + DB)"""
     media = Media.query.get_or_404(id)
-
-    # Lưu album name trước khi xóa
     album_name = media.album
 
-    # Xóa file vật lý khỏi server
+    from app.utils import delete_file
+    import os
+
     try:
-        # Convert relative path to absolute
-        if media.filepath.startswith('/static/'):
+        # 🧹 1️⃣ Xóa ảnh trên Cloudinary nếu là URL
+        if media.filepath and "res.cloudinary.com" in media.filepath:
+            res = delete_file(media.filepath)
+            print(f"[Delete Cloudinary]: {res}")
+        else:
+            print("[Delete Cloudinary]: Bỏ qua (không phải URL Cloudinary)")
+
+        # 🧹 2️⃣ Xóa file local nếu có
+        if media.filepath and media.filepath.startswith('/static/'):
             file_path = media.filepath.replace('/static/', '')
             full_path = os.path.join(current_app.config['UPLOAD_FOLDER'], '..', file_path)
-        else:
-            full_path = os.path.join(current_app.root_path, media.filepath.lstrip('/'))
+            abs_path = os.path.abspath(full_path)
 
-        if os.path.exists(full_path):
-            os.remove(full_path)
+            if os.path.exists(abs_path):
+                os.remove(abs_path)
+                print(f"[Delete Local]: Đã xóa {abs_path}")
+            else:
+                print(f"[Delete Local]: Không tìm thấy {abs_path}")
+
     except Exception as e:
-        print(f"Error deleting file: {e}")
+        print(f"[Delete Error]: {e}")
 
-    # Xóa record khỏi DB
+    # 🧹 3️⃣ Xóa record khỏi DB
     db.session.delete(media)
     db.session.commit()
+    flash('Đã xóa file (Cloudinary + Local) thành công!', 'success')
 
-    flash('Đã xóa file thành công!', 'success')
-
-    # Redirect về album nếu đang filter
+    # 🧭 4️⃣ Redirect lại đúng album
     if album_name:
         return redirect(url_for('admin.media', album=album_name))
     return redirect(url_for('admin.media'))
+
 
 
 @admin_bp.route('/media/delete-album/<album_name>')
