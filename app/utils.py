@@ -1,7 +1,3 @@
-"""
-File Utils - Ưu tiên Cloudinary cho Production (Render/Heroku)
-Local storage chỉ dùng khi dev và chưa config Cloudinary
-"""
 import os
 import re
 from datetime import datetime
@@ -10,21 +6,6 @@ from werkzeug.utils import secure_filename
 from flask import current_app
 from app import db
 
-# Cloudinary imports
-try:
-    import cloudinary
-    import cloudinary.uploader
-    import cloudinary.api
-
-    CLOUDINARY_AVAILABLE = True
-except ImportError:
-    CLOUDINARY_AVAILABLE = False
-    print("⚠️ WARNING: Cloudinary chưa cài đặt!")
-    print("   pip install cloudinary")
-    print("   Hiện tại chỉ dùng local storage (không khuyến nghị cho production)")
-
-
-# ==================== COMMON UTILS ====================
 
 def allowed_file(filename):
     """Kiểm tra file có hợp lệ không"""
@@ -64,8 +45,10 @@ def generate_seo_filename(original_filename, alt_text=None):
     name, ext = os.path.splitext(original_filename)
 
     if alt_text:
+        # Sử dụng alt_text làm tên file
         base_name = slugify(alt_text)
     else:
+        # Sử dụng tên gốc
         base_name = slugify(name)
 
     # Giới hạn độ dài (max 50 ký tự)
@@ -76,41 +59,6 @@ def generate_seo_filename(original_filename, alt_text=None):
 
     return f"{base_name}-{timestamp}{ext.lower()}"
 
-
-def validate_seo_alt_text(alt_text):
-    """
-    Validate Alt Text theo chuẩn SEO
-    Returns: (is_valid, message)
-    """
-    if not alt_text or len(alt_text.strip()) == 0:
-        return False, "Alt Text không được để trống"
-
-    alt_len = len(alt_text)
-
-    if alt_len < 10:
-        return False, f"Alt Text quá ngắn ({alt_len} ký tự). Nên từ 30-125 ký tự"
-
-    if alt_len > 125:
-        return False, f"Alt Text quá dài ({alt_len} ký tự). Nên từ 30-125 ký tự"
-
-    # Check spam keywords
-    spam_patterns = [
-        r'(ảnh|hình|image|picture|photo)\s*\d+',
-        r'click\s+here',
-        r'buy\s+now',
-    ]
-
-    for pattern in spam_patterns:
-        if re.search(pattern, alt_text.lower()):
-            return False, "Alt Text không nên chứa spam keywords"
-
-    if alt_len >= 30 and alt_len <= 125:
-        return True, "Alt Text đạt chuẩn SEO"
-    else:
-        return True, f"Alt Text hợp lệ nhưng nên 30-125 ký tự (hiện tại: {alt_len})"
-
-
-# ==================== LOCAL STORAGE FUNCTIONS (Dev only) ====================
 
 def get_image_dimensions(filepath):
     """Lấy kích thước ảnh"""
@@ -123,12 +71,17 @@ def get_image_dimensions(filepath):
 
 def optimize_image(filepath, max_width=1920, max_height=1080, quality=85):
     """
-    Tối ưu hóa ảnh cho web
+    Tối ưu hóa ảnh cho web và SEO:
+    - Resize về kích thước phù hợp (giữ tỷ lệ)
+    - Nén với quality tối ưu
+    - Convert sang Progressive JPEG (load nhanh hơn)
+    - Loại bỏ EXIF data không cần thiết
+
     Returns: dict với thông tin ảnh sau khi tối ưu
     """
     try:
         with Image.open(filepath) as img:
-            # Convert RGBA/LA/P sang RGB nếu cần
+            # Convert RGBA/LA/P sang RGB nếu cần (cho JPEG)
             if img.mode in ('RGBA', 'LA', 'P'):
                 background = Image.new('RGB', img.size, (255, 255, 255))
                 if img.mode == 'P':
@@ -136,15 +89,18 @@ def optimize_image(filepath, max_width=1920, max_height=1080, quality=85):
                 background.paste(img, mask=img.split()[-1] if img.mode == 'RGBA' else None)
                 img = background
 
+            # Lấy kích thước gốc
             original_width, original_height = img.size
 
-            # Resize nếu quá lớn
+            # Resize nếu quá lớn (giữ tỷ lệ aspect ratio)
             if original_width > max_width or original_height > max_height:
                 img.thumbnail((max_width, max_height), Image.Resampling.LANCZOS)
 
             # Lưu ảnh đã tối ưu
+            # Progressive JPEG giúp ảnh load nhanh hơn trên web
             img.save(filepath, 'JPEG', quality=quality, optimize=True, progressive=True)
 
+            # Trả về thông tin ảnh sau khi tối ưu
             return {
                 'width': img.size[0],
                 'height': img.size[1],
@@ -154,6 +110,7 @@ def optimize_image(filepath, max_width=1920, max_height=1080, quality=85):
 
     except Exception as e:
         print(f"Error optimizing image: {e}")
+        # Nếu optimize fail, vẫn lấy kích thước gốc
         try:
             width, height = get_image_dimensions(filepath)
             return {
@@ -167,7 +124,7 @@ def optimize_image(filepath, max_width=1920, max_height=1080, quality=85):
 
 
 def create_thumbnail(filepath, size=(300, 300)):
-    """Tạo thumbnail cho ảnh (chỉ dùng local)"""
+    """Tạo thumbnail cho ảnh"""
     try:
         filename, ext = os.path.splitext(filepath)
         thumb_path = f"{filename}_thumb{ext}"
@@ -180,19 +137,39 @@ def create_thumbnail(filepath, size=(300, 300)):
     except:
         return None
 
+def get_image_from_form(form_image_field, field_name, folder='uploads'):
+    file = form_image_field.data
 
-def save_to_local(file, folder='general', album=None, alt_text=None, optimize=True):
+    # Trường hợp 1: có file upload mới (FileStorage object)
+    if file and hasattr(file, 'filename') and file.filename != '':
+        relative_path, _ = save_upload_file(file, folder=folder, optimize=True)
+        return relative_path
+
+    # Trường hợp 2: giữ nguyên string (đường dẫn cũ trong DB)
+    if isinstance(file, str) and file.strip() != '':
+        return file
+
+    return None
+
+
+
+def save_upload_file(file, folder='general', album=None, alt_text=None, optimize=True):
     """
-    Lưu file vào local storage (chỉ dev)
-    ⚠️ WARNING: Không dùng trên Render/Heroku - file sẽ mất khi deploy
-    Returns: (relative_path, file_info_dict)
+    Lưu file upload với đầy đủ tính năng SEO:
+    - folder: thư mục đích (products, banners, blogs)
+    - album: tên album/thư mục con tùy chỉnh
+    - alt_text: Alt text cho tên file SEO-friendly
+    - optimize: có tối ưu ảnh không
+
+    Returns: (relative_path, file_info_dict) or (None, None)
     """
     if not file or not hasattr(file, 'filename') or not allowed_file(file.filename):
         return None, None
 
+    # Tạo tên file SEO-friendly
     filename = generate_seo_filename(file.filename, alt_text)
 
-    # Xác định đường dẫn
+    # Xác định đường dẫn lưu
     if album:
         upload_folder = os.path.join(
             current_app.config['UPLOAD_FOLDER'],
@@ -207,13 +184,14 @@ def save_to_local(file, folder='general', album=None, alt_text=None, optimize=Tr
             year_month
         )
 
+    # Tạo thư mục nếu chưa có
     os.makedirs(upload_folder, exist_ok=True)
 
     # Lưu file
     filepath = os.path.join(upload_folder, filename)
     file.save(filepath)
 
-    # Tối ưu ảnh
+    # Lấy kích thước và tối ưu ảnh
     width, height = 0, 0
     if optimize and file.content_type and file.content_type.startswith('image/'):
         max_widths = {
@@ -234,7 +212,7 @@ def save_to_local(file, folder='general', album=None, alt_text=None, optimize=Tr
 
     file_size = os.path.getsize(filepath)
 
-    # Relative path
+    # Tạo relative path để serve qua /static/
     relative_path = filepath.replace(
         current_app.config['UPLOAD_FOLDER'],
         '/static/uploads'
@@ -248,266 +226,39 @@ def save_to_local(file, folder='general', album=None, alt_text=None, optimize=Tr
         'file_size': file_size,
         'width': width,
         'height': height,
-        'album': album,
-        'storage': 'local'
+        'album': album
     }
 
     return relative_path, file_info
 
 
-# ==================== CLOUDINARY FUNCTIONS (Production) ====================
-
-def upload_to_cloudinary(file, folder='general', public_id=None, optimize=True):
-    """
-    Upload file lên Cloudinary (khuyến nghị cho production)
-    Returns: dict với thông tin file
-    """
-    if not CLOUDINARY_AVAILABLE:
-        raise Exception("❌ Cloudinary chưa được cài đặt! pip install cloudinary")
-
+def delete_file(filepath):
+    """Xóa file khỏi server"""
     try:
-        if not public_id:
-            original_filename = getattr(file, 'filename', 'unnamed')
-            name_without_ext = os.path.splitext(secure_filename(original_filename))[0]
-            public_id = name_without_ext
-
-        cloudinary_folder = f"aosmith/{folder}"
-
-        upload_options = {
-            'folder': cloudinary_folder,
-            'public_id': public_id,
-            'resource_type': 'auto',
-            'overwrite': False,
-            'unique_filename': True,
-        }
-
-        if optimize:
-            upload_options.update({
-                'quality': 'auto:good',
-                'fetch_format': 'auto',
-                'format': 'jpg',
-            })
-            upload_options['transformation'] = [
-                {'width': 1920, 'height': 1200, 'crop': 'limit'},
-                {'quality': 'auto:good'},
-            ]
-
-        result = cloudinary.uploader.upload(file, **upload_options)
-
-        return {
-            'url': result.get('url'),
-            'secure_url': result.get('secure_url'),
-            'public_id': result.get('public_id'),
-            'format': result.get('format'),
-            'width': result.get('width'),
-            'height': result.get('height'),
-            'bytes': result.get('bytes'),
-            'resource_type': result.get('resource_type'),
-            'created_at': result.get('created_at'),
-            'storage': 'cloudinary'
-        }
-
-    except Exception as e:
-        print(f"❌ Cloudinary upload error: {e}")
-        raise
-
-
-def delete_from_cloudinary(public_id):
-    """Xóa file từ Cloudinary"""
-    if not CLOUDINARY_AVAILABLE:
-        return False
-    try:
-        result = cloudinary.uploader.destroy(public_id)
-        return result.get('result') == 'ok'
-    except Exception as e:
-        print(f"❌ Cloudinary delete error: {e}")
-        return False
-
-
-def extract_public_id(cloudinary_url):
-    """
-    Lấy public_id từ Cloudinary URL
-
-    Examples:
-        'https://res.cloudinary.com/demo/image/upload/v1234/aosmith/products/abc.jpg'
-        -> 'aosmith/products/abc'
-    """
-    try:
-        parts = cloudinary_url.split('/upload/')
-        if len(parts) < 2:
-            return None
-
-        path = parts[1]
-        if path.startswith('v'):
-            path = '/'.join(path.split('/')[1:])
-
-        public_id = os.path.splitext(path)[0]
-        return public_id
-    except Exception as e:
-        print(f"❌ Error extracting public_id: {e}")
-        return None
-
-
-def get_cloudinary_url(public_id, transformation=None):
-    """
-    Tạo Cloudinary URL với transformation tùy chỉnh
-
-    Args:
-        public_id: 'aosmith/products/abc'
-        transformation: dict hoặc list of dicts
-
-    Examples:
-        get_cloudinary_url('aosmith/products/abc', {'width': 300, 'crop': 'fill'})
-        -> URL với ảnh 300px
-    """
-    try:
-        url, options = cloudinary.utils.cloudinary_url(
-            public_id,
-            transformation=transformation,
-            secure=True
-        )
-        return url
-    except Exception as e:
-        print(f"❌ Error generating URL: {e}")
-        return None
-
-
-def get_image_info(url_or_public_id):
-    """Lấy thông tin chi tiết của ảnh từ Cloudinary"""
-    try:
-        if url_or_public_id.startswith('http'):
-            public_id = extract_public_id(url_or_public_id)
-        else:
-            public_id = url_or_public_id
-
-        if not public_id:
-            return None
-
-        result = cloudinary.api.resource(public_id)
-        return result
-
-    except Exception as e:
-        print(f"❌ Error getting image info: {e}")
-        return None
-
-
-# ==================== UNIFIED INTERFACE ====================
-
-def save_upload_file(file, folder='general', album=None, alt_text=None, optimize=True):
-    """
-    Lưu file - tự động chọn Cloudinary (production) hoặc local (dev)
-
-    Priority:
-    1. Cloudinary (nếu USE_CLOUDINARY=True) ✅ Khuyến nghị cho Render/Heroku
-    2. Local fallback (nếu Cloudinary fail hoặc chưa config)
-
-    Returns: (filepath_or_url, file_info_dict)
-    """
-    if not file or not hasattr(file, 'filename') or not allowed_file(file.filename):
-        return None, None
-
-    # Check config
-    use_cloudinary = current_app.config.get('USE_CLOUDINARY', False)
-
-    if use_cloudinary and CLOUDINARY_AVAILABLE:
-        print("☁️  Uploading to Cloudinary (production mode)...")
-        try:
-            result = upload_to_cloudinary(file, folder=folder, optimize=optimize)
-            print(f"✅ Upload thành công: {result['secure_url']}")
-            return result['secure_url'], result
-        except Exception as e:
-            print(f"⚠️  Cloudinary failed: {e}")
-            print("   → Fallback to local storage (file có thể mất sau khi deploy!)")
-            return save_to_local(file, folder, album, alt_text, optimize)
-    else:
-        if use_cloudinary and not CLOUDINARY_AVAILABLE:
-            print("⚠️  USE_CLOUDINARY=True nhưng chưa cài package!")
-            print("   pip install cloudinary")
-
-        print("💾 Uploading to local storage (dev mode)...")
-        return save_to_local(file, folder, album, alt_text, optimize)
-
-
-def delete_file(filepath_or_url):
-    """
-    Xóa file - tự động detect local hay Cloudinary
-    """
-    # Nếu là Cloudinary URL
-    if filepath_or_url.startswith('http') and 'cloudinary' in filepath_or_url:
-        print(f"☁️  Deleting from Cloudinary: {filepath_or_url}")
-        public_id = extract_public_id(filepath_or_url)
-        if public_id:
-            result = delete_from_cloudinary(public_id)
-            if result:
-                print("✅ Deleted successfully")
-            return result
-        return False
-
-    # Nếu là local file
-    print(f"💾 Deleting from local storage: {filepath_or_url}")
-    try:
-        if filepath_or_url.startswith('/static/'):
-            filepath_or_url = filepath_or_url.replace('/static/', '')
+        # Convert relative path to absolute
+        if filepath.startswith('/static/'):
+            filepath = filepath.replace('/static/', '')
 
         full_path = os.path.join(
             current_app.config['UPLOAD_FOLDER'],
             '..',
-            filepath_or_url
+            filepath
         )
 
         if os.path.exists(full_path):
             os.remove(full_path)
-            print("✅ Deleted successfully")
             return True
     except Exception as e:
-        print(f"❌ Error deleting file: {e}")
+        print(f"Error deleting file: {e}")
     return False
 
 
-def get_image_from_form(form_image_field, field_name, folder='uploads'):
-    """
-    Lấy ảnh từ form - hỗ trợ cả upload mới và giữ ảnh cũ
-    """
-    file = form_image_field.data
-
-    # Upload mới
-    if file and hasattr(file, 'filename') and file.filename != '':
-        relative_path, _ = save_upload_file(file, folder=folder, optimize=True)
-        return relative_path
-
-    # Giữ nguyên (URL cũ - có thể là Cloudinary hoặc local)
-    if isinstance(file, str) and file.strip() != '':
-        return file
-
-    return None
-
-
-def handle_image_upload(form_field, field_name, folder='general', alt_text=None):
-    """
-    Xử lý upload ảnh: ưu tiên từ media library, không thì upload mới
-    """
-    from flask import request
-
-    # 1. Chọn từ media library
-    selected_path = request.form.get(f'{field_name}_selected_path', '').strip()
-    if selected_path:
-        return selected_path
-
-    # 2. Upload mới
-    if form_field and hasattr(form_field, "filename") and form_field.filename:
-        result = save_upload_file(form_field, folder=folder, alt_text=alt_text, optimize=True)
-        return result[0] if isinstance(result, tuple) else result
-
-    return None
-
-
-# ==================== ALBUMS & MEDIA LIBRARY ====================
-
 def get_albums():
-    """Lấy danh sách albums (local storage only)"""
+    """Lấy danh sách albums với số lượng file"""
     from app.models import Media
     from sqlalchemy import func
 
+    # Lấy albums từ DB
     album_counts = db.session.query(
         Media.album,
         func.count(Media.id).label('count')
@@ -518,7 +269,7 @@ def get_albums():
 
     albums_dict = {album_name: count for album_name, count in album_counts}
 
-    # Thêm thư mục rỗng (chỉ có nghĩa với local storage)
+    # Lấy thư mục vật lý (kể cả rỗng)
     albums_path = os.path.join(current_app.config['UPLOAD_FOLDER'], 'albums')
     if os.path.exists(albums_path):
         for folder_name in os.listdir(albums_path):
@@ -526,76 +277,71 @@ def get_albums():
             if os.path.isdir(folder_path) and folder_name not in albums_dict:
                 albums_dict[folder_name] = 0
 
+    # Convert sang list và sort
     albums = [{'name': name, 'count': count} for name, count in albums_dict.items()]
     albums.sort(key=lambda x: x['name'])
 
     return albums
 
 
-# ==================== MIGRATION TOOLS ====================
-
-def migrate_local_to_cloudinary(local_filepath, folder='general'):
+def handle_image_upload(form_field, field_name, folder='general', alt_text=None):
     """
-    Migrate ảnh từ local lên Cloudinary
-    Dùng để chuyển ảnh cũ từ local sang cloud khi deploy lên Render
+    Xử lý upload ảnh: ưu tiên từ media library, không thì upload mới
 
-    Usage:
-        new_url = migrate_local_to_cloudinary('/static/uploads/products/abc.jpg', 'products')
+    Args:
+        form_field: File từ form (có thể None)
+        field_name: Tên field để lấy path từ hidden input
+        folder: Thư mục lưu nếu upload mới
+        alt_text: Alt text cho SEO (optional)
+
+    Returns:
+        str: Đường dẫn ảnh hoặc None
     """
-    if not CLOUDINARY_AVAILABLE:
-        print("❌ Cloudinary chưa được cài đặt")
-        return None
+    from flask import request
 
-    try:
-        if local_filepath.startswith('/static/'):
-            local_filepath = local_filepath.replace('/static/', '')
+    # 1. Kiểm tra có chọn từ media library không
+    selected_path = request.form.get(f'{field_name}_selected_path', '').strip()
+    if selected_path:
+        return selected_path
 
-        full_path = os.path.join(current_app.root_path, 'static', local_filepath)
+    # 2. Nếu không, upload file mới
+    if form_field and hasattr(form_field, "filename") and form_field.filename:
+        result = save_upload_file(form_field, folder=folder, alt_text=alt_text, optimize=True)
+        return result[0] if isinstance(result, tuple) else result
 
-        if not os.path.exists(full_path):
-            print(f"❌ File không tồn tại: {full_path}")
-            return None
-
-        print(f"📤 Migrating {local_filepath} to Cloudinary...")
-        with open(full_path, 'rb') as f:
-            result = upload_to_cloudinary(f, folder=folder, optimize=True)
-
-        print(f"✅ Migrated: {result['secure_url']}")
-        return result['secure_url']
-
-    except Exception as e:
-        print(f"❌ Migration error: {e}")
-        return None
+    # 3. Không có gì cả
+    return None
 
 
-def bulk_migrate_to_cloudinary(folder_type='products'):
+def validate_seo_alt_text(alt_text):
     """
-    Migrate toàn bộ ảnh trong 1 folder lên Cloudinary
+    Validate Alt Text theo chuẩn SEO
 
-    Usage:
-        bulk_migrate_to_cloudinary('products')
+    Returns: (is_valid, message)
     """
-    from app.models import Media
+    if not alt_text or len(alt_text.strip()) == 0:
+        return False, "Alt Text không được để trống"
 
-    # Lấy tất cả media local
-    local_media = Media.query.filter(
-        ~Media.filepath.like('http%')  # Chưa phải URL Cloudinary
-    ).all()
+    alt_len = len(alt_text)
 
-    migrated = 0
-    failed = 0
+    if alt_len < 10:
+        return False, f"Alt Text quá ngắn ({alt_len} ký tự). Nên từ 30-125 ký tự"
 
-    for media in local_media:
-        try:
-            new_url = migrate_local_to_cloudinary(media.filepath, folder_type)
-            if new_url:
-                media.filepath = new_url
-                db.session.commit()
-                migrated += 1
-                print(f"✅ {media.filename}: {new_url}")
-        except Exception as e:
-            failed += 1
-            print(f"❌ {media.filename}: {e}")
+    if alt_len > 125:
+        return False, f"Alt Text quá dài ({alt_len} ký tự). Nên từ 30-125 ký tự"
 
-    print(f"\n🎉 Migration hoàn tất: {migrated} thành công, {failed} thất bại")
-    return {'migrated': migrated, 'failed': failed}
+    # Check spam keywords
+    spam_patterns = [
+        r'(ảnh|hình|image|picture|photo)\s*\d+',  # ảnh 1, image123
+        r'click\s+here',
+        r'buy\s+now',
+    ]
+
+    for pattern in spam_patterns:
+        if re.search(pattern, alt_text.lower()):
+            return False, "Alt Text không nên chứa spam keywords như 'ảnh 123', 'click here'"
+
+    if alt_len >= 30 and alt_len <= 125:
+        return True, "Alt Text đạt chuẩn SEO"
+    else:
+        return True, f"Alt Text hợp lệ nhưng nên 30-125 ký tự (hiện tại: {alt_len})"
