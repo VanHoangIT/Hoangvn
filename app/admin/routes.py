@@ -1333,7 +1333,7 @@ def delete_media(id):
     # 🧹 3️⃣ Xóa record khỏi DB
     db.session.delete(media)
     db.session.commit()
-    flash('Đã xóa file (Cloudinary + Local) thành công!', 'success')
+    flash('Đã xóa ảnh thành công!', 'success')
 
     # 🧭 4️⃣ Redirect lại đúng album
     if album_name:
