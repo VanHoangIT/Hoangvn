@@ -21,7 +21,16 @@ class Config:
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
-    # Cấu hình upload file
+    # ==================== CLOUDINARY CONFIG ====================
+    # Nếu có CLOUDINARY_URL thì dùng Cloudinary, không thì dùng local storage
+    USE_CLOUDINARY = bool(os.environ.get('CLOUDINARY_URL'))
+
+    CLOUDINARY_CLOUD_NAME = os.environ.get('CLOUDINARY_CLOUD_NAME')
+    CLOUDINARY_API_KEY = os.environ.get('CLOUDINARY_API_KEY')
+    CLOUDINARY_API_SECRET = os.environ.get('CLOUDINARY_API_SECRET')
+    CLOUDINARY_URL = os.environ.get('CLOUDINARY_URL')  # Format: cloudinary://api_key:api_secret@cloud_name
+
+    # Cấu hình upload file (dùng cho local fallback)
     BASE_DIR = os.path.abspath(os.path.dirname(__file__))
     UPLOAD_FOLDER = os.path.join(BASE_DIR, 'static', 'uploads')
 
@@ -39,10 +48,23 @@ class Config:
     @staticmethod
     def init_app(app):
         """Khởi tạo cấu hình cho app"""
-        # Tạo thư mục upload nếu chưa tồn tại
+        # Tạo thư mục upload nếu chưa tồn tại (cho local storage)
         upload_folder = app.config['UPLOAD_FOLDER']
         os.makedirs(upload_folder, exist_ok=True)
 
         # Tạo các thư mục con
-        for folder in ['products', 'banners', 'blogs', 'categories', 'albums']:
+        for folder in ['products', 'banners', 'blogs', 'categories', 'albums', 'projects']:
             os.makedirs(os.path.join(upload_folder, folder), exist_ok=True)
+
+        # Khởi tạo Cloudinary nếu có config
+        if app.config.get('USE_CLOUDINARY'):
+            import cloudinary
+            cloudinary.config(
+                cloud_name=app.config.get('CLOUDINARY_CLOUD_NAME'),
+                api_key=app.config.get('CLOUDINARY_API_KEY'),
+                api_secret=app.config.get('CLOUDINARY_API_SECRET'),
+                secure=True
+            )
+            print("✓ Cloudinary đã được kích hoạt!")
+        else:
+            print("ℹ Đang dùng local storage (chưa config Cloudinary)")

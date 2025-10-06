@@ -1,200 +1,238 @@
 /* ==================== GLOBAL RESET ==================== */
 * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 body {
-    font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    color: #212529;
-    overflow-x: hidden;
+  font-family: "Roboto", -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+  color: #212529;
+  overflow-x: hidden;
 }
 
 html {
-    scroll-behavior: smooth;
+  scroll-behavior: smooth;
 }
 
 .bg-gray-dark {
-    background-color: #0606060a; /* đổi mã màu tuỳ bạn chọn */
-    color: #000000; /* chữ trắng để nổi bật */
+  background-color: #0606060a; /* đổi mã màu tuỳ bạn chọn */
+  color: #000000; /* chữ trắng để nổi bật */
 }
-
 
 /* ==================== NAVBAR ENHANCEMENTS ==================== */
 /* Header đã có .bg-warning .shadow-sm .sticky-top từ Bootstrap */
 
 .navbar {
-    padding: 0.75rem 1rem;
+  padding: 0.75rem 1rem;
 }
 
 .navbar > .container {
-    padding-left: 0;
-    padding-right: 0;
+  padding-left: 0;
+  padding-right: 0;
 }
 
 .navbar-brand {
-    font-size: 1.5rem;
-    font-weight: 600;
-    flex-shrink: 0;
-    margin-right: 1rem;
+  font-size: 1.5rem;
+  font-weight: 600;
+  flex-shrink: 0;
+  margin-right: 1rem;
 }
 
 .navbar-brand img {
-    border: 2px solid rgba(255, 255, 255, 0.5);
+  border: 2px solid rgba(255, 255, 255, 0.5);
 }
 
 /* Navigation Links - Căn giữa và cách đều */
 .navbar-nav {
-    display: flex;
-    justify-content: center;
-    gap: 0.5rem;
-    margin: 0 auto;
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin: 0 auto;
 }
 
 .nav-item {
-    margin: 0;
+  margin: 0;
 }
 
 .nav-link {
-    font-weight: 500;
-    font-size: 1rem;
-    padding: 0.5rem 1rem !important;
-    color: #212529 !important;
-    white-space: nowrap;
+  font-weight: 500;
+  font-size: 1rem;
+  padding: 0.5rem 1rem !important;
+  color: #212529 !important;
+  white-space: nowrap;
 }
 
 .nav-link:hover {
-    color: #000 !important;
-    background-color: rgba(255, 255, 255, 0.3);
-    border-radius: 8px;
+  color: #000 !important;
+  background-color: rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
 }
 
 .nav-link.active {
-    color: #000 !important;
-    font-weight: 700;
-    border-radius: 8px;
+  color: #000 !important;
+  font-weight: 700;
+  border-radius: 8px;
 }
 
 /* Button CTA ở bên phải */
 .navbar .btn-dark {
-    flex-shrink: 0;
-    margin-left: 1rem;
+  flex-shrink: 0;
+  margin-left: 1rem;
 }
 
 /* Dropdown menu styling */
 .dropdown-menu {
-    border: none;
-    box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.15);
-    border-radius: 8px;
-    margin-top: 0.5rem;
+  border: none;
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+  border-radius: 8px;
+  margin-top: 0.5rem;
 }
 
 .dropdown-item {
-    padding: 0.5rem 1.5rem;
+  padding: 0.5rem 1.5rem;
 }
 
 .dropdown-item:hover {
-    background-color: #fff3cd;
-    color: #000;
+  background-color: #fff3cd;
+  color: #000;
 }
 
 /* Responsive menu */
 @media (max-width: 991px) {
-    .navbar-nav {
-        text-align: center;
-        margin-top: 1rem;
-        flex-direction: column;
-        gap: 0.5rem;
-    }
+  .navbar-nav {
+    text-align: center;
+    margin-top: 1rem;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
 
-    .navbar-nav .nav-item {
-        width: 100%;
-    }
+  .navbar-nav .nav-item {
+    width: 100%;
+  }
 
-    .navbar-nav .nav-link {
-        justify-content: center;
-        padding: 0.75rem 1rem !important;
-    }
+  .navbar-nav .nav-link {
+    justify-content: center;
+    padding: 0.75rem 1rem !important;
+  }
 
-    .navbar .btn {
-        margin: 1rem auto;
-        display: block;
-        width: fit-content;
-    }
+  .navbar .btn {
+    margin: 1rem auto;
+    display: block;
+    width: fit-content;
+  }
 
-    .dropdown-menu {
-        text-align: center;
-        border: none;
-        box-shadow: none;
-    }
+  .dropdown-menu {
+    text-align: center;
+    border: none;
+    box-shadow: none;
+  }
 }
 
 /* ==================== TOP BAR ==================== */
 /* Đã có .bg-dark .text-white .py-1 .small từ Bootstrap */
 .bg-dark a {
-    transition: color 0.3s ease;
+  transition: color 0.3s ease;
 }
 
 .bg-dark a:hover {
-    color: #ffc107 !important;
+  color: #ffc107 !important;
 }
 
-/* ==================== BANNER CAROUSEL ==================== */
-/* Bootstrap carousel đã xử lý phần lớn, chỉ custom minimal */
+/* ==================== BANNER CAROUSEL - RESPONSIVE FIX ==================== */
+
+/* Desktop: Giữ nguyên */
 .carousel-item img {
-    height: 500px;
-    object-fit: cover;
-    width: 100%;
+  height: 500px;
+  object-fit: contain; /* Thay cover → contain để không crop */
+  object-position: center; /* Căn giữa ảnh */
+  width: 100%;
+  background: linear-gradient(135deg, #f8f9fa 0%, #dee2e6 100%);
+  /* Background đẹp khi ảnh không full */
 }
 
-.carousel-caption {
-    background: rgba(0, 0, 0, 0);
-    padding: 2rem;
-    border-radius: 12px;
-    bottom: 3rem;
-    left: 50%;
-    right: auto;
-    transform: translateX(-50%);
-    max-width: 90%;
+/* Wrapper để thêm background cho carousel */
+.carousel-item {
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+  min-height: 500px;
 }
 
-.carousel-caption h2 {
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+/* Tablet: Giảm chiều cao */
+@media (max-width: 991px) {
+  .carousel-item img {
+    height: 400px;
+  }
+
+  .carousel-item {
+    min-height: 400px;
+  }
 }
 
-.carousel-control-prev-icon,
-.carousel-control-next-icon {
-    width: 3rem;
-    height: 3rem;
-    background-color: rgba(0, 0, 0, 0.4);
-    border-radius: 50%;
-}
-
-.carousel-indicators button {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-}
-
+/* Mobile: Tối ưu cho màn hình nhỏ */
 @media (max-width: 768px) {
-    .carousel-item img {
-        height: 300px;
-    }
+  .carousel-item img {
+    height: 300px;
+    object-fit: contain; /* Vẫn giữ contain */
+  }
 
-    .carousel-caption {
-        padding: 1rem;
-        bottom: 1rem;
-    }
+  .carousel-item {
+    min-height: 300px;
+  }
 
-    .carousel-caption h2 {
-        font-size: 1.5rem !important;
-    }
+  .carousel-caption {
+    padding: 1rem;
+    bottom: 1rem;
+    max-width: 95%;
+  }
 
-    .carousel-caption p {
-        font-size: 0.9rem;
-        display: none;
-    }
+  .carousel-caption h2 {
+    font-size: 1.5rem !important;
+    margin-bottom: 0.5rem !important;
+  }
+
+  .carousel-caption p {
+    font-size: 0.85rem;
+    margin-bottom: 0.75rem !important;
+  }
+
+  .carousel-caption .btn {
+    font-size: 0.875rem;
+    padding: 0.5rem 1.5rem !important;
+  }
+}
+
+/* Mobile nhỏ (< 576px): Tối ưu tối đa */
+@media (max-width: 576px) {
+  .carousel-item img {
+    height: 250px;
+  }
+
+  .carousel-item {
+    min-height: 250px;
+  }
+
+  .carousel-caption h2 {
+    font-size: 1.25rem !important;
+  }
+
+  .carousel-caption p {
+    display: none; /* Ẩn mô tả trên màn hình rất nhỏ */
+  }
+}
+
+/* Nút điều khiển carousel - Tối ưu cho mobile */
+@media (max-width: 768px) {
+  .carousel-control-prev-icon,
+  .carousel-control-next-icon {
+    width: 2rem;
+    height: 2rem;
+  }
+
+  .carousel-indicators button {
+    width: 8px;
+    height: 8px;
+  }
 }
 
 /* ==================== PRODUCT CARD ==================== */
@@ -229,15 +267,15 @@ HTML structure được khuyến nghị:
 }
 
 .product-card .card-body {
-    display: flex;
-    flex-direction: column;
-    align-items: center;  /* căn giữa ngang */
-    text-align: center;   /* căn giữa chữ */
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* căn giữa ngang */
+  text-align: center; /* căn giữa chữ */
 }
 
 .product-card:hover {
   transform: translateY(-6px);
-  box-shadow: 0 0.75rem 1.5rem rgba(0,0,0,0.1);
+  box-shadow: 0 0.75rem 1.5rem rgba(0, 0, 0, 0.1);
   border-color: #ffc107;
 }
 
@@ -247,7 +285,7 @@ HTML structure được khuyến nghị:
   background: #f8f9fa;
   height: 240px;
   border-bottom: 1px solid #e9ecef;
-  border-top-left-radius: 0.75rem;   /* bo góc trên ảnh */
+  border-top-left-radius: 0.75rem; /* bo góc trên ảnh */
   border-top-right-radius: 0.75rem;
 }
 
@@ -259,22 +297,22 @@ HTML structure được khuyến nghị:
 }
 
 .product-card:hover .product-image img {
-    transform: scale(1.1);
+  transform: scale(1.1);
 }
 
 /* Badge discount */
 .product-image .badge {
-    font-size: 0.75rem;
-    padding: 0.35rem 0.6rem;
-    font-weight: 600;
+  font-size: 0.75rem;
+  padding: 0.35rem 0.6rem;
+  font-weight: 600;
 }
 
 /* Product info - support cả structure cũ và mới */
 .product-info {
-    padding: 1rem;
-    display: flex;
-    flex-direction: column;
-    height: 100%;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
 .product-name {
@@ -298,17 +336,17 @@ HTML structure được khuyến nghị:
 }
 
 .product-name:hover {
-    color: #ffc107;
+  color: #ffc107;
 }
 
 .product-price {
-    margin-top: auto;
-    margin-bottom: 1rem;
-    text-align: center; /* căn giữa giá */
+  margin-top: auto;
+  margin-bottom: 1rem;
+  text-align: center; /* căn giữa giá */
 }
 .card-body .btn {
-    align-self: center;
-    width: auto; /* hoặc giữ w-100 nếu muốn full */
+  align-self: center;
+  width: auto; /* hoặc giữ w-100 nếu muốn full */
 }
 
 /* Price style */
@@ -319,27 +357,27 @@ HTML structure được khuyến nghị:
 }
 
 .product-price .old-price {
-    color: #6c757d;
-    text-decoration: line-through;
-    font-size: 0.875rem;
-    margin-left: 0.5rem;
-    display: inline-block;
+  color: #6c757d;
+  text-decoration: line-through;
+  font-size: 0.875rem;
+  margin-left: 0.5rem;
+  display: inline-block;
 }
 
 /* Responsive product cards */
 @media (max-width: 768px) {
-    .product-image {
-        height: 200px;
-    }
+  .product-image {
+    height: 200px;
+  }
 
-    .product-name {
-        font-size: 1.5rem;
-        min-height: 42px;
-    }
+  .product-name {
+    font-size: 1.5rem;
+    min-height: 42px;
+  }
 
-    .product-price .price {
-        font-size: 1.1rem;
-    }
+  .product-price .price {
+    font-size: 1.1rem;
+  }
 }
 
 /* ==================== BLOG CARD ==================== */
@@ -362,48 +400,48 @@ HTML được khuyến nghị:
 */
 
 .blog-card {
-    transition: all 0.3s ease;
-    overflow: hidden;
+  transition: all 0.3s ease;
+  overflow: hidden;
 }
 
 .blog-card:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 1rem 2rem rgba(0,0,0,0.175) !important;
+  transform: translateY(-8px);
+  box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.175) !important;
 }
 
 .blog-card img {
-    width: 100%;
-    height: 200px;
-    object-fit: cover;
-    transition: transform 0.4s ease;
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  transition: transform 0.4s ease;
 }
 
 .blog-card:hover img {
-    transform: scale(1.08);
+  transform: scale(1.08);
 }
 
 .blog-content {
-    padding: 1.5rem;
+  padding: 1.5rem;
 }
 
 .blog-content h5 {
-    font-weight: 600;
-    margin-bottom: 0.75rem;
-    color: #212529;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  color: #212529;
 }
 
 .blog-content h5:hover {
-    color: #ffc107;
+  color: #ffc107;
 }
 
 /* Text truncate utility cho 2 dòng */
 .text-truncate-2 {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    line-height: 1.5;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  line-height: 1.5;
 }
 
 /* ==================== SECTION TITLE ==================== */
@@ -416,108 +454,110 @@ HTML:
 */
 
 .title-underline {
-    width: 60px;
-    height: 3px;
-    background: linear-gradient(90deg, #ffc107, #ffb300);
-    border-radius: 2px;
-    margin: 0 auto;
+  width: 60px;
+  height: 3px;
+  background: linear-gradient(90deg, #ffc107, #ffb300);
+  border-radius: 2px;
+  margin: 0 auto;
 }
 
 /* ==================== FILTER SIDEBAR ==================== */
 .filter-sidebar {
-    position: sticky;
-    top: 80px;
+  position: sticky;
+  top: 80px;
 }
 
 .filter-sidebar ul {
-    list-style: none;
-    padding: 0;
+  list-style: none;
+  padding: 0;
 }
 
 .filter-sidebar ul li a {
-    display: block;
-    padding: 0.75rem 1rem;
-    color: #6c757d;
-    transition: all 0.3s ease;
-    border-radius: 8px;
-    margin-bottom: 0.25rem;
+  display: block;
+  padding: 0.75rem 1rem;
+  color: #6c757d;
+  transition: all 0.3s ease;
+  border-radius: 8px;
+  margin-bottom: 0.25rem;
 }
 
 .filter-sidebar ul li a:hover,
 .filter-sidebar ul li a.active {
-    color: #000;
-    background: #fff3cd;
-    padding-left: 1.5rem;
-    font-weight: 500;
+  color: #000;
+  background: #fff3cd;
+  padding-left: 1.5rem;
+  font-weight: 500;
 }
 
 /* ==================== FLOATING ACTION BUTTONS ==================== */
 .floating-buttons {
-    position: fixed;
-    right: 1.25rem;
-    bottom: 1.25rem;
-    z-index: 1030;
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
+  position: fixed;
+  right: 1.25rem;
+  bottom: 1.25rem;
+  z-index: 1030;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
 }
 
 .floating-btn {
-    width: 56px;
-    height: 56px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #fff;
-    font-size: 1.5rem;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.25);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    animation: pulse 2.5s infinite ease-in-out;
-    border: none;
-    cursor: pointer;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 1.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: pulse 2.5s infinite ease-in-out;
+  border: none;
+  cursor: pointer;
 }
 
 .floating-btn:hover {
-    transform: scale(1.15);
-    animation: none;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+  transform: scale(1.15);
+  animation: none;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
 }
 
 .zalo-btn {
-    background: linear-gradient(135deg, #0068FF, #0084FF);
+  background: linear-gradient(135deg, #0068ff, #0084ff);
 }
 
 .phone-btn {
-    background: linear-gradient(135deg, #25D366, #128C7E);
+  background: linear-gradient(135deg, #25d366, #128c7e);
 }
 
 .messenger-btn {
-    background: linear-gradient(135deg, #00B2FF, #006AFF);
+  background: linear-gradient(135deg, #00b2ff, #006aff);
 }
 
 @keyframes pulse {
-    0%, 100% {
-        box-shadow: 0 4px 12px rgba(0,0,0,0.25);
-        transform: scale(1);
-    }
-    50% {
-        box-shadow: 0 4px 20px rgba(255,193,7,0.5), 0 0 0 8px rgba(255,193,7,0.1);
-        transform: scale(1.05);
-    }
+  0%,
+  100% {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 4px 20px rgba(255, 193, 7, 0.5),
+      0 0 0 8px rgba(255, 193, 7, 0.1);
+    transform: scale(1.05);
+  }
 }
 
 @media (max-width: 768px) {
-    .floating-buttons {
-        right: 1rem;
-        bottom: 1rem;
-    }
+  .floating-buttons {
+    right: 1rem;
+    bottom: 1rem;
+  }
 
-    .floating-btn {
-        width: 50px;
-        height: 50px;
-        font-size: 1.25rem;
-    }
+  .floating-btn {
+    width: 50px;
+    height: 50px;
+    font-size: 1.25rem;
+  }
 }
 
 /* ==================== PAGE HEADER ==================== */
@@ -531,324 +571,326 @@ HTML:
 */
 
 .page-header {
-    background: linear-gradient(to bottom, #fff, #fffbf0);
+  background: linear-gradient(to bottom, #fff, #fffbf0);
 }
 
 .page-header h1 {
-    color: #212529;
-    font-weight: 700;
+  color: #212529;
+  font-weight: 700;
 }
 
 /* ==================== PAGINATION ==================== */
 .pagination {
-    gap: 0.25rem;
+  gap: 0.25rem;
 }
 
 .pagination .page-link {
-    color: #212529;
-    border-color: #dee2e6;
-    transition: all 0.3s ease;
-    border-radius: 8px !important;
-    margin: 0 0.125rem;
+  color: #212529;
+  border-color: #dee2e6;
+  transition: all 0.3s ease;
+  border-radius: 8px !important;
+  margin: 0 0.125rem;
 }
 
 .pagination .page-item.active .page-link {
-    background-color: #ffc107;
-    border-color: #ffc107;
-    color: #000;
-    font-weight: 600;
+  background-color: #ffc107;
+  border-color: #ffc107;
+  color: #000;
+  font-weight: 600;
 }
 
 .pagination .page-link:hover {
-    background-color: #fff3cd;
-    border-color: #ffc107;
-    color: #000;
-    transform: translateY(-2px);
+  background-color: #fff3cd;
+  border-color: #ffc107;
+  color: #000;
+  transform: translateY(-2px);
 }
 
 .pagination .page-link:focus {
-    box-shadow: 0 0 0 0.2rem rgba(255, 193, 7, 0.25);
+  box-shadow: 0 0 0 0.2rem rgba(255, 193, 7, 0.25);
 }
 
 /* ==================== FOOTER ==================== */
 /* Bootstrap classes: .bg-dark .text-white .py-5 */
 footer {
-    background: linear-gradient(180deg, #212529 0%, #1a1d20 100%);
+  background: linear-gradient(180deg, #212529 0%, #1a1d20 100%);
 }
 
 footer h5 {
-    color: #ffc107;
-    font-weight: 600;
-    font-size: 1.1rem;
-    text-transform: uppercase;
-    margin-bottom: 1.25rem;
-    position: relative;
-    padding-bottom: 0.5rem;
+  color: #ffc107;
+  font-weight: 600;
+  font-size: 1.1rem;
+  text-transform: uppercase;
+  margin-bottom: 1.25rem;
+  position: relative;
+  padding-bottom: 0.5rem;
 }
 
 footer h5::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 40px;
-    height: 2px;
-    background: #ffc107;
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 40px;
+  height: 2px;
+  background: #ffc107;
 }
 
 footer p,
 footer li,
 footer a {
-    color: #adb5bd;
-    font-size: 0.9rem;
-    line-height: 1.8;
+  color: #adb5bd;
+  font-size: 0.9rem;
+  line-height: 1.8;
 }
 
 footer a {
-    text-decoration: none;
-    transition: all 0.3s ease;
+  text-decoration: none;
+  transition: all 0.3s ease;
 }
 
 footer a:hover {
-    color: #ffc107 !important;
-    padding-left: 5px;
+  color: #ffc107 !important;
+  padding-left: 5px;
 }
 
 footer .social-links a {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 40px;
-    height: 40px;
-    margin-right: 0.5rem;
-    border-radius: 50%;
-    background-color: #343a40;
-    color: #fff;
-    transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  margin-right: 0.5rem;
+  border-radius: 50%;
+  background-color: #343a40;
+  color: #fff;
+  transition: all 0.3s ease;
 }
 
 footer .social-links a:hover {
-    background-color: #ffc107;
-    color: #212529 !important;
-    transform: translateY(-4px);
-    box-shadow: 0 4px 8px rgba(255,193,7,0.3);
+  background-color: #ffc107;
+  color: #212529 !important;
+  transform: translateY(-4px);
+  box-shadow: 0 4px 8px rgba(255, 193, 7, 0.3);
 }
 
 footer hr {
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-    opacity: 1;
-    margin: 2rem 0 1.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  opacity: 1;
+  margin: 2rem 0 1.5rem;
 }
 
 footer ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
+  list-style: none;
+  padding: 0;
+  margin: 0;
 }
 
 footer ul li {
-    margin-bottom: 0.5rem;
+  margin-bottom: 0.5rem;
 }
 
 footer ul li:last-child {
-    margin-bottom: 0;
+  margin-bottom: 0;
 }
 /* Footer text mobile center */
 @media (max-width: 767.98px) {
-    footer .row > [class*="col-"] {
-        text-align: center !important; /* căn giữa toàn bộ cột trên mobile */
-    }
+  footer .row > [class*="col-"] {
+    text-align: center !important; /* căn giữa toàn bộ cột trên mobile */
+  }
 
-    footer .row .text-md-start {
-        text-align: center !important; /* ghi đè text-md-start */
-    }
+  footer .row .text-md-start {
+    text-align: center !important; /* ghi đè text-md-start */
+  }
 
-    footer .row .text-md-end {
-        text-align: center !important; /* ghi đè text-md-end */
-    }
+  footer .row .text-md-end {
+    text-align: center !important; /* ghi đè text-md-end */
+  }
 
-    footer ul li {
-        text-align: center; /* nếu cần căn các list item */
-    }
+  footer ul li {
+    text-align: center; /* nếu cần căn các list item */
+  }
 }
-
 
 /* ==================== UTILITY ANIMATIONS ==================== */
 @keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(30px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .animate-on-scroll {
-    animation: fadeInUp 0.6s ease;
+  animation: fadeInUp 0.6s ease;
 }
 
 /* ==================== BUTTONS ENHANCEMENT ==================== */
 .btn {
-    transition: all 0.3s ease;
-    font-weight: 500;
+  transition: all 0.3s ease;
+  font-weight: 500;
 }
 
 .btn-warning {
-    color: #000;
-    border: none;
+  color: #000;
+  border: none;
 }
 
 .btn-warning:hover {
-    background-color: #ffb300;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(255,193,7,0.4);
+  background-color: #ffb300;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 193, 7, 0.4);
 }
 
 .btn-outline-warning:hover {
-    color: #000;
-    transform: translateY(-2px);
+  color: #000;
+  transform: translateY(-2px);
 }
 
 .btn-dark:hover {
-    background-color: #1a1d20;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  background-color: #1a1d20;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 /* ==================== CUSTOM SCROLLBAR ==================== */
 ::-webkit-scrollbar {
-    width: 10px;
+  width: 10px;
 }
 
 ::-webkit-scrollbar-track {
-    background: #f1f1f1;
+  background: #f1f1f1;
 }
 
 ::-webkit-scrollbar-thumb {
-    background: linear-gradient(180deg, #ffc107, #ffb300);
-    border-radius: 5px;
+  background: linear-gradient(180deg, #ffc107, #ffb300);
+  border-radius: 5px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(180deg, #ffb300, #ffa000);
+  background: linear-gradient(180deg, #ffb300, #ffa000);
 }
 
 /* ==================== ALERT MESSAGES ==================== */
 .alert {
-    border: none;
-    border-left: 4px solid;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  border: none;
+  border-left: 4px solid;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .alert-success {
-    border-left-color: #198754;
+  border-left-color: #198754;
 }
 
 .alert-warning {
-    border-left-color: #ffc107;
+  border-left-color: #ffc107;
 }
 
 .alert-danger {
-    border-left-color: #dc3545;
+  border-left-color: #dc3545;
 }
 
 .alert-info {
-    border-left-color: #0dcaf0;
+  border-left-color: #0dcaf0;
 }
 
 /* ==================== LOADING STATES ==================== */
 .loading {
-    pointer-events: none;
-    opacity: 0.6;
-    position: relative;
+  pointer-events: none;
+  opacity: 0.6;
+  position: relative;
 }
 
 .loading::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 20px;
-    height: 20px;
-    margin: -10px 0 0 -10px;
-    border: 2px solid #ffc107;
-    border-top-color: transparent;
-    border-radius: 50%;
-    animation: spin 0.6s linear infinite;
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  margin: -10px 0 0 -10px;
+  border: 2px solid #ffc107;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
 }
 
 @keyframes spin {
-    to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 /* CSS cho trang Giới thiệu - Thêm vào style.css hoặc trong <style> tag */
 
 /* Fix alignment cho 2 section đầu */
 .row.align-items-center {
-    display: flex;
-    align-items: center;
+  display: flex;
+  align-items: center;
 }
 
 .row.align-items-center .col-lg-6 {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 /* Video Section */
 .video-container {
-    background: #000;
-    transition: transform 0.3s ease;
+  background: #000;
+  transition: transform 0.3s ease;
 }
 
 .video-container:hover {
-    transform: scale(1.02);
+  transform: scale(1.02);
 }
 
 .video-container .ratio {
-    background: #000;
+  background: #000;
 }
 
 .play-btn {
-    width: 80px;
-    height: 80px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.3s ease;
-    animation: pulse-play 2s infinite;
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  animation: pulse-play 2s infinite;
 }
 
 .play-btn:hover {
-    transform: scale(1.1);
-    animation: none;
+  transform: scale(1.1);
+  animation: none;
 }
 
 @keyframes pulse-play {
-    0%, 100% {
-        box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.7);
-    }
-    50% {
-        box-shadow: 0 0 0 15px rgba(255, 193, 7, 0);
-    }
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.7);
+  }
+  50% {
+    box-shadow: 0 0 0 15px rgba(255, 193, 7, 0);
+  }
 }
 
 /* Đảm bảo ảnh và video cùng chiều cao */
 .row.align-items-center .col-lg-6 img,
 .row.align-items-center .col-lg-6 .video-container {
-    width: 100%;
-    height: auto;
+  width: 100%;
+  height: auto;
 }
 
 /* Responsive */
 @media (max-width: 991px) {
-    .video-container {
-        margin-bottom: 2rem;
-    }
+  .video-container {
+    margin-bottom: 2rem;
+  }
 
-    .row.align-items-center .col-lg-6 {
-        margin-bottom: 2rem;
-    }
+  .row.align-items-center .col-lg-6 {
+    margin-bottom: 2rem;
+  }
 }

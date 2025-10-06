@@ -3,6 +3,33 @@ fallback của img nên đổi theo dự án
 SEO trang bằng schema
 đổi từng type schema cho từng dự án
 
+-------------------------------------------- 
+deploy lên web thì tạo file gitignore xong nhập:
+# Bỏ file môi trường
+.env
+
+# Bỏ venv (virtual environment)
+venv/
+ENV/
+.venv/
+
+# Bỏ file dịch vụ flask migrations
+migrations/
+
+# Bỏ cache và compiled files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Bỏ logs
+*.log
+
+# Bỏ file hệ thống
+.DS_Store
+Thumbs.db
+
+---------------------------------------------------
 
 
 

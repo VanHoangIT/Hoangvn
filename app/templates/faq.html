@@ -29,7 +29,7 @@
                              class="accordion-collapse collapse {% if loop.first %}show{% endif %}" 
                              data-bs-parent="#faqAccordion">
                             <div class="accordion-body">
-                                {{ faq.answer|safe }}
+                                {{ faq.answer|nl2br|safe }}
                             </div>
                         </div>
                     </div>

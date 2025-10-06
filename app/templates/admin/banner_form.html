@@ -14,20 +14,20 @@
     <div class="card-body">
         <form method="POST" enctype="multipart/form-data">
             {{ form.hidden_tag() }}
-            
+
             <div class="row g-3">
                 <div class="col-md-6">
                     <label class="form-label">Tiêu đề</label>
                     {{ form.title(class="form-control", placeholder="Khuyến mãi lớn 2024") }}
                     <small class="text-muted">Tiêu đề chính hiển thị trên banner</small>
                 </div>
-                
+
                 <div class="col-md-6">
                     <label class="form-label">Phụ đề</label>
                     {{ form.subtitle(class="form-control", placeholder="Giảm giá lên đến 50%") }}
                     <small class="text-muted">Mô tả ngắn dưới tiêu đề</small>
                 </div>
-                
+
                 <div class="col-12">
                     <label class="form-label">Hình ảnh Banner *</label>
                     <div class="input-group">

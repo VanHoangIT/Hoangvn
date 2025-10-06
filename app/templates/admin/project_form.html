@@ -22,7 +22,7 @@
                 <div class="card-body">
                     <div class="mb-3">
                         {{ form.title.label(class="form-label") }}
-                        {{ form.title(class="form-control", placeholder="VD: Dự án lắp đặt hệ thống lọc nước cho Vincom") }}
+                        {{ form.title(class="form-control", placeholder="VD: Dự án xây dựng website chuẩn SEO") }}
                         {% if form.title.errors %}
                         <div class="invalid-feedback d-block">
                             {% for error in form.title.errors %}{{ error }}{% endfor %}
@@ -75,7 +75,7 @@
                     <div class="mb-3">
                         {{ form.products_used.label(class="form-label") }}
                         {{ form.products_used(class="form-control", rows="3", 
-                           placeholder="VD: Máy lọc nước RO A.O.Smith AR75, Máy nước nóng...") }}
+                           placeholder="VD: Keo dán gạch...") }}
                     </div>
                 </div>
             </div>

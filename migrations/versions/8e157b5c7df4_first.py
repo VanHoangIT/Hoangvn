@@ -1,8 +1,8 @@
-"""Initial for PostgreSQL
+"""first
 
-Revision ID: 5c5184cfc65d
+Revision ID: 8e157b5c7df4
 Revises: 
-Create Date: 2025-10-01 15:10:55.635646
+Create Date: 2025-10-06 12:00:36.677295
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '5c5184cfc65d'
+revision = '8e157b5c7df4'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -43,6 +43,18 @@ def upgrade():
     sa.Column('views', sa.Integer(), nullable=True),
     sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.Column('updated_at', sa.DateTime(), nullable=True),
+    sa.Column('image_alt_text', sa.String(length=255), nullable=True),
+    sa.Column('image_title', sa.String(length=255), nullable=True),
+    sa.Column('image_caption', sa.Text(), nullable=True),
+    sa.Column('meta_title', sa.String(length=70), nullable=True),
+    sa.Column('meta_description', sa.String(length=160), nullable=True),
+    sa.Column('meta_keywords', sa.String(length=255), nullable=True),
+    sa.Column('focus_keyword', sa.String(length=100), nullable=True),
+    sa.Column('reading_time', sa.Integer(), nullable=True),
+    sa.Column('word_count', sa.Integer(), nullable=True),
+    sa.Column('seo_score', sa.Integer(), nullable=True),
+    sa.Column('seo_grade', sa.String(length=5), nullable=True),
+    sa.Column('seo_last_checked', sa.DateTime(), nullable=True),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('slug')
     )
@@ -77,6 +89,51 @@ def upgrade():
     sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
+    op.create_table('jobs',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('title', sa.String(length=200), nullable=False),
+    sa.Column('slug', sa.String(length=200), nullable=False),
+    sa.Column('department', sa.String(length=100), nullable=True),
+    sa.Column('location', sa.String(length=200), nullable=True),
+    sa.Column('job_type', sa.String(length=50), nullable=True),
+    sa.Column('level', sa.String(length=50), nullable=True),
+    sa.Column('salary', sa.String(length=100), nullable=True),
+    sa.Column('experience', sa.String(length=100), nullable=True),
+    sa.Column('description', sa.Text(), nullable=True),
+    sa.Column('requirements', sa.Text(), nullable=True),
+    sa.Column('benefits', sa.Text(), nullable=True),
+    sa.Column('deadline', sa.DateTime(), nullable=True),
+    sa.Column('contact_email', sa.String(length=200), nullable=True),
+    sa.Column('is_active', sa.Boolean(), nullable=True),
+    sa.Column('is_urgent', sa.Boolean(), nullable=True),
+    sa.Column('view_count', sa.Integer(), nullable=True),
+    sa.Column('created_at', sa.DateTime(), nullable=True),
+    sa.Column('updated_at', sa.DateTime(), nullable=True),
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('slug')
+    )
+    op.create_table('projects',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('title', sa.String(length=200), nullable=False),
+    sa.Column('slug', sa.String(length=200), nullable=False),
+    sa.Column('client', sa.String(length=200), nullable=True),
+    sa.Column('location', sa.String(length=200), nullable=True),
+    sa.Column('year', sa.Integer(), nullable=True),
+    sa.Column('description', sa.Text(), nullable=True),
+    sa.Column('content', sa.Text(), nullable=True),
+    sa.Column('image', sa.String(length=300), nullable=True),
+    sa.Column('gallery', sa.Text(), nullable=True),
+    sa.Column('project_type', sa.String(length=100), nullable=True),
+    sa.Column('area', sa.String(length=100), nullable=True),
+    sa.Column('products_used', sa.Text(), nullable=True),
+    sa.Column('is_featured', sa.Boolean(), nullable=True),
+    sa.Column('is_active', sa.Boolean(), nullable=True),
+    sa.Column('view_count', sa.Integer(), nullable=True),
+    sa.Column('created_at', sa.DateTime(), nullable=True),
+    sa.Column('updated_at', sa.DateTime(), nullable=True),
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('slug')
+    )
     op.create_table('users',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('username', sa.String(length=80), nullable=False),
@@ -87,6 +144,28 @@ def upgrade():
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('email'),
     sa.UniqueConstraint('username')
+    )
+    op.create_table('media',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('filename', sa.String(length=255), nullable=False),
+    sa.Column('original_filename', sa.String(length=255), nullable=True),
+    sa.Column('filepath', sa.String(length=500), nullable=False),
+    sa.Column('file_type', sa.String(length=50), nullable=True),
+    sa.Column('file_size', sa.Integer(), nullable=True),
+    sa.Column('width', sa.Integer(), nullable=True),
+    sa.Column('height', sa.Integer(), nullable=True),
+    sa.Column('alt_text', sa.String(length=255), nullable=True),
+    sa.Column('title', sa.String(length=255), nullable=True),
+    sa.Column('caption', sa.Text(), nullable=True),
+    sa.Column('album', sa.String(length=100), nullable=True),
+    sa.Column('seo_score', sa.Integer(), nullable=True),
+    sa.Column('seo_grade', sa.String(length=5), nullable=True),
+    sa.Column('seo_last_checked', sa.DateTime(), nullable=True),
+    sa.Column('uploaded_by', sa.Integer(), nullable=True),
+    sa.Column('created_at', sa.DateTime(), nullable=True),
+    sa.Column('updated_at', sa.DateTime(), nullable=True),
+    sa.ForeignKeyConstraint(['uploaded_by'], ['users.id'], ),
+    sa.PrimaryKeyConstraint('id')
     )
     op.create_table('products',
     sa.Column('id', sa.Integer(), nullable=False),
@@ -103,6 +182,9 @@ def upgrade():
     sa.Column('category_id', sa.Integer(), nullable=True),
     sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.Column('updated_at', sa.DateTime(), nullable=True),
+    sa.Column('image_alt_text', sa.String(length=255), nullable=True),
+    sa.Column('image_title', sa.String(length=255), nullable=True),
+    sa.Column('image_caption', sa.Text(), nullable=True),
     sa.ForeignKeyConstraint(['category_id'], ['categories.id'], ),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('slug')
@@ -113,7 +195,10 @@ def upgrade():
 def downgrade():
     # ### commands auto generated by Alembic - please adjust! ###
     op.drop_table('products')
+    op.drop_table('media')
     op.drop_table('users')
+    op.drop_table('projects')
+    op.drop_table('jobs')
     op.drop_table('faqs')
     op.drop_table('contacts')
     op.drop_table('categories')

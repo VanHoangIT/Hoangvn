@@ -1,6 +1,6 @@
 """
 File cấu hình cho Project Types
-Dễ dàng thay đổi các loại dự án mà không cần sửa code
+
 """
 
 PROJECT_TYPES = [
