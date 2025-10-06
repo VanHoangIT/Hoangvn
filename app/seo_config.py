@@ -6,28 +6,21 @@ Dễ dàng chỉnh sửa keywords mà không cần sửa code logic
 # Keywords cho Media/Image SEO
 MEDIA_KEYWORDS = {
     'primary': [
-        'máy lọc nước',
-        'a.o smith',
-        'ao smith',
-        'hoang.com.vn'
+        'Thiết kế web',
+        'Hoangvn'
     ],
     'secondary': [
-        'lọc nước',
-        'máy lọc',
-        'thiết bị lọc',
-        'bộ lọc nước'
+        'Thiết kế web',
+        'Hoangvn'
     ],
     'brand': [
-        'a.o',
-        'smith',
-        'aosmith'
+        'Thiết kế web',
+        'Hoangvn'
     ],
     'general': [
         'sản phẩm',
         'thiết bị',
-        'dịch vụ',
-        'máy',
-        'nước'
+        'dịch vụ'
     ]
 }
 
