@@ -38,7 +38,7 @@ class Config:
 
     # ========== THÊM MỚI: GEMINI CHATBOT CONFIGURATION ==========
     GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY')
-    CHATBOT_REQUEST_LIMIT = 20  # Giới hạn 30 tin nhắn/giờ
+    CHATBOT_REQUEST_LIMIT = 20  # Giới hạn 20 tin nhắn/giờ
     CHATBOT_REQUEST_WINDOW = 7200  # 1 giờ (tính bằng giây)
     CHATBOT_ENABLED = True  # Bật/tắt chatbot
 

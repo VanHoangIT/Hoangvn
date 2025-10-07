@@ -563,6 +563,38 @@ def blog_get_media_seo_info(self):
 # Gán lại method cho class Blog
 Blog.get_media_seo_info = blog_get_media_seo_info
 
+# ==================== CẬP NHẬT METHOD CHO PROJECT ====================
+def project_get_media_seo_info(self):
+    """
+    Lấy thông tin SEO từ Media Library cho Project
+
+    Priority:
+    1. Media Library
+    2. Fallback về title/description của Project
+    """
+    if not self.image:
+        return None
+
+    media = get_media_by_image_url(self.image)
+
+    if media:
+        return {
+            'alt_text': media.alt_text or self.title,
+            'title': media.title or self.title,
+            'caption': media.caption or self.description
+        }
+
+    # Fallback: dùng thông tin từ Project
+    return {
+        'alt_text': f"Dự án {self.title}" + (f" - {self.location}" if self.location else ""),
+        'title': f"{self.title} ({self.year})" if self.year else self.title,
+        'caption': self.description or f"Dự án {self.project_type} tại {self.location}"
+    }
+
+
+# Gán lại method cho class Project
+Project.get_media_seo_info = project_get_media_seo_info
+
 # ==============================================================================
 # HẾT - ĐÃ CẬP NHẬT XONG
 # ==============================================================================

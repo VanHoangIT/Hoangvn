@@ -47,48 +47,6 @@
     </div>
 </section>
 
-<!-- Featured Projects -->
-{% if featured_projects and not current_type %}
-<section class="featured-projects py-5 bg-light">
-    <div class="container">
-        <h2 class="text-center mb-4">Dự án nổi bật</h2>
-        <div class="row g-4">
-            {% for project in featured_projects[:3] %}
-            <div class="col-md-4">
-                <div class="card h-100 border-0 shadow-sm project-card">
-                    <div class="position-relative overflow-hidden">
-                        <img src="{{ project.image or '/static/img/placeholder.jpg' }}" 
-                             class="card-img-top" 
-                             alt="{{ project.title }}"
-                             style="height: 250px; object-fit: cover; transition: transform 0.3s;">
-                        <span class="badge bg-warning position-absolute top-0 end-0 m-2">
-                            <i class="bi bi-star-fill"></i> Nổi bật
-                        </span>
-                    </div>
-                    <div class="card-body">
-                        <h5 class="card-title">{{ project.title }}</h5>
-                        <p class="text-muted small mb-2">
-                            <i class="bi bi-geo-alt"></i> {{ project.location }}
-                            {% if project.year %}
-                            | <i class="bi bi-calendar"></i> {{ project.year }}
-                            {% endif %}
-                        </p>
-                        <p class="card-text text-muted">
-                            {{ project.description[:120] }}{% if project.description|length > 120 %}...{% endif %}
-                        </p>
-                        <a href="{{ url_for('main.project_detail', slug=project.slug) }}" 
-                           class="btn btn-outline-warning">
-                            Xem chi tiết <i class="bi bi-arrow-right"></i>
-                        </a>
-                    </div>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
-    </div>
-</section>
-{% endif %}
-
 <!-- All Projects -->
 <section class="projects-list py-5">
     <div class="container">
@@ -109,7 +67,19 @@
                         {% endif %}
                     </div>
                     <div class="card-body">
+                    {% if project.project_type == 'residential' %}
+                        <span class="badge bg-secondary mb-2">Nhà ở</span>
+                    {% elif project.project_type == 'office' %}
+                        <span class="badge bg-secondary mb-2">Văn phòng</span>
+                    {% elif project.project_type == 'hotel' %}
+                        <span class="badge bg-secondary mb-2">Khách sạn</span>
+                    {% elif project.project_type == 'restaurant' %}
+                        <span class="badge bg-secondary mb-2">Nhà hàng</span>
+                    {% elif project.project_type == 'hospital' %}
+                        <span class="badge bg-secondary mb-2">Bệnh viện</span>
+                    {% else %}
                         <span class="badge bg-secondary mb-2">{{ project.project_type }}</span>
+                    {% endif %}
                         <h5 class="card-title">{{ project.title }}</h5>
                         <p class="text-muted small mb-2">
                             {% if project.client %}

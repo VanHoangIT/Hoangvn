@@ -179,22 +179,25 @@
     </div>
 </section>
 
-<!-- ==================== LATEST PRODUCTS ==================== -->
+{% include 'components/featured_projects.html' %}
+
+<!-- ==================== Tất cả sản phẩm mới nhất ====================
+
 <section class="py-5 white">
     <div class="container">
-        <!-- Section Title -->
+
         <div class="text-center mb-5">
             <h2 class="fw-bold mb-3">Sản phẩm mới nhất</h2>
             <div class="title-underline mx-auto"></div>
             <p class="text-muted mt-3">Cập nhật những sản phẩm mới nhất</p>
         </div>
 
-        <!-- Products Grid -->
+
         <div class="row g-4">
             {% for product in latest_products[:8] %}
             <div class="col-lg-3 col-md-4 col-sm-6">
                 <div class="card product-card h-100 border-0 shadow-sm">
-                    <!-- Product Image -->
+
                     <div class="product-image position-relative">
                         {% set media_info = product.get_media_seo_info() if product.image else None %}
 
@@ -204,13 +207,13 @@
                              title="{{ media_info.title if media_info and media_info.title else product.name }}"
                              loading="lazy">
 
-                        <!-- New Badge -->
+
                         <span class="badge bg-success position-absolute top-0 end-0 m-2">
                             <i class="bi bi-star-fill"></i> Mới
                         </span>
                     </div>
 
-                    <!-- Product Info -->
+
                     <div class="card-body d-flex flex-column">
                         <h5 class="product-name mb-3">
                             <a href="{{ url_for('main.product_detail', slug=product.slug) }}" class="text-decoration-none text-dark">
@@ -218,7 +221,7 @@
                             </a>
                         </h5>
 
-                        <!-- Price Section -->
+
                         <div class="mt-auto">
                             <div class="product-price mb-3">
                                 {% if product.price == 0 %}
@@ -231,7 +234,7 @@
                                 {% endif %}
                             </div>
 
-                            <!-- Action Button -->
+
                             <a href="{{ url_for('main.product_detail', slug=product.slug) }}"
                                class="btn btn-warning w-100">
                                 <i class="bi bi-cart-plus me-1"></i> Xem chi tiết
@@ -244,7 +247,7 @@
         </div>
     </div>
 </section>
-
+-->
 <!-- ==================== FEATURED BLOGS ==================== -->
 {% if featured_blogs %}
 <section class="py-5 bg-gray-dark">
@@ -319,6 +322,7 @@
     </div>
 </section>
 {% endif %}
+
 
 <!-- ==================== CALL TO ACTION ==================== -->
 <section class="py-5 bg-warning">

@@ -481,7 +481,8 @@ def get_image_from_form(form_image_field, field_name='image', folder='uploads'):
 
         # ✅ CRITICAL: Nếu là URL Cloudinary, giữ nguyên!
         if path.startswith('http://') or path.startswith('https://'):
-            print(f"[Media Picker] Selected Cloudinary URL: {path}")
+            # ❌ BỎ dòng print này - đây là nguyên nhân lỗi!
+            # print(f"[Media Picker] Selected Cloudinary URL: {path}")
             return path
 
         # ✅ Nếu là đường dẫn local, chuẩn hóa
@@ -493,8 +494,26 @@ def get_image_from_form(form_image_field, field_name='image', folder='uploads'):
             else:
                 path = '/static/' + path.lstrip('/')
 
-        print(f"[Media Picker] Selected local path: {path}")
         return path
+
+    # 2. Nếu không, kiểm tra upload file mới hoặc giữ ảnh cũ
+    if form_image_field and form_image_field.data:
+        # ✅ FIX: Kiểm tra type của data
+        if isinstance(form_image_field.data, FileStorage):
+            # Case 1: Upload file mới
+            result = save_upload_file(form_image_field.data, folder=folder, optimize=True)
+
+            if result and isinstance(result, tuple):
+                # save_upload_file trả về (filepath, file_info)
+                filepath = result[0]
+                return filepath
+            return result
+
+        elif isinstance(form_image_field.data, str):
+            # Case 2: Giữ nguyên ảnh cũ (khi edit mà không đổi ảnh)
+            return form_image_field.data
+
+    return None
 
     # 2. Nếu không, kiểm tra upload file mới hoặc giữ ảnh cũ
     if form_image_field and form_image_field.data:

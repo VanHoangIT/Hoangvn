@@ -33,11 +33,14 @@ def index():
         is_active=True
     ).limit(3).all()
 
+    featured_projects = Project.query.filter_by(is_featured=True, is_active=True).order_by(Project.created_at.desc()).all()
+
     return render_template('index.html',
                            banners=banners,
                            featured_products=featured_products,
                            latest_products=latest_products,
-                           featured_blogs=featured_blogs)
+                           featured_blogs=featured_blogs,
+                           featured_projects=featured_projects)
 
 
 # ==================== GIỚI THIỆU ====================

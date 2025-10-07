@@ -7,7 +7,7 @@ class ChatbotWidget {
     constructor() {
         this.isOpen = false;
         this.isTyping = false;
-        this.remainingRequests = 30;
+        this.remainingRequests = 20;
 
         // DOM elements
         this.chatButton = document.getElementById('chatbotButton');
@@ -221,7 +221,7 @@ class ChatbotWidget {
                 });
 
                 // Reset counter
-                this.remainingRequests = 30;
+                this.remainingRequests = 20;
                 this.updateRequestCount();
 
                 // Thông báo thành công
