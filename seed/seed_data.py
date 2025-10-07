@@ -11,14 +11,14 @@ def seed_staff_data():
     staff_list = [
         {
             "username": "admin",
-            "email": "admin@ub.com.vn",
-            "password": "Admin@123456",
+            "email": "admin@hoang.com.vn",
+            "password": "admin@hoang123",
             "is_admin": True
         },
         {
             "username": "van_hoang",
             "email": "vuvanhoang.1607@gmail.com",
-            "password": "VanHoang@2025",
+            "password": "123456",
             "is_admin": True
         }
     ]

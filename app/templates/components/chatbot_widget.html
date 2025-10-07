@@ -1,0 +1,69 @@
+<!-- Chatbot Widget Component -->
+
+<!-- Nút mở chat (floating button) -->
+<!-- Nút mở chat (floating button) -->
+<button class="chatbot-button" id="chatbotButton" aria-label="Mở chat tư vấn">
+    <img src="{{ url_for('static', filename='img/chatbot_logo.png') }}" alt="Chatbot">
+</button>
+
+<!-- Cửa sổ chat -->
+<div class="chatbot-widget" id="chatbotWidget">
+    <!-- Header -->
+    <div class="chatbot-header">
+        <div class="chatbot-header-info">
+            <div class="chatbot-avatar">HV</div>
+            <div>
+                <h3>Hoangvn Chatbot</h3>
+                <span class="chatbot-status">
+                    <span class="chatbot-status-dot"></span>
+                    Đang hoạt động
+                </span>
+            </div>
+        </div>
+        <button class="chatbot-close-btn" id="chatbotCloseBtn" aria-label="Đóng chat">
+            ✕
+        </button>
+    </div>
+
+    <!-- Messages Container -->
+    <div class="chatbot-messages" id="chatbotMessages">
+        <!-- Tin nhắn chào mừng -->
+        <div class="chatbot-message bot">
+            <div class="chatbot-message-content">
+                Xin chào! Tôi là trợ lý ảo của Hoangvn 😊<br><br>
+                Tôi có thể tư vấn cho bạn về:<br>
+                • Sản phẩm & Dịch vụ<br>
+                • Giá cả & Chương trình ưu đãi<br>
+                • Quy trình đặt hàng<br>
+                • Chính sách bảo hành<br>
+                • Thông tin liên hệ<br><br>
+                Bạn cần hỗ trợ gì hôm nay? 🤗
+            </div>
+        </div>
+    </div>
+
+    <!-- Input Area -->
+    <div class="chatbot-input">
+        <input
+            type="text"
+            id="chatbotInput"
+            placeholder="Nhập tin nhắn của bạn..."
+            maxlength="500"
+            autocomplete="off"
+        />
+        <button id="chatbotSendBtn" aria-label="Gửi tin nhắn">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="22" y1="2" x2="11" y2="13"></line>
+                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+            </svg>
+        </button>
+    </div>
+
+    <!-- Footer -->
+    <div class="chatbot-footer">
+        <button id="chatbotResetBtn" class="chatbot-reset-btn">
+            🔄 Làm mới
+        </button>
+        <span class="chatbot-request-count" id="requestCount">Còn 30 tin nhắn</span>
+    </div>
+</div>

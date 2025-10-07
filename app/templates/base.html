@@ -102,6 +102,12 @@
                                         <i class="bi bi-info-circle me-2"></i>Giới thiệu
                                     </a>
                                 </li>
+                                <!-- Dự án -->
+                                <li>
+                                    <a class="dropdown-item" href="{{ url_for('main.projects') }}">
+                                        <i class="bi bi-building"></i> Dự án tiêu biểu
+                                    </a>
+                                </li>
                                 <li>
                                     <a class="dropdown-item" href="{{ url_for('main.contact') }}">
                                         <i class="bi bi-envelope me-2"></i>Liên hệ
@@ -121,12 +127,6 @@
                                href="{{ url_for('main.products') }}">
                                 <i class="bi bi-box-seam d-lg-none me-1"></i>
                                 Sản phẩm
-                            </a>
-                        </li>
-                        <!-- Dự án -->
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('main.projects') }}">
-                                <i class="bi bi-building"></i> Dự án tiêu biểu
                             </a>
                         </li>
                          <!-- Tuyển dụng -->
@@ -386,6 +386,15 @@
 
     <!-- Extra JS Block -->
     {% block extra_js %}{% endblock %}
+
+    <!-- ==================== CHATBOT WIDGET ==================== -->
+    {% include 'components/chatbot_widget.html' %}
+
+    <!-- Chatbot CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/chatbot.css') }}">
+
+    <!-- Chatbot JS -->
+    <script src="{{ url_for('static', filename='js/chatbot.js') }}"></script>
 
     <!-- Schema.org structured data -->
     <script type="application/ld+json">

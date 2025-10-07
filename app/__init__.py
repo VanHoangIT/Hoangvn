@@ -23,7 +23,7 @@ def create_app(config_class=Config):
     login_manager.init_app(app)
 
     # Cấu hình Flask-Login
-    login_manager.login_view = 'admin.login'  # Redirect đến trang login nếu chưa đăng nhập
+    login_manager.login_view = 'admin.login'
     login_manager.login_message = 'Vui lòng đăng nhập để truy cập trang này.'
     login_manager.login_message_category = 'warning'
 
@@ -37,6 +37,15 @@ def create_app(config_class=Config):
     app.register_blueprint(main_bp)
     app.register_blueprint(admin_bp, url_prefix='/admin')
 
+    # ========== THÊM MỚI: Đăng ký chatbot blueprint ==========
+    from app.chatbot import chatbot_bp
+    app.register_blueprint(chatbot_bp)
+
+    # Khởi tạo Gemini sau khi app được tạo
+    with app.app_context():
+        from app.chatbot.routes import init_gemini
+        init_gemini()
+
     # Khởi tạo cấu hình
     config_class.init_app(app)
 
@@ -46,7 +55,8 @@ def create_app(config_class=Config):
         from app.models import Category
         return {
             'site_name': app.config['SITE_NAME'],
-            'all_categories': Category.query.filter_by(is_active=True).all()
+            'all_categories': Category.query.filter_by(is_active=True).all(),
+            'current_year': 2025  # Thêm current_year cho footer
         }
 
     # Custom Jinja2 filters
@@ -64,6 +74,7 @@ def create_app(config_class=Config):
             return ''
         return text.replace('\n', '<br>\n')
 
+    # Cấu hình Cloudinary
     cloudinary.config(
         cloud_name=os.getenv('CLOUDINARY_CLOUD_NAME'),
         api_key=os.getenv('CLOUDINARY_API_KEY'),

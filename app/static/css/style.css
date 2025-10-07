@@ -26,9 +26,14 @@ html {
 
 .navbar {
   padding: 0.75rem 1rem;
+  overflow: visible;
 }
 
 .navbar > .container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
   padding-left: 0;
   padding-right: 0;
 }
@@ -44,12 +49,14 @@ html {
   border: 2px solid rgba(255, 255, 255, 0.5);
 }
 
-/* Navigation Links - Căn giữa và cách đều */
+/* Navigation Links - Căn giữa và co giãn linh hoạt */
 .navbar-nav {
   display: flex;
+  flex: 1;
   justify-content: center;
   gap: 0.5rem;
   margin: 0 auto;
+  flex-wrap: wrap;
 }
 
 .nav-item {
@@ -62,6 +69,7 @@ html {
   padding: 0.5rem 1rem !important;
   color: #212529 !important;
   white-space: nowrap;
+  transition: 0.2s ease-in-out;
 }
 
 .nav-link:hover {
@@ -76,13 +84,15 @@ html {
   border-radius: 8px;
 }
 
-/* Button CTA ở bên phải */
+/* Nút CTA ở bên phải, luôn giữ khoảng cách tự động */
 .navbar .btn-dark {
   flex-shrink: 0;
-  margin-left: 1rem;
+  margin-left: auto;
+  margin-right: 0;
+  white-space: nowrap;
 }
 
-/* Dropdown menu styling */
+/* Dropdown menu */
 .dropdown-menu {
   border: none;
   box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
@@ -99,12 +109,33 @@ html {
   color: #000;
 }
 
-/* Responsive menu */
-@media (max-width: 991px) {
+/* Responsive - Tablet & Mobile */
+@media (max-width: 1199px) {
   .navbar-nav {
-    text-align: center;
-    margin-top: 1rem;
+    gap: 0.25rem;
+  }
+
+  .nav-link {
+    padding: 0.5rem 0.75rem !important;
+    font-size: 0.95rem;
+  }
+
+  .navbar .btn-dark {
+    font-size: 0.9rem;
+    padding: 0.45rem 0.9rem;
+  }
+}
+
+@media (max-width: 991px) {
+  .navbar > .container {
     flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .navbar-nav {
+    width: 100%;
+    justify-content: flex-start;
+    margin-top: 1rem;
     gap: 0.5rem;
   }
 
@@ -112,23 +143,13 @@ html {
     width: 100%;
   }
 
-  .navbar-nav .nav-link {
-    justify-content: center;
-    padding: 0.75rem 1rem !important;
-  }
-
-  .navbar .btn {
+  .navbar .btn-dark {
     margin: 1rem auto;
     display: block;
     width: fit-content;
   }
-
-  .dropdown-menu {
-    text-align: center;
-    border: none;
-    box-shadow: none;
-  }
 }
+
 
 /* ==================== TOP BAR ==================== */
 /* Đã có .bg-dark .text-white .py-1 .small từ Bootstrap */
