@@ -481,8 +481,7 @@ def get_image_from_form(form_image_field, field_name='image', folder='uploads'):
 
         # ✅ CRITICAL: Nếu là URL Cloudinary, giữ nguyên!
         if path.startswith('http://') or path.startswith('https://'):
-            # ❌ BỎ dòng print này - đây là nguyên nhân lỗi!
-            # print(f"[Media Picker] Selected Cloudinary URL: {path}")
+
             return path
 
         # ✅ Nếu là đường dẫn local, chuẩn hóa
@@ -1348,21 +1347,31 @@ def create_album():
 @login_required
 def delete_media(id):
     """Xóa media file (Cloudinary + local + DB)"""
+    from app.utils import delete_file
+    import os
+    import logging
+
+    # Cấu hình logging (ghi log an toàn, không crash khi print)
+    logging.basicConfig(level=logging.INFO)
+    def safe_print(*args):
+        try:
+            print(*args)
+        except Exception:
+            pass
+
     media = Media.query.get_or_404(id)
     album_name = media.album
 
-    from app.utils import delete_file
-    import os
-
     try:
-        # 🧹 1️⃣ Xóa ảnh trên Cloudinary nếu là URL
+        # 🧹 1️⃣ Xử lý Cloudinary
         if media.filepath and "res.cloudinary.com" in media.filepath:
+            safe_print(f"[Delete Cloudinary Start]: {repr(media.filepath)}")
             res = delete_file(media.filepath)
-            print(f"[Delete Cloudinary]: {res}")
+            safe_print(f"[Delete Cloudinary Result]: {res}")
         else:
-            print("[Delete Cloudinary]: Bỏ qua (không phải URL Cloudinary)")
+            safe_print("[Delete Cloudinary]: Bỏ qua (không phải URL Cloudinary)")
 
-        # 🧹 2️⃣ Xóa file local nếu có
+        # 🧹 2️⃣ Xử lý file local (nếu có)
         if media.filepath and media.filepath.startswith('/static/'):
             file_path = media.filepath.replace('/static/', '')
             full_path = os.path.join(current_app.config['UPLOAD_FOLDER'], '..', file_path)
@@ -1370,22 +1379,32 @@ def delete_media(id):
 
             if os.path.exists(abs_path):
                 os.remove(abs_path)
-                print(f"[Delete Local]: Đã xóa {abs_path}")
+                safe_print(f"[Delete Local]: Đã xóa {abs_path}")
             else:
-                print(f"[Delete Local]: Không tìm thấy {abs_path}")
+                safe_print(f"[Delete Local]: Không tìm thấy {abs_path}")
 
     except Exception as e:
-        print(f"[Delete Error]: {e}")
+        safe_print(f"[Delete Error]: {e}")
+        logging.exception(e)
 
-    # 🧹 3️⃣ Xóa record khỏi DB
-    db.session.delete(media)
-    db.session.commit()
-    flash('Đã xóa ảnh thành công!', 'success')
+    # 🧹 3️⃣ Xóa record trong DB dù Cloudinary có xóa được hay không
+    try:
+        db.session.delete(media)
+        db.session.commit()
+        flash('🗑️ Đã xóa ảnh khỏi hệ thống', 'success')
+        safe_print("[DB Delete]: Media record removed successfully.")
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Lỗi khi xóa khỏi cơ sở dữ liệu: {e}', 'danger')
+        safe_print(f"[DB Delete Error]: {e}")
+        logging.exception(e)
 
-    # 🧭 4️⃣ Redirect lại đúng album
+    # 🧭 4️⃣ Quay lại đúng album
     if album_name:
         return redirect(url_for('admin.media', album=album_name))
     return redirect(url_for('admin.media'))
+
+
 
 
 

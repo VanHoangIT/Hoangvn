@@ -212,42 +212,64 @@ def save_upload_file(file, folder='general', album=None, alt_text=None, optimize
 
 
 
-import os
-import cloudinary.uploader
-
-import os
-import cloudinary.uploader
-
 def delete_file(filepath):
     """Xóa file khỏi Cloudinary hoặc local"""
     try:
+        if not filepath or not isinstance(filepath, str):
+            print("[Delete Error]: Filepath rỗng hoặc không hợp lệ")
+            return False
+
+        # --- Xử lý Cloudinary ---
         if "res.cloudinary.com" in filepath:
-            parts = filepath.split("/upload/")[-1]
-            # Loại bỏ phần version (vd: v1759744420/)
-            if parts.startswith("v") and "/" in parts:
-                parts = "/".join(parts.split("/")[1:])
-            # Bỏ phần mở rộng .jpg/.png
-            public_id = os.path.splitext(parts)[0]
+            try:
+                # Tách public_id đúng định dạng
+                parts = filepath.split("/upload/")[-1]  # lấy phần sau /upload/
+                parts = parts.split("/")  # ['v1759825641', 'enterprise', 'general', 'cat-say-so-2-20251007152712.png']
 
-            result = cloudinary.uploader.destroy(public_id)
-            print(f"[Cloudinary delete]: {public_id} -> {result}")
-            return result.get("result") == "ok"
+                # Nếu phần đầu có version (v1234...) thì bỏ đi
+                if parts[0].startswith("v") and parts[0][1:].isdigit():
+                    parts = parts[1:]
 
-        # Nếu là file local
+                # Ghép lại, bỏ phần mở rộng (.jpg, .png,...)
+                path_no_ext = "/".join(parts)
+                public_id = os.path.splitext(path_no_ext)[0]
+
+                print(f"[Debug] Cloudinary public_id: {public_id}")
+
+                result = cloudinary.uploader.destroy(public_id)
+                print(f"[Cloudinary delete]: {public_id} -> {result}")
+                return result.get("result") == "ok"
+
+            except Exception as e:
+                print(f"[Cloudinary Delete Error]: {e}")
+                return False
+
+        # --- Xử lý file local ---
         elif filepath.startswith('/static/'):
-            file_path = filepath.replace('/static/', '')
-            full_path = os.path.join(
-                os.path.dirname(__file__), 'static', file_path
-            )
-            abs_path = os.path.abspath(full_path)
+            rel_path = filepath.replace('/static/', '', 1).lstrip("\\/")
+            static_dir = os.path.join(os.path.dirname(__file__), 'static')
+            abs_path = os.path.abspath(os.path.join(static_dir, rel_path))
+
+            if not abs_path.startswith(static_dir):
+                print(f"[Security Warning]: Path không hợp lệ -> {abs_path}")
+                return False
+
             if os.path.exists(abs_path):
                 os.remove(abs_path)
                 print(f"[Local delete]: {abs_path}")
                 return True
+            else:
+                print(f"[Delete Warning]: File không tồn tại -> {abs_path}")
+                return False
+
+        else:
+            print(f"[Delete Skipped]: Không nhận dạng được kiểu đường dẫn ({filepath})")
+            return False
 
     except Exception as e:
         print(f"[Delete Error]: {e}")
-    return False
+        return False
+
 
 
 
