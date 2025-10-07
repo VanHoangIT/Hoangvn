@@ -193,24 +193,35 @@ function renderMediaGrid(mediaList) {
         return;
     }
 
-    grid.innerHTML = mediaList.map(media => `
-        <div class="col-lg-2 col-md-3 col-sm-4 col-6">
-            <div class="media-item" data-id="${media.id}" data-path="${media.filepath}">
-                <span class="selected-badge">✓ Đã chọn</span>
-                <img src="${media.filepath}" alt="${media.original_filename}" loading="lazy"
-                     onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22%3E%3Crect fill=%22%23ddd%22 width=%22100%22 height=%22100%22/%3E%3Ctext fill=%22%23999%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22%3ENo Image%3C/text%3E%3C/svg%3E';">
-                <div class="media-item-info">
-                    <div class="filename text-truncate" title="${media.original_filename}">
-                        ${media.original_filename}
-                    </div>
-                    <div class="dimensions">
-                        ${media.width} × ${media.height}
+    grid.innerHTML = mediaList.map(media => {
+        // ✅ CRITICAL: Đảm bảo filepath không bị thêm "/" ở đầu URL Cloudinary
+        let imageSrc = media.filepath;
+
+        // Debug log
+        console.log('Media item:', media.original_filename, 'filepath:', imageSrc);
+
+        return `
+            <div class="col-lg-2 col-md-3 col-sm-4 col-6">
+                <div class="media-item" data-id="${media.id}" data-path="${imageSrc}">
+                    <span class="selected-badge">✓ Đã chọn</span>
+                    <img src="${imageSrc}"
+                         alt="${media.original_filename}"
+                         loading="lazy"
+                         onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22%3E%3Crect fill=%22%23ddd%22 width=%22100%22 height=%22100%22/%3E%3Ctext fill=%22%23999%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22%3ENo Image%3C/text%3E%3C/svg%3E';">
+                    <div class="media-item-info">
+                        <div class="filename text-truncate" title="${media.original_filename}">
+                            ${media.original_filename}
+                        </div>
+                        <div class="dimensions">
+                            ${media.width} × ${media.height}
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-    `).join('');
+        `;
+    }).join('');
 
+    // Attach click handlers
     document.querySelectorAll('.media-item').forEach(item => {
         item.addEventListener('click', function() {
             selectMedia(this.dataset.id, this.dataset.path);
@@ -261,18 +272,33 @@ document.addEventListener('DOMContentLoaded', function() {
     selectBtn.addEventListener('click', function() {
         if (!selectedMediaPath || !currentTargetInput) return;
 
-        // Chuẩn hóa đường dẫn
-        let normalizedPath = selectedMediaPath.trim();
+        // ✅ CRITICAL FIX: Trim và kiểm tra kỹ URL
+        let finalPath = selectedMediaPath.trim();
 
-        // Đảm bảo có /static/ ở đầu
-        if (!normalizedPath.startsWith('/static/')) {
-            if (normalizedPath.startsWith('static/')) {
-                normalizedPath = '/' + normalizedPath;
-            } else if (normalizedPath.startsWith('/uploads/')) {
-                normalizedPath = '/static' + normalizedPath;
-            } else if (normalizedPath.startsWith('uploads/')) {
-                normalizedPath = '/static/' + normalizedPath;
+        console.log('[Media Picker] Raw selected path:', selectedMediaPath);
+
+        // ✅ BẮT BUỘC: Kiểm tra Cloudinary URL TRƯỚC KHI làm gì khác
+        if (finalPath.startsWith('http://') || finalPath.startsWith('https://')) {
+            // Giữ nguyên 100%, không thêm gì cả
+            console.log('[Media Picker] Cloudinary URL detected, keeping as-is');
+        }
+        // ⚠️ Trường hợp đặc biệt: Nếu có "/http" thì loại bỏ "/"
+        else if (finalPath.startsWith('/http://') || finalPath.startsWith('/https://')) {
+            finalPath = finalPath.substring(1); // Bỏ "/" ở đầu
+            console.log('[Media Picker] Fixed malformed Cloudinary URL:', finalPath);
+        }
+        // Nếu là đường dẫn local, chuẩn hóa
+        else {
+            if (!finalPath.startsWith('/static/')) {
+                if (finalPath.startsWith('static/')) {
+                    finalPath = '/' + finalPath;
+                } else if (finalPath.startsWith('/uploads/')) {
+                    finalPath = '/static' + finalPath;
+                } else if (finalPath.startsWith('uploads/')) {
+                    finalPath = '/static/' + finalPath;
+                }
             }
+            console.log('[Media Picker] Local path normalized:', finalPath);
         }
 
         // Tìm hoặc tạo hidden input
@@ -284,11 +310,13 @@ document.addEventListener('DOMContentLoaded', function() {
             hiddenInput.name = 'selected_image_path';
             currentTargetInput.parentNode.appendChild(hiddenInput);
         }
-        hiddenInput.value = normalizedPath;
+        hiddenInput.value = finalPath;
+
+        console.log('[Media Picker] Hidden input value set to:', finalPath);
 
         // Hiển thị preview
         if (currentPreviewImg) {
-            currentPreviewImg.src = normalizedPath;
+            currentPreviewImg.src = finalPath;
             currentPreviewImg.style.display = 'block';
         }
 
@@ -311,7 +339,10 @@ document.addEventListener('DOMContentLoaded', function() {
         // Đóng modal
         bootstrap.Modal.getInstance(document.getElementById('mediaPickerModal')).hide();
 
-        console.log('Selected image path:', normalizedPath);
+        // ✅ Log để debug
+        console.log('✅ [Media Picker] Image selected successfully!');
+        console.log('   - Final path:', finalPath);
+        console.log('   - Is Cloudinary:', finalPath.startsWith('http'));
     });
 
     // Event listeners cho filter

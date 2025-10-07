@@ -455,44 +455,72 @@ def calculate_blog_seo_score(blog):
 # Tạo Blueprint cho admin
 admin_bp = Blueprint('admin', __name__)
 
+
 # ==================== Render ảnh từ library ====================
 def get_image_from_form(form_image_field, field_name='image', folder='uploads'):
     """
-    Lấy đường dẫn ảnh từ form - ưu tiên selected_image từ media picker
-    Returns: image_path hoặc None
+    Lấy đường dẫn ảnh từ form - Ưu tiên selected_image từ media picker
+
+    Returns:
+        - URL Cloudinary (https://...)
+        - Local path (/static/uploads/...)
+        - None (nếu không có ảnh)
+
+    Xử lý 3 trường hợp:
+    1. Chọn từ Media Library → selected_image_path
+    2. Upload file mới → FileStorage object
+    3. Giữ nguyên ảnh cũ → string (khi edit)
     """
+    from werkzeug.datastructures import FileStorage
+
     # 1. Kiểm tra nếu chọn từ thư viện (media picker)
     selected_image = request.form.get('selected_image_path')
+
     if selected_image and selected_image.strip():
-        # Đảm bảo đường dẫn có format đúng
         path = selected_image.strip()
 
-        # Nếu path đã có /static/ thì giữ nguyên
-        if path.startswith('/static/'):
+        # ✅ CRITICAL: Nếu là URL Cloudinary, giữ nguyên!
+        if path.startswith('http://') or path.startswith('https://'):
+            print(f"[Media Picker] Selected Cloudinary URL: {path}")
             return path
 
-        # Nếu path có static/ nhưng thiếu / ở đầu
-        if path.startswith('static/'):
-            return '/' + path
+        # ✅ Nếu là đường dẫn local, chuẩn hóa
+        if not path.startswith('/'):
+            path = '/' + path
+        if not path.startswith('/static/'):
+            if path.startswith('/uploads/'):
+                path = '/static' + path
+            else:
+                path = '/static/' + path.lstrip('/')
 
-        # Nếu chỉ có uploads/... thì thêm /static/
-        if path.startswith('uploads/'):
-            return '/static/' + path
-
-        # Nếu có / ở đầu nhưng không có static/
-        if path.startswith('/uploads/'):
-            return '/static' + path
-
-        # Mặc định: giả sử là path đầy đủ
+        print(f"[Media Picker] Selected local path: {path}")
         return path
 
-    # 2. Nếu không, kiểm tra upload file mới
+    # 2. Nếu không, kiểm tra upload file mới hoặc giữ ảnh cũ
     if form_image_field and form_image_field.data:
-        result = save_upload_file(form_image_field.data, folder=folder, optimize=True)
-        if result and isinstance(result, tuple):
-            return result[0]  # Trả về filepath
-        return result
+        # ✅ FIX: Kiểm tra type của data
+        if isinstance(form_image_field.data, FileStorage):
+            # Case 1: Upload file mới
+            print(f"[Upload] New file detected: {form_image_field.data.filename}")
+            result = save_upload_file(form_image_field.data, folder=folder, optimize=True)
 
+            if result and isinstance(result, tuple):
+                # save_upload_file trả về (filepath, file_info)
+                filepath = result[0]
+                print(f"[Upload] Saved to: {filepath}")
+                return filepath
+            return result
+
+        elif isinstance(form_image_field.data, str):
+            # Case 2: Giữ nguyên ảnh cũ (khi edit mà không đổi ảnh)
+            print(f"[Keep Old Image] {form_image_field.data}")
+            return form_image_field.data
+
+        else:
+            # Unknown type - Log để debug
+            print(f"[Warning] Unknown image data type: {type(form_image_field.data)}")
+
+    print("[No Image] No image selected or uploaded")
     return None
 
 
@@ -1485,7 +1513,7 @@ def check_media_seo(id):
 @admin_bp.route('/api/media')
 @login_required
 def api_media():
-    """API trả về danh sách media"""
+    """API trả về danh sách media với đường dẫn chuẩn hóa"""
     album = request.args.get('album', '')
     search = request.args.get('search', '')
 
@@ -1501,12 +1529,39 @@ def api_media():
     albums_data = get_albums()
     album_names = [a['name'] if isinstance(a, dict) else a for a in albums_data]
 
+    # ✅ CRITICAL FIX: Chuẩn hóa filepath
+    def normalize_filepath(media):
+        """Chuẩn hóa filepath để đảm bảo có thể hiển thị được"""
+        filepath = media.filepath
+
+        if not filepath:
+            return ''
+
+        # ✅ KIỂM TRA CLOUDINARY TRƯỚC - Giữ nguyên 100%
+        if filepath.startswith('http://') or filepath.startswith('https://'):
+            return filepath
+
+        # ✅ Nếu là local path, chuẩn hóa
+        # Đảm bảo có / ở đầu
+        if not filepath.startswith('/'):
+            filepath = '/' + filepath
+
+        # Đảm bảo có /static/
+        if not filepath.startswith('/static/'):
+            if filepath.startswith('/uploads/'):
+                filepath = '/static' + filepath
+            else:
+                # uploads/... → /static/uploads/...
+                filepath = '/static/' + filepath.lstrip('/')
+
+        return filepath
+
     return jsonify({
         'media': [{
             'id': m.id,
             'filename': m.filename,
             'original_filename': m.original_filename,
-            'filepath': '/' + m.filepath if not m.filepath.startswith('/') else m.filepath,  # ← FIX: Thêm / ở đầu
+            'filepath': normalize_filepath(m),  # ← DÙNG HÀM CHUẨN HÓA
             'width': m.width or 0,
             'height': m.height or 0,
             'album': m.album or ''

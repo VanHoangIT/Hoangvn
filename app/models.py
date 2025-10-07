@@ -77,24 +77,6 @@ class Product(db.Model):
     image_title = db.Column(db.String(255))
     image_caption = db.Column(db.Text)
 
-    # Trong class Product
-    def get_media_seo_info(self):
-        """Lấy thông tin SEO từ Media Library dựa vào image path"""
-        if not self.image:
-            return None
-
-        # Tìm media có filepath khớp với product.image
-        media = Media.query.filter_by(filepath=self.image).first()
-
-        if media:
-            return {
-                'alt_text': media.alt_text,
-                'title': media.title,
-                'caption': media.caption
-            }
-        return None
-
-
     def __repr__(self):
         return f'<Product {self.name}>'
 
@@ -114,21 +96,6 @@ class Banner(db.Model):
     is_active = db.Column(db.Boolean, default=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-    # Trong class Banner
-    def get_media_seo_info(self):
-        """Lấy thông tin SEO từ Media Library dựa vào image path"""
-        if not self.image:
-            return None
-
-        media = Media.query.filter_by(filepath=self.image).first()
-
-        if media:
-            return {
-                'alt_text': media.alt_text,
-                'title': media.title,
-                'caption': media.caption
-            }
-        return None
 
     def __repr__(self):
         return f'<Banner {self.title}>'
@@ -171,21 +138,6 @@ class Blog(db.Model):
     seo_score = db.Column(db.Integer, default=0)
     seo_grade = db.Column(db.String(5), default='F')
     seo_last_checked = db.Column(db.DateTime)
-
-    def get_media_seo_info(self):
-        """Lấy thông tin SEO từ Media Library dựa vào image path"""
-        if not self.image:
-            return None
-
-        media = Media.query.filter_by(filepath=self.image).first()
-
-        if media:
-            return {
-                'alt_text': media.alt_text,
-                'title': media.title,
-                'caption': media.caption
-            }
-        return None
 
     def calculate_reading_time(self):
         """Tính thời gian đọc dựa trên số từ (200 từ/phút)"""
@@ -424,3 +376,193 @@ class Job(db.Model):
         if self.deadline:
             return datetime.utcnow() > self.deadline
         return False
+
+
+# ==================== HELPER FUNCTIONS ====================
+def get_media_by_image_url(image_url):
+    """
+    Tìm Media record từ image URL (Cloudinary hoặc local)
+    Hỗ trợ:
+    - https://res.cloudinary.com/.../image.jpg
+    - /static/uploads/image.jpg
+    - uploads/image.jpg
+    """
+    if not image_url:
+        return None
+
+    # Case 1: Cloudinary URL - tìm theo filepath
+    if image_url.startswith('http'):
+        return Media.query.filter_by(filepath=image_url).first()
+
+    # Case 2: Local path - chuẩn hóa và tìm theo filename
+    # /static/uploads/products/abc.jpg → abc.jpg
+    filename = image_url.split('/')[-1]
+
+    # Tìm theo filename (có thể có nhiều file trùng tên)
+    media = Media.query.filter_by(filename=filename).first()
+
+    # Nếu không tìm thấy, thử tìm theo filepath
+    if not media:
+        # Chuẩn hóa path
+        normalized_path = image_url
+        if not normalized_path.startswith('/'):
+            normalized_path = '/' + normalized_path
+        if not normalized_path.startswith('/static/'):
+            if normalized_path.startswith('/uploads/'):
+                normalized_path = '/static' + normalized_path
+
+        media = Media.query.filter_by(filepath=normalized_path).first()
+
+    return media
+
+
+# ==============================================================================
+# THÊM ĐOẠN NÀY VÀO CUỐI FILE models.py (SAU CLASS Media)
+# ==============================================================================
+
+# ==================== HELPER FUNCTION ====================
+def get_media_by_image_url(image_url):
+    """
+    Tìm Media record từ image URL (Cloudinary hoặc local)
+
+    Hỗ trợ các format:
+    - https://res.cloudinary.com/.../image.jpg (Cloudinary)
+    - /static/uploads/products/image.jpg (Local)
+    - uploads/products/image.jpg (Local không có /)
+
+    Returns: Media object hoặc None
+    """
+    if not image_url:
+        return None
+
+    # Case 1: URL Cloudinary đầy đủ - tìm theo filepath
+    if image_url.startswith('http://') or image_url.startswith('https://'):
+        return Media.query.filter_by(filepath=image_url).first()
+
+    # Case 2: Local path - tìm theo filename
+    # Lấy tên file: /static/uploads/products/abc.jpg → abc.jpg
+    filename = image_url.split('/')[-1]
+
+    # Tìm theo filename (ưu tiên)
+    media = Media.query.filter_by(filename=filename).first()
+
+    if media:
+        return media
+
+    # Case 3: Nếu không tìm thấy, thử chuẩn hóa path và tìm lại
+    normalized_path = image_url
+    if not normalized_path.startswith('/'):
+        normalized_path = '/' + normalized_path
+    if not normalized_path.startswith('/static/'):
+        if normalized_path.startswith('/uploads/'):
+            normalized_path = '/static' + normalized_path
+        else:
+            normalized_path = '/static/' + normalized_path.lstrip('/')
+
+    return Media.query.filter_by(filepath=normalized_path).first()
+
+
+# ==================== CẬP NHẬT METHOD CHO PRODUCT ====================
+def product_get_media_seo_info(self):
+    """
+    Lấy thông tin SEO từ Media Library dựa vào image path
+
+    Priority:
+    1. Tìm Media record theo image URL
+    2. Fallback về thông tin legacy từ Product nếu không tìm thấy
+    3. Fallback về tên Product nếu không có gì
+    """
+    if not self.image:
+        return None
+
+    # Tìm Media record
+    media = get_media_by_image_url(self.image)
+
+    if media:
+        return {
+            'alt_text': media.alt_text or self.name,
+            'title': media.title or self.name,
+            'caption': media.caption
+        }
+
+    # Fallback: dùng thông tin legacy từ Product (nếu có)
+    return {
+        'alt_text': self.image_alt_text or self.name,
+        'title': self.image_title or self.name,
+        'caption': self.image_caption
+    }
+
+
+# Gán lại method cho class Product
+Product.get_media_seo_info = product_get_media_seo_info
+
+
+# ==================== CẬP NHẬT METHOD CHO BANNER ====================
+def banner_get_media_seo_info(self):
+    """
+    Lấy thông tin SEO từ Media Library cho Banner
+
+    Priority:
+    1. Media Library
+    2. Fallback về title/subtitle của Banner
+    """
+    if not self.image:
+        return None
+
+    media = get_media_by_image_url(self.image)
+
+    if media:
+        return {
+            'alt_text': media.alt_text or self.title,
+            'title': media.title or self.title,
+            'caption': media.caption or self.subtitle
+        }
+
+    # Fallback
+    return {
+        'alt_text': self.title,
+        'title': self.title,
+        'caption': self.subtitle
+    }
+
+
+# Gán lại method cho class Banner
+Banner.get_media_seo_info = banner_get_media_seo_info
+
+
+# ==================== CẬP NHẬT METHOD CHO BLOG ====================
+def blog_get_media_seo_info(self):
+    """
+    Lấy thông tin SEO từ Media Library cho Blog
+
+    Priority:
+    1. Media Library
+    2. Legacy fields từ Blog
+    3. Fallback về title/excerpt
+    """
+    if not self.image:
+        return None
+
+    media = get_media_by_image_url(self.image)
+
+    if media:
+        return {
+            'alt_text': media.alt_text or self.title,
+            'title': media.title or self.title,
+            'caption': media.caption or self.excerpt
+        }
+
+    # Fallback: dùng legacy fields
+    return {
+        'alt_text': self.image_alt_text or self.title,
+        'title': self.image_title or self.title,
+        'caption': self.image_caption or self.excerpt
+    }
+
+
+# Gán lại method cho class Blog
+Blog.get_media_seo_info = blog_get_media_seo_info
+
+# ==============================================================================
+# HẾT - ĐÃ CẬP NHẬT XONG
+# ==============================================================================
