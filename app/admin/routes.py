@@ -476,7 +476,11 @@ def get_image_from_form(form_image_field, field_name='image', folder='uploads'):
 def login():
     """Trang đăng nhập admin - KHÔNG CẦN QUYỀN"""
     if current_user.is_authenticated:
-        return redirect(url_for('admin.dashboard'))
+        # Redirect dựa vào role
+        if current_user.has_any_permission('manage_users', 'manage_products', 'manage_categories'):
+            return redirect(url_for('admin.dashboard'))
+        else:
+            return redirect(url_for('admin.welcome'))
 
     form = LoginForm()
     if form.validate_on_submit():
@@ -484,7 +488,15 @@ def login():
         if user and user.check_password(form.password.data):
             login_user(user, remember=form.remember_me.data)
             next_page = request.args.get('next')
-            return redirect(next_page) if next_page else redirect(url_for('admin.dashboard'))
+
+            if next_page:
+                return redirect(next_page)
+
+            # Redirect dựa vào role
+            if user.has_any_permission('manage_users', 'manage_products', 'manage_categories'):
+                return redirect(url_for('admin.dashboard'))
+            else:
+                return redirect(url_for('admin.welcome'))
         else:
             flash('Email hoặc mật khẩu không đúng!', 'danger')
 
@@ -502,9 +514,17 @@ def logout():
 
 # ==================== DASHBOARD ====================
 @admin_bp.route('/dashboard')
-@permission_required('view_dashboard')  # ✅ Xem dashboard
+@permission_required('view_dashboard')
 def dashboard():
-    """Trang tổng quan admin"""
+    """
+    Dashboard đầy đủ - CHỈ cho Admin & Editor
+    User khác redirect sang Welcome
+    """
+    # Kiểm tra quyền - chỉ Admin/Editor vào được
+    if not current_user.has_any_permission('manage_users', 'manage_products', 'manage_categories'):
+        return redirect(url_for('admin.welcome'))
+
+    # Dashboard cho Admin/Editor
     total_products = Product.query.count()
     total_categories = Category.query.count()
     total_blogs = Blog.query.count()
@@ -519,6 +539,22 @@ def dashboard():
                            total_contacts=total_contacts,
                            recent_products=recent_products,
                            recent_contacts=recent_contacts)
+
+# ==================== WELCOME USER ====================
+@admin_bp.route('/welcome')
+@login_required
+def welcome():
+    """Trang chào mừng cho User thường (không phải Admin/Editor)"""
+    # Nếu là Admin/Editor, redirect về dashboard
+    if current_user.has_any_permission('manage_users', 'manage_products', 'manage_categories'):
+        return redirect(url_for('admin.dashboard'))
+
+    # Lấy số liên hệ chưa đọc (nếu có quyền xem)
+    total_contacts = 0
+    if current_user.has_any_permission('view_contacts', 'manage_contacts'):
+        total_contacts = Contact.query.filter_by(is_read=False).count()
+
+    return render_template('admin/welcome.html', total_contacts=total_contacts)
 
 
 # ==================== QUẢN LÝ DANH MỤC ====================
