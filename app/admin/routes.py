@@ -4,16 +4,20 @@ from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.utils import secure_filename
 from app import db
 from app.models import User, Product, Category, Banner, Blog, FAQ, Contact, Media, Project, Job
+from app.models_rbac import Role, Permission
 from app.forms import (LoginForm, CategoryForm, ProductForm, BannerForm,
-                       BlogForm, FAQForm, UserForm, ProjectForm, JobForm)
+                       BlogForm, FAQForm, UserForm, ProjectForm, JobForm,
+                       RoleForm, PermissionForm)
 from app.utils import save_upload_file, delete_file, get_albums, optimize_image
-from app.decorators import admin_required
+from app.decorators import permission_required, role_required
 import shutil
 import re
 from html import unescape
 from app.seo_config import MEDIA_KEYWORDS, KEYWORD_SCORES
 
-# ==================== Tính điểm SEO ảnh ====================
+# ==================== Giữ nguyên các hàm calculate_seo_score, calculate_blog_seo_score ====================
+# (Copy từ file cũ - giữ nguyên 100%)
+
 def calculate_seo_score(media):
     """Tính SEO score - dùng config từ seo_config.py"""
     score = 0
@@ -181,12 +185,9 @@ def calculate_seo_score(media):
         'checklist': checklist
     }
 
-# ==================== SEO BLOG ====================
+
 def calculate_blog_seo_score(blog):
-    """
-    Tính toán điểm SEO cho blog post
-    Returns: dict với score, grade, issues, recommendations, checklist
-    """
+    """Tính toán điểm SEO cho blog post"""
     score = 0
     issues = []
     recommendations = []
@@ -197,7 +198,6 @@ def calculate_blog_seo_score(blog):
         title_len = len(blog.title)
         title_lower = blog.title.lower()
 
-        # 1.1. Độ dài title (10 điểm)
         if 30 <= title_len <= 60:
             score += 10
             checklist.append(('success', f'✓ Tiêu đề tối ưu ({title_len} ký tự)'))
@@ -215,7 +215,6 @@ def calculate_blog_seo_score(blog):
             checklist.append(('danger', f'✗ Tiêu đề chưa tối ưu ({title_len} ký tự)'))
             recommendations.append('Tiêu đề nên 30-60 ký tự để hiển thị đầy đủ trên Google')
 
-        # 1.2. Keyword trong title (10 điểm)
         if blog.focus_keyword and blog.focus_keyword.lower() in title_lower:
             score += 10
             checklist.append(('success', f'✓ Keyword "{blog.focus_keyword}" có trong tiêu đề'))
@@ -231,7 +230,6 @@ def calculate_blog_seo_score(blog):
         desc_len = len(blog.meta_description)
         desc_lower = blog.meta_description.lower()
 
-        # 2.1. Độ dài meta description (10 điểm)
         if 120 <= desc_len <= 160:
             score += 10
             checklist.append(('success', f'✓ Meta description tối ưu ({desc_len} ký tự)'))
@@ -247,7 +245,6 @@ def calculate_blog_seo_score(blog):
             checklist.append(('warning', f'⚠ Meta description: {desc_len} ký tự'))
             recommendations.append('Meta description nên 120-160 ký tự')
 
-        # 2.2. Keyword trong meta description (5 điểm)
         if blog.focus_keyword and blog.focus_keyword.lower() in desc_lower:
             score += 5
             checklist.append(('success', '✓ Keyword có trong meta description'))
@@ -262,8 +259,6 @@ def calculate_blog_seo_score(blog):
     # === 3. FOCUS KEYWORD ANALYSIS (25 điểm) ===
     if blog.focus_keyword:
         keyword = blog.focus_keyword.lower()
-
-        # Strip HTML từ content để phân tích
         content_text = ''
         if blog.content:
             content_text = re.sub(r'<[^>]+>', '', blog.content)
@@ -271,7 +266,6 @@ def calculate_blog_seo_score(blog):
 
         content_lower = content_text.lower()
 
-        # 3.1. Keyword density (10 điểm)
         if content_lower:
             keyword_count = content_lower.count(keyword)
             words = content_lower.split()
@@ -294,7 +288,6 @@ def calculate_blog_seo_score(blog):
                 checklist.append(('danger', f'✗ Keyword chỉ xuất hiện {keyword_count} lần'))
                 recommendations.append(f'❗ Thêm keyword "{keyword}" vào nội dung (ít nhất 3-5 lần)')
 
-        # 3.2. Keyword trong đoạn đầu (8 điểm)
         if content_lower:
             first_150_words = ' '.join(content_lower.split()[:150])
             if keyword in first_150_words:
@@ -304,7 +297,6 @@ def calculate_blog_seo_score(blog):
                 recommendations.append('❗ Thêm keyword vào đoạn đầu tiên')
                 checklist.append(('danger', '✗ Keyword không có trong đoạn đầu'))
 
-        # 3.3. Keyword trong heading (H2, H3) (7 điểm)
         if blog.content:
             headings = re.findall(r'<h[23][^>]*>(.*?)</h[23]>', blog.content.lower())
             has_keyword_in_heading = any(keyword in h for h in headings)
@@ -354,11 +346,8 @@ def calculate_blog_seo_score(blog):
     # === 5. IMAGE SEO (10 điểm) ===
     if blog.image:
         media_info = blog.get_media_seo_info()
-
         if media_info and media_info.get('alt_text'):
             alt_text = media_info['alt_text']
-
-            # Check alt text có keyword không
             if blog.focus_keyword and blog.focus_keyword.lower() in alt_text.lower():
                 score += 10
                 checklist.append(('success', '✓ Ảnh có Alt Text chứa keyword'))
@@ -377,9 +366,7 @@ def calculate_blog_seo_score(blog):
 
     # === 6. INTERNAL LINKS (10 điểm) ===
     if blog.content:
-        # Đếm internal links
         internal_links = len(re.findall(r'href=["\'](?:/|(?:https?://)?(?:www\.)?aosmith\.com\.vn)', blog.content))
-
         if internal_links >= 3:
             score += 10
             checklist.append(('success', f'✓ Có {internal_links} liên kết nội bộ'))
@@ -397,14 +384,10 @@ def calculate_blog_seo_score(blog):
 
     # === 7. READABILITY & STRUCTURE (5 điểm) ===
     if blog.content:
-        # Đếm paragraphs
         paragraphs = len(re.findall(r'<p[^>]*>.*?</p>', blog.content))
-
-        # Đếm headings
         headings = len(re.findall(r'<h[2-6][^>]*>.*?</h[2-6]>', blog.content))
 
         structure_score = 0
-
         if headings >= 3:
             structure_score += 3
             checklist.append(('success', f'✓ Có {headings} tiêu đề phụ (H2-H6)'))
@@ -456,35 +439,16 @@ def calculate_blog_seo_score(blog):
 admin_bp = Blueprint('admin', __name__)
 
 
-# ==================== Render ảnh từ library ====================
+# ==================== Helper function ====================
 def get_image_from_form(form_image_field, field_name='image', folder='uploads'):
-    """
-    Lấy đường dẫn ảnh từ form - Ưu tiên selected_image từ media picker
-
-    Returns:
-        - URL Cloudinary (https://...)
-        - Local path (/static/uploads/...)
-        - None (nếu không có ảnh)
-
-    Xử lý 3 trường hợp:
-    1. Chọn từ Media Library → selected_image_path
-    2. Upload file mới → FileStorage object
-    3. Giữ nguyên ảnh cũ → string (khi edit)
-    """
+    """Lấy đường dẫn ảnh từ form - Ưu tiên selected_image từ media picker"""
     from werkzeug.datastructures import FileStorage
 
-    # 1. Kiểm tra nếu chọn từ thư viện (media picker)
     selected_image = request.form.get('selected_image_path')
-
     if selected_image and selected_image.strip():
         path = selected_image.strip()
-
-        # ✅ CRITICAL: Nếu là URL Cloudinary, giữ nguyên!
         if path.startswith('http://') or path.startswith('https://'):
-
             return path
-
-        # ✅ Nếu là đường dẫn local, chuẩn hóa
         if not path.startswith('/'):
             path = '/' + path
         if not path.startswith('/static/'):
@@ -492,72 +456,33 @@ def get_image_from_form(form_image_field, field_name='image', folder='uploads'):
                 path = '/static' + path
             else:
                 path = '/static/' + path.lstrip('/')
-
         return path
 
-    # 2. Nếu không, kiểm tra upload file mới hoặc giữ ảnh cũ
     if form_image_field and form_image_field.data:
-        # ✅ FIX: Kiểm tra type của data
         if isinstance(form_image_field.data, FileStorage):
-            # Case 1: Upload file mới
             result = save_upload_file(form_image_field.data, folder=folder, optimize=True)
-
             if result and isinstance(result, tuple):
-                # save_upload_file trả về (filepath, file_info)
                 filepath = result[0]
                 return filepath
             return result
-
         elif isinstance(form_image_field.data, str):
-            # Case 2: Giữ nguyên ảnh cũ (khi edit mà không đổi ảnh)
             return form_image_field.data
 
-    return None
-
-    # 2. Nếu không, kiểm tra upload file mới hoặc giữ ảnh cũ
-    if form_image_field and form_image_field.data:
-        # ✅ FIX: Kiểm tra type của data
-        if isinstance(form_image_field.data, FileStorage):
-            # Case 1: Upload file mới
-            print(f"[Upload] New file detected: {form_image_field.data.filename}")
-            result = save_upload_file(form_image_field.data, folder=folder, optimize=True)
-
-            if result and isinstance(result, tuple):
-                # save_upload_file trả về (filepath, file_info)
-                filepath = result[0]
-                print(f"[Upload] Saved to: {filepath}")
-                return filepath
-            return result
-
-        elif isinstance(form_image_field.data, str):
-            # Case 2: Giữ nguyên ảnh cũ (khi edit mà không đổi ảnh)
-            print(f"[Keep Old Image] {form_image_field.data}")
-            return form_image_field.data
-
-        else:
-            # Unknown type - Log để debug
-            print(f"[Warning] Unknown image data type: {type(form_image_field.data)}")
-
-    print("[No Image] No image selected or uploaded")
     return None
 
 
 # ==================== LOGIN & LOGOUT ====================
 @admin_bp.route('/login', methods=['GET', 'POST'])
 def login():
-    """Trang đăng nhập admin"""
+    """Trang đăng nhập admin - KHÔNG CẦN QUYỀN"""
     if current_user.is_authenticated:
         return redirect(url_for('admin.dashboard'))
 
     form = LoginForm()
-
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
-
         if user and user.check_password(form.password.data):
             login_user(user, remember=form.remember_me.data)
-
-            # Redirect về trang trước đó hoặc dashboard
             next_page = request.args.get('next')
             return redirect(next_page) if next_page else redirect(url_for('admin.dashboard'))
         else:
@@ -569,7 +494,7 @@ def login():
 @admin_bp.route('/logout')
 @login_required
 def logout():
-    """Đăng xuất"""
+    """Đăng xuất - KHÔNG CẦN QUYỀN ĐẶC BIỆT"""
     logout_user()
     flash('Đã đăng xuất thành công!', 'success')
     return redirect(url_for('admin.login'))
@@ -577,19 +502,14 @@ def logout():
 
 # ==================== DASHBOARD ====================
 @admin_bp.route('/dashboard')
-@login_required
+@permission_required('view_dashboard')  # ✅ Xem dashboard
 def dashboard():
     """Trang tổng quan admin"""
-    # Thống kê
     total_products = Product.query.count()
     total_categories = Category.query.count()
     total_blogs = Blog.query.count()
     total_contacts = Contact.query.filter_by(is_read=False).count()
-
-    # Sản phẩm mới nhất
     recent_products = Product.query.order_by(Product.created_at.desc()).limit(5).all()
-
-    # Liên hệ mới nhất
     recent_contacts = Contact.query.order_by(Contact.created_at.desc()).limit(5).all()
 
     return render_template('admin/dashboard.html',
@@ -603,7 +523,7 @@ def dashboard():
 
 # ==================== QUẢN LÝ DANH MỤC ====================
 @admin_bp.route('/categories')
-@admin_required
+@permission_required('manage_categories')  # ✅ Quản lý danh mục
 def categories():
     """Danh sách danh mục"""
     page = request.args.get('page', 1, type=int)
@@ -614,13 +534,12 @@ def categories():
 
 
 @admin_bp.route('/categories/add', methods=['GET', 'POST'])
-@admin_required
+@permission_required('manage_categories')  # ✅ Quản lý danh mục
 def add_category():
     """Thêm danh mục mới"""
     form = CategoryForm()
 
     if form.validate_on_submit():
-        # Upload ảnh nếu có
         image_path = None
         if form.image.data:
             result = save_upload_file(form.image.data, folder='categories')
@@ -644,14 +563,13 @@ def add_category():
 
 
 @admin_bp.route('/categories/edit/<int:id>', methods=['GET', 'POST'])
-@admin_required
+@permission_required('manage_categories')  # ✅ Quản lý danh mục
 def edit_category(id):
     """Sửa danh mục"""
     category = Category.query.get_or_404(id)
     form = CategoryForm(obj=category)
 
     if form.validate_on_submit():
-        # Upload ảnh mới nếu có
         if form.image.data:
             result = save_upload_file(form.image.data, folder='categories')
             image_path = result[0] if isinstance(result, tuple) else result
@@ -671,12 +589,11 @@ def edit_category(id):
 
 
 @admin_bp.route('/categories/delete/<int:id>')
-@admin_required
+@permission_required('manage_categories')  # ✅ Quản lý danh mục
 def delete_category(id):
     """Xóa danh mục"""
     category = Category.query.get_or_404(id)
 
-    # Kiểm tra xem có sản phẩm nào đang dùng danh mục này không
     if category.products.count() > 0:
         flash('Không thể xóa danh mục đang có sản phẩm!', 'danger')
         return redirect(url_for('admin.categories'))
@@ -690,7 +607,7 @@ def delete_category(id):
 
 # ==================== QUẢN LÝ SẢN PHẨM ====================
 @admin_bp.route('/products')
-@login_required
+@permission_required('view_products')  # ✅ Xem sản phẩm
 def products():
     """Danh sách sản phẩm"""
     page = request.args.get('page', 1, type=int)
@@ -701,13 +618,12 @@ def products():
 
 
 @admin_bp.route('/products/add', methods=['GET', 'POST'])
-@login_required
+@permission_required('manage_products')  # ✅ Quản lý sản phẩm
 def add_product():
     """Thêm sản phẩm mới"""
     form = ProductForm()
 
     if form.validate_on_submit():
-        # Sử dụng hàm helper mới
         image_path = get_image_from_form(form.image, 'image', folder='products')
 
         product = Product(
@@ -731,16 +647,14 @@ def add_product():
     return render_template('admin/product_form.html', form=form, title='Thêm sản phẩm')
 
 
-
 @admin_bp.route('/products/edit/<int:id>', methods=['GET', 'POST'])
-@login_required
+@permission_required('manage_products')  # ✅ Quản lý sản phẩm
 def edit_product(id):
     """Sửa sản phẩm"""
     product = Product.query.get_or_404(id)
     form = ProductForm(obj=product)
 
     if form.validate_on_submit():
-        # Lấy ảnh mới (từ picker hoặc upload)
         new_image = get_image_from_form(form.image, 'image', folder='products')
         if new_image:
             product.image = new_image
@@ -763,7 +677,7 @@ def edit_product(id):
 
 
 @admin_bp.route('/products/delete/<int:id>')
-@admin_required
+@permission_required('manage_products')  # ✅ Quản lý sản phẩm
 def delete_product(id):
     """Xóa sản phẩm"""
     product = Product.query.get_or_404(id)
@@ -776,7 +690,7 @@ def delete_product(id):
 
 # ==================== QUẢN LÝ BANNER ====================
 @admin_bp.route('/banners')
-@login_required
+@permission_required('manage_banners')  # ✅ Quản lý banners
 def banners():
     """Danh sách banner"""
     banners = Banner.query.order_by(Banner.order).all()
@@ -784,7 +698,7 @@ def banners():
 
 
 @admin_bp.route('/banners/add', methods=['GET', 'POST'])
-@login_required
+@permission_required('manage_banners')  # ✅ Quản lý banners
 def add_banner():
     """Thêm banner mới"""
     form = BannerForm()
@@ -815,9 +729,8 @@ def add_banner():
     return render_template('admin/banner_form.html', form=form, title='Thêm banner')
 
 
-
 @admin_bp.route('/banners/edit/<int:id>', methods=['GET', 'POST'])
-@login_required
+@permission_required('manage_banners')  # ✅ Quản lý banners
 def edit_banner(id):
     """Sửa banner"""
     banner = Banner.query.get_or_404(id)
@@ -844,7 +757,7 @@ def edit_banner(id):
 
 
 @admin_bp.route('/banners/delete/<int:id>')
-@admin_required
+@permission_required('manage_banners')  # ✅ Quản lý banners
 def delete_banner(id):
     """Xóa banner"""
     banner = Banner.query.get_or_404(id)
@@ -857,7 +770,7 @@ def delete_banner(id):
 
 # ==================== QUẢN LÝ BLOG ====================
 @admin_bp.route('/blogs')
-@login_required
+@permission_required('view_blogs')  # ✅ Xem blog
 def blogs():
     """Danh sách blog"""
     page = request.args.get('page', 1, type=int)
@@ -868,7 +781,7 @@ def blogs():
 
 
 @admin_bp.route('/blogs/add', methods=['GET', 'POST'])
-@login_required
+@permission_required('create_blog')  # ✅ Tạo blog
 def add_blog():
     """Thêm blog mới với SEO optimization"""
     form = BlogForm()
@@ -876,7 +789,6 @@ def add_blog():
     if form.validate_on_submit():
         image_path = get_image_from_form(form.image, 'image', folder='blogs')
 
-        # Tạo blog instance
         blog = Blog(
             title=form.title.data,
             slug=form.slug.data,
@@ -886,23 +798,18 @@ def add_blog():
             author=form.author.data or current_user.username,
             is_featured=form.is_featured.data,
             is_active=form.is_active.data,
-            # ✅ Thêm SEO fields
             focus_keyword=form.focus_keyword.data,
-            meta_title=form.meta_title.data or form.title.data,  # Auto-fill từ title nếu trống
-            meta_description=form.meta_description.data or form.excerpt.data,  # Auto-fill từ excerpt
+            meta_title=form.meta_title.data or form.title.data,
+            meta_description=form.meta_description.data or form.excerpt.data,
             meta_keywords=form.meta_keywords.data
         )
 
-        # Tính reading time
         blog.calculate_reading_time()
-
-        # Tính SEO score
         blog.update_seo_score()
 
         db.session.add(blog)
         db.session.commit()
 
-        # Lấy kết quả SEO để hiển thị
         seo_result = blog.get_seo_info()
         flash(f'✓ Đã thêm bài viết! Điểm SEO: {seo_result["score"]}/100 ({seo_result["grade"]})', 'success')
 
@@ -912,14 +819,13 @@ def add_blog():
 
 
 @admin_bp.route('/blogs/edit/<int:id>', methods=['GET', 'POST'])
-@login_required
+@permission_required('edit_all_blogs')  # ✅ Sửa tất cả blog
 def edit_blog(id):
     """Sửa blog với SEO optimization"""
     blog = Blog.query.get_or_404(id)
     form = BlogForm(obj=blog)
 
     if form.validate_on_submit():
-        # Lấy ảnh mới (từ picker hoặc upload)
         new_image = get_image_from_form(form.image, 'image', folder='blogs')
         if new_image:
             blog.image = new_image
@@ -931,22 +837,16 @@ def edit_blog(id):
         blog.author = form.author.data
         blog.is_featured = form.is_featured.data
         blog.is_active = form.is_active.data
-
-        # ✅ Cập nhật SEO fields
         blog.focus_keyword = form.focus_keyword.data
         blog.meta_title = form.meta_title.data or form.title.data
         blog.meta_description = form.meta_description.data or form.excerpt.data
         blog.meta_keywords = form.meta_keywords.data
 
-        # Tính lại reading time
         blog.calculate_reading_time()
-
-        # Tính lại SEO score
         blog.update_seo_score()
 
         db.session.commit()
 
-        # Lấy kết quả SEO để hiển thị
         seo_result = blog.get_seo_info()
         flash(f'✓ Đã cập nhật bài viết! Điểm SEO: {seo_result["score"]}/100 ({seo_result["grade"]})', 'success')
 
@@ -955,14 +855,12 @@ def edit_blog(id):
     return render_template('admin/blog_form.html', form=form, title='Sửa bài viết', blog=blog)
 
 
-#Check SEO realtime qua AJAX
 @admin_bp.route('/api/check-blog-seo', methods=['POST'])
-@login_required
+@permission_required('view_blogs')  # ✅ Xem blog
 def api_check_blog_seo():
     """API để check SEO score real-time khi đang viết bài"""
     data = request.get_json()
 
-    # Tạo temporary blog object để tính SEO
     temp_blog = Blog(
         title=data.get('title', ''),
         content=data.get('content', ''),
@@ -972,14 +870,12 @@ def api_check_blog_seo():
         image=data.get('image', '')
     )
 
-    # Tính SEO score
     seo_result = calculate_blog_seo_score(temp_blog)
-
     return jsonify(seo_result)
 
 
 @admin_bp.route('/blogs/delete/<int:id>')
-@login_required
+@permission_required('delete_blog')  # ✅ Xóa blog
 def delete_blog(id):
     """Xóa blog"""
     blog = Blog.query.get_or_404(id)
@@ -992,7 +888,7 @@ def delete_blog(id):
 
 # ==================== QUẢN LÝ FAQ ====================
 @admin_bp.route('/faqs')
-@login_required
+@permission_required('manage_faqs')  # ✅ Quản lý FAQs
 def faqs():
     """Danh sách FAQ"""
     faqs = FAQ.query.order_by(FAQ.order).all()
@@ -1000,7 +896,7 @@ def faqs():
 
 
 @admin_bp.route('/faqs/add', methods=['GET', 'POST'])
-@login_required
+@permission_required('manage_faqs')  # ✅ Quản lý FAQs
 def add_faq():
     """Thêm FAQ mới"""
     form = FAQForm()
@@ -1023,7 +919,7 @@ def add_faq():
 
 
 @admin_bp.route('/faqs/edit/<int:id>', methods=['GET', 'POST'])
-@login_required
+@permission_required('manage_faqs')  # ✅ Quản lý FAQs
 def edit_faq(id):
     """Sửa FAQ"""
     faq = FAQ.query.get_or_404(id)
@@ -1044,7 +940,7 @@ def edit_faq(id):
 
 
 @admin_bp.route('/faqs/delete/<int:id>')
-@login_required
+@permission_required('manage_faqs')  # ✅ Quản lý FAQs
 def delete_faq(id):
     """Xóa FAQ"""
     faq = FAQ.query.get_or_404(id)
@@ -1057,15 +953,23 @@ def delete_faq(id):
 
 # ==================== QUẢN LÝ NGƯỜI DÙNG ====================
 @admin_bp.route('/users')
-@admin_required
+@permission_required('view_users')  # ✅ Xem danh sách user
 def users():
-    """Danh sách người dùng"""
-    users = User.query.order_by(User.created_at.desc()).all()
+    """Danh sách người dùng với filter theo role"""
+    role_filter = request.args.get('role', '')
+
+    query = User.query
+    if role_filter:
+        role_obj = Role.query.filter_by(name=role_filter).first()
+        if role_obj:
+            query = query.filter_by(role_id=role_obj.id)
+
+    users = query.order_by(User.created_at.desc()).all()
     return render_template('admin/users.html', users=users)
 
 
 @admin_bp.route('/users/add', methods=['GET', 'POST'])
-@admin_required
+@permission_required('manage_users')  # ✅ Quản lý users
 def add_user():
     """Thêm người dùng mới"""
     form = UserForm()
@@ -1074,7 +978,7 @@ def add_user():
         user = User(
             username=form.username.data,
             email=form.email.data,
-            is_admin=form.is_admin.data
+            role_id=form.role_id.data
         )
 
         if form.password.data:
@@ -1086,14 +990,14 @@ def add_user():
         db.session.add(user)
         db.session.commit()
 
-        flash('Đã thêm người dùng thành công!', 'success')
+        flash(f'Đã thêm người dùng "{user.username}" với vai trò "{user.role_display_name}"!', 'success')
         return redirect(url_for('admin.users'))
 
     return render_template('admin/user_form.html', form=form, title='Thêm người dùng')
 
 
 @admin_bp.route('/users/edit/<int:id>', methods=['GET', 'POST'])
-@admin_required
+@permission_required('manage_users')  # ✅ Quản lý users
 def edit_user(id):
     """Sửa người dùng"""
     user = User.query.get_or_404(id)
@@ -1102,22 +1006,21 @@ def edit_user(id):
     if form.validate_on_submit():
         user.username = form.username.data
         user.email = form.email.data
-        user.is_admin = form.is_admin.data
+        user.role_id = form.role_id.data
 
-        # Chỉ cập nhật mật khẩu nếu có nhập
         if form.password.data:
             user.set_password(form.password.data)
 
         db.session.commit()
 
-        flash('Đã cập nhật người dùng thành công!', 'success')
+        flash(f'Đã cập nhật người dùng "{user.username}"!', 'success')
         return redirect(url_for('admin.users'))
 
     return render_template('admin/user_form.html', form=form, title='Sửa người dùng')
 
 
 @admin_bp.route('/users/delete/<int:id>')
-@admin_required
+@permission_required('manage_users')  # ✅ Quản lý users
 def delete_user(id):
     """Xóa người dùng"""
     if id == current_user.id:
@@ -1134,7 +1037,7 @@ def delete_user(id):
 
 # ==================== QUẢN LÝ LIÊN HỆ ====================
 @admin_bp.route('/contacts')
-@admin_required
+@permission_required('view_contacts')  # ✅ Xem liên hệ
 def contacts():
     """Danh sách liên hệ"""
     page = request.args.get('page', 1, type=int)
@@ -1145,12 +1048,11 @@ def contacts():
 
 
 @admin_bp.route('/contacts/view/<int:id>')
-@admin_required
+@permission_required('view_contacts')  # ✅ Xem liên hệ
 def view_contact(id):
     """Xem chi tiết liên hệ"""
     contact = Contact.query.get_or_404(id)
 
-    # Đánh dấu đã đọc
     if not contact.is_read:
         contact.is_read = True
         db.session.commit()
@@ -1159,7 +1061,7 @@ def view_contact(id):
 
 
 @admin_bp.route('/contacts/delete/<int:id>')
-@admin_required
+@permission_required('manage_contacts')  # ✅ Quản lý liên hệ
 def delete_contact(id):
     """Xóa liên hệ"""
     contact = Contact.query.get_or_404(id)
@@ -1172,14 +1074,13 @@ def delete_contact(id):
 
 # ==================== QUẢN LÝ MEDIA LIBRARY ====================
 @admin_bp.route('/media')
-@login_required
+@permission_required('view_media')  # ✅ Xem thư viện media
 def media():
     """Trang quản lý Media Library với SEO status"""
     page = request.args.get('page', 1, type=int)
     album_filter = request.args.get('album', '')
-    seo_filter = request.args.get('seo', '')  # Thêm filter theo SEO score
+    seo_filter = request.args.get('seo', '')
 
-    # Query media
     query = Media.query
     if album_filter:
         query = query.filter_by(album=album_filter)
@@ -1188,7 +1089,6 @@ def media():
         page=page, per_page=24, error_out=False
     )
 
-    # Tính SEO score cho từng media item
     media_with_seo = []
     for m in media_files.items:
         seo_result = calculate_seo_score(m)
@@ -1197,26 +1097,21 @@ def media():
             'seo': seo_result
         })
 
-    # Filter theo SEO nếu có
     if seo_filter:
-        if seo_filter == 'excellent':  # >= 85
+        if seo_filter == 'excellent':
             media_with_seo = [m for m in media_with_seo if m['seo']['score'] >= 85]
-        elif seo_filter == 'good':  # 65-84
+        elif seo_filter == 'good':
             media_with_seo = [m for m in media_with_seo if 65 <= m['seo']['score'] < 85]
-        elif seo_filter == 'fair':  # 50-64
+        elif seo_filter == 'fair':
             media_with_seo = [m for m in media_with_seo if 50 <= m['seo']['score'] < 65]
-        elif seo_filter == 'poor':  # < 50
+        elif seo_filter == 'poor':
             media_with_seo = [m for m in media_with_seo if m['seo']['score'] < 50]
 
-    # Lấy danh sách albums
     albums = get_albums()
-
-    # Thống kê
     total_files = Media.query.count()
     total_size = db.session.query(db.func.sum(Media.file_size)).scalar() or 0
     total_size_mb = round(total_size / (1024 * 1024), 2)
 
-    # Thống kê SEO
     all_media = Media.query.all()
     seo_stats = {
         'excellent': sum(1 for m in all_media if calculate_seo_score(m)['score'] >= 85),
@@ -1239,7 +1134,7 @@ def media():
 
 
 @admin_bp.route('/media/upload', methods=['GET', 'POST'])
-@login_required
+@permission_required('upload_media')  # ✅ Upload media
 def upload_media():
     """Upload media files với SEO optimization"""
     if request.method == 'POST':
@@ -1259,18 +1154,15 @@ def upload_media():
         for file in files:
             if file and file.filename:
                 try:
-                    # Generate alt text cho file này
                     if default_alt_text:
                         file_alt_text = default_alt_text
                     elif auto_alt_text:
-                        # Tự động tạo alt text từ tên file
                         from app.utils import slugify
                         name_without_ext = os.path.splitext(file.filename)[0]
                         file_alt_text = name_without_ext.replace('-', ' ').replace('_', ' ').title()
                     else:
                         file_alt_text = None
 
-                    # Lưu file với SEO optimization
                     filepath, file_info = save_upload_file(
                         file,
                         folder=folder,
@@ -1280,7 +1172,6 @@ def upload_media():
                     )
 
                     if filepath:
-                        # Lưu vào database với đầy đủ thông tin SEO
                         media = Media(
                             filename=file_info['filename'],
                             original_filename=file_info['original_filename'],
@@ -1291,7 +1182,7 @@ def upload_media():
                             height=file_info['height'],
                             album=album if album else None,
                             alt_text=file_alt_text,
-                            title=file_alt_text,  # Auto-set title = alt_text
+                            title=file_alt_text,
                             uploaded_by=current_user.id
                         )
                         db.session.add(media)
@@ -1302,7 +1193,6 @@ def upload_media():
                 except Exception as e:
                     errors.append(f"Lỗi upload {file.filename}: {str(e)}")
 
-        # Commit tất cả media đã upload
         if uploaded_count > 0:
             db.session.commit()
             flash(f'Đã upload thành công {uploaded_count} file!', 'success')
@@ -1313,13 +1203,12 @@ def upload_media():
 
         return redirect(url_for('admin.media'))
 
-    # GET request
     albums = get_albums()
     return render_template('admin/upload_media.html', albums=albums)
 
 
 @admin_bp.route('/media/create-album', methods=['POST'])
-@login_required
+@permission_required('manage_albums')  # ✅ Quản lý albums
 def create_album():
     """Tạo album mới"""
     album_name = request.form.get('album_name', '').strip()
@@ -1344,14 +1233,12 @@ def create_album():
 
 
 @admin_bp.route('/media/delete/<int:id>')
-@login_required
+@permission_required('delete_media')  # ✅ Xóa media
 def delete_media(id):
     """Xóa media file (Cloudinary + local + DB)"""
     from app.utils import delete_file
-    import os
     import logging
 
-    # Cấu hình logging (ghi log an toàn, không crash khi print)
     logging.basicConfig(level=logging.INFO)
     def safe_print(*args):
         try:
@@ -1363,7 +1250,6 @@ def delete_media(id):
     album_name = media.album
 
     try:
-        # 🧹 1️⃣ Xử lý Cloudinary
         if media.filepath and "res.cloudinary.com" in media.filepath:
             safe_print(f"[Delete Cloudinary Start]: {repr(media.filepath)}")
             res = delete_file(media.filepath)
@@ -1371,7 +1257,6 @@ def delete_media(id):
         else:
             safe_print("[Delete Cloudinary]: Bỏ qua (không phải URL Cloudinary)")
 
-        # 🧹 2️⃣ Xử lý file local (nếu có)
         if media.filepath and media.filepath.startswith('/static/'):
             file_path = media.filepath.replace('/static/', '')
             full_path = os.path.join(current_app.config['UPLOAD_FOLDER'], '..', file_path)
@@ -1387,7 +1272,6 @@ def delete_media(id):
         safe_print(f"[Delete Error]: {e}")
         logging.exception(e)
 
-    # 🧹 3️⃣ Xóa record trong DB dù Cloudinary có xóa được hay không
     try:
         db.session.delete(media)
         db.session.commit()
@@ -1399,27 +1283,21 @@ def delete_media(id):
         safe_print(f"[DB Delete Error]: {e}")
         logging.exception(e)
 
-    # 🧭 4️⃣ Quay lại đúng album
     if album_name:
         return redirect(url_for('admin.media', album=album_name))
     return redirect(url_for('admin.media'))
 
 
-
-
-
 @admin_bp.route('/media/delete-album/<album_name>')
-@login_required
+@permission_required('manage_albums')  # ✅ Quản lý albums
 def delete_album(album_name):
     """Xóa album (chỉ khi rỗng)"""
-    # Kiểm tra còn file nào trong album không
     remaining_files = Media.query.filter_by(album=album_name).count()
 
     if remaining_files > 0:
         flash(f'Không thể xóa album có {remaining_files} file! Vui lòng xóa hết file trước.', 'danger')
         return redirect(url_for('admin.media'))
 
-    # Xóa thư mục vật lý nếu tồn tại
     album_path = os.path.join(
         current_app.config['UPLOAD_FOLDER'],
         'albums',
@@ -1428,16 +1306,16 @@ def delete_album(album_name):
 
     try:
         if os.path.exists(album_path):
-            shutil.rmtree(album_path)   # khác os.rmdir: xóa cả thư mục + file ẩn bên trong
-        flash(f'Đã xóa album \"{album_name}\" thành công!', 'success')
+            shutil.rmtree(album_path)
+        flash(f'Đã xóa album "{album_name}" thành công!', 'success')
     except Exception as e:
-        flash(f'Lỗi khi xóa album \"{album_name}\": {str(e)}', 'danger')
+        flash(f'Lỗi khi xóa album "{album_name}": {str(e)}', 'danger')
 
     return redirect(url_for('admin.media'))
 
 
 @admin_bp.route('/media/edit/<int:id>', methods=['GET', 'POST'])
-@login_required
+@permission_required('edit_media')  # ✅ Chỉnh sửa media
 def edit_media(id):
     """Sửa thông tin media với SEO fields và hiển thị điểm SEO"""
     from app.forms import MediaSEOForm
@@ -1446,13 +1324,11 @@ def edit_media(id):
     form = MediaSEOForm(obj=media)
 
     if form.validate_on_submit():
-        # Cập nhật thông tin SEO (không liên quan đến file upload)
         media.alt_text = form.alt_text.data.strip()
         media.title = form.title.data.strip() if form.title.data else None
         media.caption = form.caption.data.strip() if form.caption.data else None
         media.album = form.album.data.strip() if form.album.data else None
 
-        # Validate Alt Text
         if not media.alt_text:
             flash('Alt Text là bắt buộc cho SEO!', 'warning')
             albums = get_albums()
@@ -1466,19 +1342,16 @@ def edit_media(id):
         if len(media.alt_text) < 10:
             flash('Alt Text quá ngắn! Nên từ 30-125 ký tự.', 'warning')
 
-        # Auto-generate title from alt_text if empty
         if not media.title:
             media.title = media.alt_text
 
         try:
             db.session.commit()
 
-            # Tính toán và hiển thị điểm SEO sau khi lưu
             seo_result = calculate_seo_score(media)
             flash(f'✓ Đã cập nhật thông tin media! Điểm SEO: {seo_result["score"]}/100 ({seo_result["grade"]})',
                   'success')
 
-            # Redirect về album nếu có
             if media.album:
                 return redirect(url_for('admin.media', album=media.album))
             return redirect(url_for('admin.media'))
@@ -1498,7 +1371,7 @@ def edit_media(id):
 
 
 @admin_bp.route('/media/bulk-edit', methods=['POST'])
-@login_required
+@permission_required('edit_media')  # ✅ Chỉnh sửa media
 def bulk_edit_media():
     """Bulk edit SEO cho nhiều media"""
     media_ids = request.form.getlist('media_ids[]')
@@ -1514,8 +1387,6 @@ def bulk_edit_media():
         for media_id in media_ids:
             media = Media.query.get(media_id)
             if media:
-                # Generate alt text từ template
-                # Template có thể có placeholders: {filename}, {album}, {index}
                 alt_text = alt_text_template.replace('{filename}', media.original_filename)
                 if media.album:
                     alt_text = alt_text.replace('{album}', media.album)
@@ -1539,7 +1410,7 @@ def bulk_edit_media():
 
 
 @admin_bp.route('/media/check-seo/<int:id>')
-@login_required
+@permission_required('view_media')  # ✅ Xem thư viện media
 def check_media_seo(id):
     """API check SEO score của media - trả về JSON"""
     media = Media.query.get_or_404(id)
@@ -1549,7 +1420,7 @@ def check_media_seo(id):
 
 # ==================== API CHO MEDIA PICKER ====================
 @admin_bp.route('/api/media')
-@login_required
+@permission_required('view_media')  # ✅ Xem thư viện media
 def api_media():
     """API trả về danh sách media với đường dẫn chuẩn hóa"""
     album = request.args.get('album', '')
@@ -1563,11 +1434,9 @@ def api_media():
 
     media_list = query.order_by(Media.created_at.desc()).limit(100).all()
 
-    # Lấy danh sách albums
     albums_data = get_albums()
     album_names = [a['name'] if isinstance(a, dict) else a for a in albums_data]
 
-    # ✅ CRITICAL FIX: Chuẩn hóa filepath
     def normalize_filepath(media):
         """Chuẩn hóa filepath để đảm bảo có thể hiển thị được"""
         filepath = media.filepath
@@ -1575,21 +1444,16 @@ def api_media():
         if not filepath:
             return ''
 
-        # ✅ KIỂM TRA CLOUDINARY TRƯỚC - Giữ nguyên 100%
         if filepath.startswith('http://') or filepath.startswith('https://'):
             return filepath
 
-        # ✅ Nếu là local path, chuẩn hóa
-        # Đảm bảo có / ở đầu
         if not filepath.startswith('/'):
             filepath = '/' + filepath
 
-        # Đảm bảo có /static/
         if not filepath.startswith('/static/'):
             if filepath.startswith('/uploads/'):
                 filepath = '/static' + filepath
             else:
-                # uploads/... → /static/uploads/...
                 filepath = '/static/' + filepath.lstrip('/')
 
         return filepath
@@ -1599,7 +1463,7 @@ def api_media():
             'id': m.id,
             'filename': m.filename,
             'original_filename': m.original_filename,
-            'filepath': normalize_filepath(m),  # ← DÙNG HÀM CHUẨN HÓA
+            'filepath': normalize_filepath(m),
             'width': m.width or 0,
             'height': m.height or 0,
             'album': m.album or ''
@@ -1610,7 +1474,7 @@ def api_media():
 
 # ==================== QUẢN LÝ DỰ ÁN ====================
 @admin_bp.route('/projects')
-@admin_required
+@permission_required('view_projects')  # ✅ Xem dự án
 def projects():
     """Danh sách dự án"""
     page = request.args.get('page', 1, type=int)
@@ -1621,7 +1485,7 @@ def projects():
 
 
 @admin_bp.route('/projects/add', methods=['GET', 'POST'])
-@admin_required
+@permission_required('manage_projects')  # ✅ Quản lý dự án
 def add_project():
     """Thêm dự án mới"""
     form = ProjectForm()
@@ -1655,7 +1519,7 @@ def add_project():
 
 
 @admin_bp.route('/projects/edit/<int:id>', methods=['GET', 'POST'])
-@admin_required
+@permission_required('manage_projects')  # ✅ Quản lý dự án
 def edit_project(id):
     """Sửa dự án"""
     project = Project.query.get_or_404(id)
@@ -1688,7 +1552,7 @@ def edit_project(id):
 
 
 @admin_bp.route('/projects/delete/<int:id>')
-@admin_required
+@permission_required('manage_projects')  # ✅ Quản lý dự án
 def delete_project(id):
     """Xóa dự án"""
     project = Project.query.get_or_404(id)
@@ -1701,7 +1565,7 @@ def delete_project(id):
 
 # ==================== QUẢN LÝ TUYỂN DỤNG ====================
 @admin_bp.route('/jobs')
-@admin_required
+@permission_required('view_jobs')  # ✅ Xem tuyển dụng
 def jobs():
     """Danh sách tuyển dụng"""
     page = request.args.get('page', 1, type=int)
@@ -1712,7 +1576,7 @@ def jobs():
 
 
 @admin_bp.route('/jobs/add', methods=['GET', 'POST'])
-@admin_required
+@permission_required('manage_jobs')  # ✅ Quản lý tuyển dụng
 def add_job():
     """Thêm tin tuyển dụng mới"""
     form = JobForm()
@@ -1746,7 +1610,7 @@ def add_job():
 
 
 @admin_bp.route('/jobs/edit/<int:id>', methods=['GET', 'POST'])
-@admin_required
+@permission_required('manage_jobs')  # ✅ Quản lý tuyển dụng
 def edit_job(id):
     """Sửa tin tuyển dụng"""
     job = Job.query.get_or_404(id)
@@ -1778,7 +1642,7 @@ def edit_job(id):
 
 
 @admin_bp.route('/jobs/delete/<int:id>')
-@admin_required
+@permission_required('manage_jobs')  # ✅ Quản lý tuyển dụng
 def delete_job(id):
     """Xóa tin tuyển dụng"""
     job = Job.query.get_or_404(id)
@@ -1787,3 +1651,186 @@ def delete_job(id):
 
     flash('Đã xóa tin tuyển dụng thành công!', 'success')
     return redirect(url_for('admin.jobs'))
+
+
+# ==================== QUẢN LÝ ROLES & PERMISSIONS ====================
+
+@admin_bp.route('/roles')
+@permission_required('manage_roles')  # ✅ Quản lý phân quyền
+def roles():
+    """Danh sách roles"""
+    roles = Role.query.order_by(Role.priority.desc()).all()
+
+    stats = {
+        'total_roles': Role.query.count(),
+        'total_permissions': Permission.query.count(),
+        'total_users': User.query.count(),
+        'active_roles': Role.query.filter_by(is_active=True).count()
+    }
+
+    return render_template('admin/roles.html', roles=roles, stats=stats)
+
+
+@admin_bp.route('/roles/add', methods=['GET', 'POST'])
+@permission_required('manage_roles')  # ✅ Quản lý phân quyền
+def add_role():
+    """Thêm role mới"""
+    form = RoleForm()
+
+    if form.validate_on_submit():
+        existing = Role.query.filter_by(name=form.name.data).first()
+        if existing:
+            flash('Tên role đã tồn tại!', 'danger')
+            return render_template('admin/role_form.html', form=form, title='Thêm vai trò')
+
+        role = Role(
+            name=form.name.data,
+            display_name=form.display_name.data,
+            description=form.description.data,
+            priority=form.priority.data,
+            color=form.color.data,
+            is_active=form.is_active.data
+        )
+
+        db.session.add(role)
+        db.session.commit()
+
+        flash(f'Đã tạo vai trò "{role.display_name}" thành công!', 'success')
+        return redirect(url_for('admin.roles'))
+
+    return render_template('admin/role_form.html', form=form, title='Thêm vai trò')
+
+
+@admin_bp.route('/roles/edit/<int:id>', methods=['GET', 'POST'])
+@permission_required('manage_roles')  # ✅ Quản lý phân quyền
+def edit_role(id):
+    """Sửa role"""
+    role = Role.query.get_or_404(id)
+    form = RoleForm(obj=role)
+
+    if form.validate_on_submit():
+        if role.name in ['admin', 'user'] and form.name.data != role.name:
+            flash('Không thể đổi tên role hệ thống!', 'danger')
+            return render_template('admin/role_form.html', form=form, title='Sửa vai trò', role=role)
+
+        role.name = form.name.data
+        role.display_name = form.display_name.data
+        role.description = form.description.data
+        role.priority = form.priority.data
+        role.color = form.color.data
+        role.is_active = form.is_active.data
+
+        db.session.commit()
+
+        flash(f'Đã cập nhật vai trò "{role.display_name}" thành công!', 'success')
+        return redirect(url_for('admin.roles'))
+
+    return render_template('admin/role_form.html', form=form, title='Sửa vai trò', role=role)
+
+
+@admin_bp.route('/roles/delete/<int:id>')
+@permission_required('manage_roles')  # ✅ Quản lý phân quyền
+def delete_role(id):
+    """Xóa role"""
+    role = Role.query.get_or_404(id)
+
+    if role.name in ['admin', 'user']:
+        flash('Không thể xóa role hệ thống!', 'danger')
+        return redirect(url_for('admin.roles'))
+
+    if role.users.count() > 0:
+        flash(f'Không thể xóa role có {role.users.count()} người dùng!', 'danger')
+        return redirect(url_for('admin.roles'))
+
+    db.session.delete(role)
+    db.session.commit()
+
+    flash(f'Đã xóa vai trò "{role.display_name}" thành công!', 'success')
+    return redirect(url_for('admin.roles'))
+
+
+@admin_bp.route('/roles/<int:id>/permissions', methods=['GET', 'POST'])
+@permission_required('manage_roles')  # ✅ Quản lý phân quyền
+def edit_role_permissions(id):
+    """Chỉnh sửa permissions của role"""
+    role = Role.query.get_or_404(id)
+
+    all_permissions = Permission.query.filter_by(is_active=True).order_by(
+        Permission.category, Permission.name
+    ).all()
+
+    perms_by_category = {}
+    for perm in all_permissions:
+        cat = perm.category or 'other'
+        if cat not in perms_by_category:
+            perms_by_category[cat] = []
+        perms_by_category[cat].append(perm)
+
+    current_perm_ids = [p.id for p in role.permissions.all()]
+
+    if request.method == 'POST':
+        selected_perm_ids = request.form.getlist('permissions')
+        selected_perm_ids = [int(pid) for pid in selected_perm_ids]
+
+        role.permissions = []
+
+        for perm_id in selected_perm_ids:
+            perm = Permission.query.get(perm_id)
+            if perm:
+                role.add_permission(perm)
+
+        db.session.commit()
+
+        flash(f'Đã cập nhật quyền cho vai trò "{role.display_name}"', 'success')
+        return redirect(url_for('admin.roles'))
+
+    return render_template('admin/edit_role_permissions.html',
+                           role=role,
+                           perms_by_category=perms_by_category,
+                           current_perm_ids=current_perm_ids)
+
+
+@admin_bp.route('/permissions')
+@permission_required('manage_roles')  # ✅ Quản lý phân quyền
+def permissions():
+    """Danh sách permissions"""
+    all_permissions = Permission.query.order_by(Permission.category, Permission.name).all()
+
+    perms_by_category = {}
+    for perm in all_permissions:
+        cat = perm.category or 'other'
+        if cat not in perms_by_category:
+            perms_by_category[cat] = []
+        perms_by_category[cat].append(perm)
+
+    return render_template('admin/permissions.html', perms_by_category=perms_by_category)
+
+
+@admin_bp.route('/permissions/add', methods=['GET', 'POST'])
+@permission_required('manage_roles')  # ✅ Quản lý phân quyền
+def add_permission():
+    """Thêm permission mới"""
+    form = PermissionForm()
+
+    if form.validate_on_submit():
+        existing = Permission.query.filter_by(name=form.name.data).first()
+        if existing:
+            flash('Tên permission đã tồn tại!', 'danger')
+            return render_template('admin/permission_form.html', form=form, title='Thêm quyền')
+
+        perm = Permission(
+            name=form.name.data,
+            display_name=form.display_name.data,
+            description=form.description.data,
+            category=form.category.data,
+            icon=form.icon.data or 'bi-key',
+            is_active=form.is_active.data
+        )
+
+        db.session.add(perm)
+        db.session.commit()
+
+        flash(f'Đã tạo quyền "{perm.display_name}" thành công!', 'success')
+        return redirect(url_for('admin.permissions'))
+
+    return render_template('admin/permission_form.html', form=form, title='Thêm quyền')

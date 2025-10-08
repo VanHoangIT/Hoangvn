@@ -54,28 +54,33 @@
                     {% endif %}
                 </div>
                 
+                <!-- ===== ROLE SELECTION ===== -->
                 <div class="col-12">
                     <hr>
-                    <div class="form-check form-switch">
-                        {{ form.is_admin(class="form-check-input") }}
-                        <label class="form-check-label" for="{{ form.is_admin.id }}">
-                            <i class="bi bi-shield-check text-danger"></i> 
-                            <strong>Cấp quyền Quản trị viên (Admin)</strong>
-                        </label>
-                    </div>
-                    <small class="text-muted">Admin có toàn quyền quản lý website</small>
+                    <label class="form-label">
+                        <i class="bi bi-shield-lock"></i> <strong>Vai trò *</strong>
+                    </label>
+                    {{ form.role_id(class="form-select form-select-lg") }}
+                    {% if form.role_id.errors %}
+                        <div class="text-danger small mt-1">{{ form.role_id.errors[0] }}</div>
+                    {% endif %}
+                    <small class="text-muted">Quyền hạn sẽ được áp dụng theo vai trò</small>
                 </div>
-                
+
+                <!-- ===== ROLE INFO ===== -->
                 <div class="col-12">
                     <div class="alert alert-info">
-                        <i class="bi bi-info-circle"></i> 
-                        <strong>Quyền hạn Admin:</strong>
+                        <i class="bi bi-info-circle"></i>
+                        <strong>Mô tả vai trò:</strong>
                         <ul class="mb-0 mt-2">
-                            <li>Toàn quyền với hệ thống</li>
+                            <li><strong class="text-danger">Admin:</strong> Toàn quyền quản lý hệ thống (users, roles, permissions)</li>
+                            <li><strong class="text-primary">Editor:</strong> Quản lý nội dung (blog, sản phẩm, media, dự án)</li>
+                            <li><strong class="text-info">Moderator:</strong> Kiểm duyệt blog, xử lý liên hệ</li>
+                            <li><strong class="text-secondary">User:</strong> Chỉ xem dashboard và thông tin cơ bản</li>
                         </ul>
                     </div>
                 </div>
-                
+
                 <div class="col-12 mt-4">
                     {{ form.submit(class="btn btn-warning px-5") }}
                     <a href="{{ url_for('admin.users') }}" class="btn btn-secondary">Hủy</a>
@@ -84,4 +89,54 @@
         </form>
     </div>
 </div>
+
+<!-- ===== HIỂN thị PERMISSIONS (nếu đang edit user) ===== -->
+{% if form.user and form.user.role_obj %}
+<div class="card mt-4">
+    <div class="card-header bg-light">
+        <h5 class="mb-0">
+            <i class="bi bi-key"></i> Quyền hạn của {{ form.user.username }}
+        </h5>
+    </div>
+    <div class="card-body">
+        {% set perms_by_cat = form.user.role_obj.get_permissions_by_category() %}
+        {% if perms_by_cat %}
+        <div class="row">
+            {% for category, perms in perms_by_cat.items() %}
+            <div class="col-md-6 mb-3">
+                <h6 class="text-uppercase text-muted">
+                    <i class="bi bi-folder"></i> {{ category }}
+                </h6>
+                <ul class="list-unstyled">
+                    {% for perm in perms %}
+                    <li class="mb-1">
+                        <i class="bi bi-check-circle text-success"></i>
+                        <small>{{ perm.display_name }}</small>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-muted mb-0">
+            <i class="bi bi-exclamation-circle"></i>
+            Không có quyền nào
+        </p>
+        {% endif %}
+
+        <hr>
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <strong>Tổng số quyền:</strong>
+                <span class="badge bg-primary">{{ form.user.get_permissions()|length }}</span>
+            </div>
+            <a href="{{ url_for('admin.roles') }}" class="btn btn-sm btn-outline-info">
+                <i class="bi bi-gear"></i> Quản lý Roles & Permissions
+            </a>
+        </div>
+    </div>
+</div>
+{% endif %}
+
 {% endblock %}

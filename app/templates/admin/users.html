@@ -10,6 +10,34 @@
     </a>
 </div>
 
+<!-- ===== FILTER BY ROLE ===== -->
+<div class="card mb-3">
+    <div class="card-body">
+        <div class="btn-group" role="group">
+            <a href="{{ url_for('admin.users') }}"
+               class="btn btn-sm btn-outline-secondary {% if not request.args.get('role') %}active{% endif %}">
+                Tất cả
+            </a>
+            <a href="{{ url_for('admin.users', role='admin') }}"
+               class="btn btn-sm btn-outline-danger {% if request.args.get('role') == 'admin' %}active{% endif %}">
+                <i class="bi bi-shield-check"></i> Admin
+            </a>
+            <a href="{{ url_for('admin.users', role='editor') }}"
+               class="btn btn-sm btn-outline-primary {% if request.args.get('role') == 'editor' %}active{% endif %}">
+                <i class="bi bi-pencil"></i> Editor
+            </a>
+            <a href="{{ url_for('admin.users', role='moderator') }}"
+               class="btn btn-sm btn-outline-info {% if request.args.get('role') == 'moderator' %}active{% endif %}">
+                <i class="bi bi-eye"></i> Moderator
+            </a>
+            <a href="{{ url_for('admin.users', role='user') }}"
+               class="btn btn-sm btn-outline-secondary {% if request.args.get('role') == 'user' %}active{% endif %}">
+                <i class="bi bi-person"></i> User
+            </a>
+        </div>
+    </div>
+</div>
+
 <div class="card">
     <div class="card-body">
         <div class="table-responsive">
@@ -21,6 +49,7 @@
                         <th>Tên đăng nhập</th>
                         <th>Email</th>
                         <th>Vai trò</th>
+                        <th>Permissions</th>
                         <th>Ngày tạo</th>
                         <th>Thao tác</th>
                     </tr>
@@ -30,7 +59,7 @@
                     <tr>
                         <td>{{ user.id }}</td>
                         <td>
-                            <div class="bg-warning text-white rounded-circle d-flex align-items-center justify-content-center" 
+                            <div class="bg-{{ user.role_color }} text-white rounded-circle d-flex align-items-center justify-content-center"
                                  style="width: 40px; height: 40px; font-weight: bold;">
                                 {{ user.username[0]|upper }}
                             </div>
@@ -38,33 +67,43 @@
                         <td>
                             <strong>{{ user.username }}</strong>
                             {% if user.id == current_user.id %}
-                            <span class="badge bg-info">Bạn</span>
+                            <span class="badge bg-success">Bạn</span>
                             {% endif %}
                         </td>
                         <td>
                             <i class="bi bi-envelope"></i> {{ user.email }}
                         </td>
                         <td>
-                            {% if user.is_admin %}
-                            <span class="badge bg-danger">
-                                <i class="bi bi-shield-check"></i> Admin
+                            <span class="badge bg-{{ user.role_color }}">
+                                {% if user.role_name == 'admin' %}
+                                <i class="bi bi-shield-check"></i>
+                                {% elif user.role_name == 'editor' %}
+                                <i class="bi bi-pencil"></i>
+                                {% elif user.role_name == 'moderator' %}
+                                <i class="bi bi-eye"></i>
+                                {% else %}
+                                <i class="bi bi-person"></i>
+                                {% endif %}
+                                {{ user.role_display_name }}
                             </span>
-                            {% else %}
-                            <span class="badge bg-secondary">User</span>
-                            {% endif %}
+                        </td>
+                        <td>
+                            <small class="text-muted">
+                                {{ user.get_permissions()|length }} quyền
+                            </small>
                         </td>
                         <td>
                             <small class="text-muted">{{ user.created_at.strftime('%d/%m/%Y') }}</small>
                         </td>
                         <td class="table-actions">
-                            <a href="{{ url_for('admin.edit_user', id=user.id) }}" 
-                               class="btn btn-sm btn-primary" 
+                            <a href="{{ url_for('admin.edit_user', id=user.id) }}"
+                               class="btn btn-sm btn-primary"
                                title="Sửa">
                                 <i class="bi bi-pencil"></i>
                             </a>
                             {% if user.id != current_user.id %}
-                            <a href="{{ url_for('admin.delete_user', id=user.id) }}" 
-                               class="btn btn-sm btn-danger" 
+                            <a href="{{ url_for('admin.delete_user', id=user.id) }}"
+                               class="btn btn-sm btn-danger"
                                data-confirm="Bạn có chắc muốn xóa người dùng này?"
                                title="Xóa">
                                 <i class="bi bi-trash"></i>
@@ -84,13 +123,13 @@
 </div>
 
 <div class="alert alert-warning mt-4">
-    <i class="bi bi-exclamation-triangle"></i> 
-    <strong>Lưu ý bảo mật:</strong>
+    <i class="bi bi-exclamation-triangle"></i>
+    <strong>Lưu ý phân quyền:</strong>
     <ul class="mb-0">
-        <li>Chỉ cấp quyền Admin cho người đáng tin cậy</li>
-        <li>Sử dụng mật khẩu mạnh (tối thiểu 8 ký tự)</li>
-        <li>Không chia sẻ thông tin đăng nhập</li>
-        <li>Đổi mật khẩu định kỳ</li>
+        <li><strong>Admin:</strong> Toàn quyền hệ thống</li>
+        <li><strong>Editor:</strong> Quản lý nội dung (blog, sản phẩm, media)</li>
+        <li><strong>Moderator:</strong> Kiểm duyệt blog, xử lý liên hệ</li>
+        <li><strong>User:</strong> Chỉ xem thông tin cơ bản</li>
     </ul>
 </div>
 {% endblock %}

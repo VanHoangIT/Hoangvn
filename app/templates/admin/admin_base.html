@@ -138,108 +138,139 @@
         <i class="bi bi-speedometer2"></i> Admin Panel
     </div>
 
-    <ul class="sidebar-nav nav flex-column">
-        <li class="nav-item">
-            <a class="nav-link {% if request.endpoint == 'admin.dashboard' %}active{% endif %}"
-               href="{{ url_for('admin.dashboard') }}">
-                <i class="bi bi-house-door"></i> Dashboard
-            </a>
-        </li>
+<!-- ===== PHẦN SIDEBAR TRONG admin_base.html ===== -->
+        <ul class="sidebar-nav nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link {% if request.endpoint == 'admin.dashboard' %}active{% endif %}"
+                   href="{{ url_for('admin.dashboard') }}">
+                    <i class="bi bi-house-door"></i> Dashboard
+                </a>
+            </li>
+            <!-- ===== CHỈ ADMIN ===== -->
+            {% if current_user.is_admin %}
+            <li class="nav-item">
+                <hr class="bg-light my-2">
+                <div class="px-3 text-uppercase small text-muted">Quản trị</div>
+            </li>
 
+            <li class="nav-item">
+                <a class="nav-link {% if 'users' in request.endpoint %}active{% endif %}"
+                   href="{{ url_for('admin.users') }}">
+                    <i class="bi bi-people"></i> Người dùng
+                </a>
+            </li>
 
-                <!-- ===== CHỈ ADMIN MỚI THẤY ===== -->
-        {% if current_user.is_admin %}
-        <li class="nav-item">
-            <hr class="bg-light my-2">
-            <div class="px-3">QUẢN TRỊ</div>
-        </li>
+            <li class="nav-item">
+                <a class="nav-link {% if 'roles' in request.endpoint %}active{% endif %}"
+                   href="{{ url_for('admin.roles') }}">
+                    <i class="bi bi-shield-lock"></i> Phân quyền
+                </a>
+            </li>
+            {% endif %}
+            <li class="nav-item">
+                <hr class="bg-light my-2">
+            </li>
 
-        <li class="nav-item">
-            <a class="nav-link {% if 'categories' in request.endpoint %}active{% endif %}"
-               href="{{ url_for('admin.categories') }}">
-                <i class="bi bi-tag"></i> Danh mục
-            </a>
-        </li>
+                        <!-- ===== CHỈ ADMIN & EDITOR ===== -->
+            {% if current_user.has_any_permission('manage_categories', 'manage_projects', 'manage_jobs', 'view_contacts') %}
+            <li class="nav-item">
+                <div class="px-3 text-uppercase small text-muted">Quản lý</div>
+            </li>
 
-        <li class="nav-item">
-            <a class="nav-link {% if 'contacts' in request.endpoint %}active{% endif %}"
-               href="{{ url_for('admin.contacts') }}">
-                <i class="bi bi-envelope"></i> Liên hệ
-                {% if total_contacts and total_contacts > 0 %}
-                <span class="badge bg-danger ms-2">{{ total_contacts }}</span>
-                {% endif %}
-            </a>
-        </li>
+            {% if current_user.has_permission('manage_categories') %}
+            <li class="nav-item">
+                <a class="nav-link {% if 'categories' in request.endpoint %}active{% endif %}"
+                   href="{{ url_for('admin.categories') }}">
+                    <i class="bi bi-tag"></i> Danh mục
+                </a>
+            </li>
+            {% endif %}
 
-        <li class="nav-item">
-            <a class="nav-link {% if 'users' in request.endpoint %}active{% endif %}"
-               href="{{ url_for('admin.users') }}">
-                <i class="bi bi-people"></i> Người dùng
-            </a>
-        </li>
+            {% if current_user.has_permission('view_contacts') %}
+            <li class="nav-item">
+                <a class="nav-link {% if 'contacts' in request.endpoint %}active{% endif %}"
+                   href="{{ url_for('admin.contacts') }}">
+                    <i class="bi bi-envelope"></i> Liên hệ
+                    {% if total_contacts and total_contacts > 0 %}
+                    <span class="badge bg-danger ms-2">{{ total_contacts }}</span>
+                    {% endif %}
+                </a>
+            </li>
+            {% endif %}
 
-        <li class="nav-item">
-            <a class="nav-link" href="{{ url_for('admin.projects') }}">
-                <i class="bi bi-building"></i> Dự án
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="{{ url_for('admin.jobs') }}">
-                <i class="bi bi-briefcase"></i> Tuyển dụng
-            </a>
-        </li>
-        {% endif %}
+            {% if current_user.has_permission('manage_projects') %}
+            <li class="nav-item">
+                <a class="nav-link {% if 'projects' in request.endpoint %}active{% endif %}"
+                   href="{{ url_for('admin.projects') }}">
+                    <i class="bi bi-building"></i> Dự án
+                </a>
+            </li>
+            {% endif %}
 
-        <li class="nav-item">
-            <hr class="bg-light">
-        </li>
-        <!-- ===== CHỨC NĂNG USER THƯỜNG ===== -->
-        <li class="nav-item">
-            <a class="nav-link {% if 'products' in request.endpoint %}active{% endif %}"
-               href="{{ url_for('admin.products') }}">
-                <i class="bi bi-box-seam"></i> Sản phẩm
-            </a>
-        </li>
+            {% if current_user.has_permission('manage_jobs') %}
+            <li class="nav-item">
+                <a class="nav-link {% if 'jobs' in request.endpoint %}active{% endif %}"
+                   href="{{ url_for('admin.jobs') }}">
+                    <i class="bi bi-briefcase"></i> Tuyển dụng
+                </a>
+            </li>
+            {% endif %}
+            {% endif %}
+            <li class="nav-item">
+                <hr class="bg-light my-2">
+            </li>
 
-        <li class="nav-item">
-            <a class="nav-link {% if 'media' in request.endpoint %}active{% endif %}"
-               href="{{ url_for('admin.media') }}">
-                <i class="bi bi-folder2-open"></i> Media Library
-            </a>
-        </li>
+            <!-- ===== CHỨC NĂNG NGƯỜI DÙNG THƯỜNG ===== -->
+            <li class="nav-item">
+                <div class="px-3 text-uppercase small text-muted">Nội dung</div>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if 'products' in request.endpoint %}active{% endif %}"
+                   href="{{ url_for('admin.products') }}">
+                    <i class="bi bi-box-seam"></i> Sản phẩm
+                </a>
+            </li>
 
-        <li class="nav-item">
-            <a class="nav-link {% if 'banners' in request.endpoint %}active{% endif %}"
-               href="{{ url_for('admin.banners') }}">
-                <i class="bi bi-images"></i> Banner
-            </a>
-        </li>
+            <li class="nav-item">
+                <a class="nav-link {% if 'blogs' in request.endpoint %}active{% endif %}"
+                   href="{{ url_for('admin.blogs') }}">
+                    <i class="bi bi-newspaper"></i> Tin tức
+                </a>
+            </li>
 
-        <li class="nav-item">
-            <a class="nav-link {% if 'blogs' in request.endpoint %}active{% endif %}"
-               href="{{ url_for('admin.blogs') }}">
-                <i class="bi bi-newspaper"></i> Tin tức
-            </a>
-        </li>
+            <li class="nav-item">
+                <a class="nav-link {% if 'media' in request.endpoint %}active{% endif %}"
+                   href="{{ url_for('admin.media') }}">
+                    <i class="bi bi-folder2-open"></i> Media Library
+                </a>
+            </li>
 
-        <li class="nav-item">
-            <a class="nav-link {% if 'faqs' in request.endpoint %}active{% endif %}"
-               href="{{ url_for('admin.faqs') }}">
-                <i class="bi bi-question-circle"></i> FAQ
-            </a>
-        </li>
-                <li class="nav-item">
-            <a class="nav-link" href="{{ url_for('main.index') }}" target="_blank">
-                <i class="bi bi-globe"></i> Xem Website
-            </a>
-        </li>
+            <li class="nav-item">
+                <a class="nav-link {% if 'banners' in request.endpoint %}active{% endif %}"
+                   href="{{ url_for('admin.banners') }}">
+                    <i class="bi bi-images"></i> Banner
+                </a>
+            </li>
 
-        <li class="nav-item">
-            <a class="nav-link" href="{{ url_for('admin.logout') }}">
-                <i class="bi bi-box-arrow-right"></i> Đăng xuất
-            </a>
-        </li>
-    </ul>
+            <li class="nav-item">
+                <a class="nav-link {% if 'faqs' in request.endpoint %}active{% endif %}"
+                   href="{{ url_for('admin.faqs') }}">
+                    <i class="bi bi-question-circle"></i> FAQ
+                </a>
+            </li>
+                <hr class="bg-light my-2">
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('main.index') }}" target="_blank">
+                    <i class="bi bi-globe"></i> Xem Website
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('admin.logout') }}">
+                    <i class="bi bi-box-arrow-right"></i> Đăng xuất
+                </a>
+            </li>
+        </ul>
 </div>
 
     <!-- Main Content -->
