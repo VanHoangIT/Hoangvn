@@ -63,14 +63,34 @@
         }
 
         .sidebar-section-title {
-            padding: 0.5rem 1.5rem;
-            margin-top: 1rem;
+            position: relative;
+            text-align: center;
+            margin: 1.5rem 1rem 0.75rem;
             font-size: 0.75rem;
+            font-weight: 700;
+            color: #bdc3c7;
             text-transform: uppercase;
-            color: #95a5a6;
-            font-weight: 600;
-            letter-spacing: 0.5px;
+            letter-spacing: 1px;
         }
+
+        .sidebar-section-title::before,
+        .sidebar-section-title::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            width: 30%;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .sidebar-section-title::before {
+            left: 0;
+        }
+
+        .sidebar-section-title::after {
+            right: 0;
+        }
+
 
         .main-content {
             margin-left: var(--sidebar-width);
