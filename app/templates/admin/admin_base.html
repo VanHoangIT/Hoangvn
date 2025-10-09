@@ -185,6 +185,14 @@
                 </a>
                 {% endif %}
             </li>
+            <!-- ===== Lập trinhf viên ===== -->
+            {% if current_user.has_permission('manage_settings') %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('admin.settings') }}">
+                        <i class="bi bi-gear"></i> Cài đặt
+                    </a>
+                </li>
+            {% endif %}
 
             <!-- ===== QUẢN TRỊ HỆ THỐNG (ADMIN ONLY) ===== -->
             {% if current_user.has_any_permission('manage_users', 'view_users', 'manage_roles') %}

@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 
-{% block title %}Trang chủ - {{ site_name }}{% endblock %}
+{% block title %}{{ get_setting('meta_title', 'Trang chủ - Hoangvn') }}{% endblock %}
+{% block meta_description %}{{ get_setting('index_meta_description', 'Khám phá các sản phẩm và dịch vụ chất lượng cao từ Hoangvn, công ty hàng đầu trong thương mại điện tử.') }}{% endblock %}
 
 {% block content %}
 <!-- ==================== BANNER SLIDER ==================== -->
@@ -29,7 +30,11 @@
                          loading="lazy">
 
                     <div class="carousel-caption">
-                        <h2 class="display-4 fw-bold mb-3">{{ banner.title }}</h2>
+                        {% if loop.first %}
+                        <h1 class="display-4 fw-bold mb-3">{{ banner.title }}</h1> <!-- ✅ chỉ H1 cho banner đầu tiên -->
+                        {% else %}
+                        <h2 class="display-4 fw-bold mb-3">{{ banner.title }}</h2> <!-- những banner khác dùng H2 -->
+                        {% endif %}
                         <p class="lead mb-4">{{ banner.subtitle }}</p>
                         {% if banner.button_text and banner.link %}
                         <a href="{{ banner.link }}" class="btn btn-warning btn-lg px-4 py-2">
@@ -340,5 +345,49 @@
         </div>
     </div>
 </section>
+<!-- Schema WebSite -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "{{ get_setting('website_name', 'Hoangvn') }}",
+  "url": "{{ get_setting('main_url', request.url_root) }}",
+  "potentialAction": {
+    "@type": "SearchAction",
+    "target": "{{ url_for('main.products') }}?q={search_term_string}",
+    "query-input": "required name=search_term_string"
+  }
+}
+</script>
+<!-- Schema Product cho featured_products -->
+{% if featured_products %}
+<script type="application/ld+json">
+[
+{% for product in featured_products %}
+  {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": "{{ product.name|e }}",
+    "image": "{{ product.image|e }}",
+    "description": "{{ (product.description or 'Sản phẩm chất lượng cao từ Hoangvn')|e }}",
+    "sku": "{{ product.id }}",
+    "brand": {
+      "@type": "Brand",
+      "name": "{{ get_setting('website_name', 'Hoangvn')|e }}"
+    },
+    "offers": {
+      "@type": "Offer",
+      "priceCurrency": "VND",
+      "price": "{{ product.price }}",
+      "url": "{{ url_for('main.product_detail', slug=product.slug, _external=True) }}",
+      "availability": "https://schema.org/InStock",
+      "itemCondition": "https://schema.org/NewCondition"
+    }
+  }{% if not loop.last %},{% endif %}
+{% endfor %}
+]
+</script>
+{% endif %}
+
 
 {% endblock %}

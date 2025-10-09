@@ -1,76 +1,71 @@
 {% extends "base.html" %}
 
-{% block title %}Giới thiệu - {{ site_name }}{% endblock %}
+{% block title %}{{ get_setting('meta_title', 'Giới thiệu - Hoangvn') }}{% endblock %}
+{% block meta_description %}{{ get_setting('about_meta_description', 'Giới thiệu về Hoangvn - Công ty hàng đầu trong lĩnh vực thương mại điện tử, cung cấp sản phẩm công nghệ chất lượng cao.') }}{% endblock %}
 
 {% block content %}
+<!-- ==================== BREADCRUMB ==================== -->
 <div class="page-header bg-light py-4">
     <div class="container">
         <h1 class="fw-bold">Giới thiệu</h1>
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a href="{{ url_for('main.index') }}">Trang chủ</a></li>
-                <li class="breadcrumb-item active">Giới thiệu</li>
+                <li class="breadcrumb-item active" aria-current="page">Giới thiệu</li>
             </ol>
         </nav>
     </div>
 </div>
 
-<section class="py-5">
+<!-- ==================== ABOUT CONTENT ==================== -->
+<section class="py-5" itemscope itemtype="https://schema.org/AboutPage">
     <div class="container">
         <div class="row align-items-center mb-5">
             <div class="col-lg-6">
-                <h2 class="fw-bold mb-4">Về chúng tôi</h2>
-                <p class="lead">Chúng tôi là công ty hàng đầu trong lĩnh vực thương mại điện tử,
-                cung cấp các sản phẩm công nghệ chất lượng cao.</p>
-                <p>Với hơn 10 năm kinh nghiệm, chúng tôi tự hào mang đến cho khách hàng:</p>
-                <ul>
-                    <li>Sản phẩm chính hãng 100%</li>
-                    <li>Giá cả cạnh tranh nhất thị trường</li>
-                    <li>Dịch vụ khách hàng tận tâm 24/7</li>
-                    <li>Bảo hành chính hãng toàn quốc</li>
-                </ul>
+                <h2 class="fw-bold mb-4" itemprop="name">Về chúng tôi</h2>
+                <div itemprop="description">
+                    <p class="lead">{{ get_setting('company_info', 'Chúng tôi là công ty hàng đầu trong lĩnh vực thương mại điện tử, cung cấp các sản phẩm công nghệ chất lượng cao.') }}</p>
+                    <p>Với hơn 10 năm kinh nghiệm, chúng tôi tự hào mang đến cho khách hàng:</p>
+                    <ul>
+                        <li>Sản phẩm chính hãng 100%</li>
+                        <li>Giá cả cạnh tranh nhất thị trường</li>
+                        <li>Dịch vụ khách hàng tận tâm 24/7</li>
+                        <li>Bảo hành chính hãng toàn quốc</li>
+                    </ul>
+                </div>
             </div>
             <div class="col-lg-6">
-                <img src="{{ url_for('static', filename='img/logo.png') }}"
-                     class="img-fluid rounded shadow" alt="About Us">
+                <img src="{{ get_setting('logo_url', url_for('static', filename='img/logo.png')) }}"
+                     alt="{{ get_setting('website_name', 'Hoangvn') }}"
+                     itemprop="image"
+                     loading="lazy"
+                     class="img-fluid rounded shadow">
             </div>
         </div>
 
-        <!-- VIDEO SECTION -->
+        <!-- ==================== VIDEO SECTION ==================== -->
         <div class="row align-items-center py-5 bg-light rounded">
             <div class="col-lg-6">
-                <!-- Video Container -->
                 <div class="video-container position-relative rounded overflow-hidden shadow-lg">
                     <div class="ratio ratio-16x9">
-                        <!-- Thay YOUR_VIDEO_ID bằng ID YouTube hoặc URL video của bạn -->
                         <iframe src="https://www.youtube.com/embed/dE9sptWH8pI"
-                                title="Video giới thiệu"
+                                title="Video giới thiệu {{ get_setting('website_name', 'Hoangvn') }}"
                                 frameborder="0"
                                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                                 allowfullscreen>
                         </iframe>
                     </div>
-
-                    <!-- Overlay text (nếu dùng video tag thay vì iframe) -->
-                    <!--
-                    <div class="position-absolute top-50 start-50 translate-middle text-center">
-                        <h3 class="text-warning fw-bold text-uppercase">VIDEO GIỚI THIỆU</h3>
-                        <button class="btn btn-warning btn-lg rounded-circle play-btn">
-                            <i class="bi bi-play-fill fs-1"></i>
-                        </button>
-                    </div>
-                    -->
                 </div>
             </div>
 
             <div class="col-lg-6 ps-lg-5 mt-4 mt-lg-0">
                 <h2 class="fw-bold mb-3">
                     Tìm Hiểu Thêm Về
-                    <span class="text-warning">{{ site_name|upper }}</span>
+                    <span class="text-warning">{{ get_setting('website_name', 'Hoangvn')|upper }}</span>
                 </h2>
                 <p class="lead mb-4">
                     Khám phá công nghệ hiện đại và quy trình kiểm soát chất lượng nghiêm ngặt
-                    tại nhà máy {{ site_name }} để tạo ra những vật liệu xây dựng tốt nhất.
+                    tại nhà máy {{ get_setting('website_name', 'Hoangvn') }} để tạo ra những vật liệu xây dựng tốt nhất.
                 </p>
                 <ul class="list-unstyled">
                     <li class="mb-2">
@@ -96,6 +91,7 @@
             </div>
         </div>
 
+        <!-- ==================== STATISTICS ==================== -->
         <div class="row g-4 mt-5">
             <div class="col-md-3 text-center">
                 <div class="bg-light p-4 rounded">
@@ -128,6 +124,64 @@
         </div>
     </div>
 </section>
+
+<!-- ==================== SCHEMA.ORG - ABOUT PAGE ==================== -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "AboutPage",
+  "name": "Giới thiệu {{ get_setting('website_name', 'Hoangvn')|e }}",
+  "url": "{{ url_for('main.about', _external=True) }}",
+  "mainEntity": {
+    "@type": "Organization",
+    "name": "{{ get_setting('website_name', 'Hoangvn')|e }}",
+    "url": "{{ get_setting('main_url', request.url_root)|e }}",
+    "logo": "{{ get_setting('logo_url', url_for('static', filename='img/logo.png', _external=True))|e }}",
+    "description": "{{ get_setting('company_info', 'Công ty hàng đầu trong lĩnh vực thương mại điện tử')|e }}",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "{{ get_setting('address', '982/l98/a1 Tân Bình, Tân Phú Nhà Bè')|e }}",
+      "addressLocality": "Hồ Chí Minh",
+      "addressCountry": "VN"
+    },
+    "contactPoint": {
+      "@type": "ContactPoint",
+      "telephone": "{{ get_setting('hotline', '098.422.6602')|e }}",
+      "contactType": "customer service",
+      "email": "{{ get_setting('contact_email', 'info@hoang.vn')|e }}",
+      "availableLanguage": "Vietnamese"
+    },
+    "sameAs": [
+      "{{ get_setting('facebook_url', '')|e }}",
+      "{{ get_setting('zalo_url', '')|e }}",
+      "{{ get_setting('youtube_url', '')|e }}",
+      "{{ get_setting('tiktok_url', '')|e }}"
+    ]
+  }
+}
+</script>
+
+<!-- ==================== SCHEMA.ORG - BREADCRUMB ==================== -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Trang chủ",
+      "item": "{{ url_for('main.index', _external=True) }}"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Giới thiệu",
+      "item": "{{ url_for('main.about', _external=True) }}"
+    }
+  ]
+}
+</script>
 
 <!-- Custom CSS cho video -->
 <style>
@@ -164,7 +218,6 @@
     }
 }
 
-/* Responsive */
 @media (max-width: 991px) {
     .video-container {
         margin-bottom: 2rem;

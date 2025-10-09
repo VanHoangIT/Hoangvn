@@ -1,19 +1,21 @@
 import os
-from flask import Blueprint, render_template, request, flash, redirect, url_for, current_app, jsonify
+from flask import Blueprint, render_template, request, flash, redirect, url_for, current_app, jsonify, session
 from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.utils import secure_filename
 from app import db
-from app.models import User, Product, Category, Banner, Blog, FAQ, Contact, Media, Project, Job
+from app.models import User, Product, Category, Banner, Blog, FAQ, Contact, Media, Project, Job, Settings, get_setting, set_setting
 from app.models_rbac import Role, Permission
 from app.forms import (LoginForm, CategoryForm, ProductForm, BannerForm,
                        BlogForm, FAQForm, UserForm, ProjectForm, JobForm,
-                       RoleForm, PermissionForm)
+                       RoleForm, PermissionForm, SettingsForm)
 from app.utils import save_upload_file, delete_file, get_albums, optimize_image
 from app.decorators import permission_required, role_required
 import shutil
 import re
 from html import unescape
 from app.seo_config import MEDIA_KEYWORDS, KEYWORD_SCORES
+import xml.etree.ElementTree as ET
+from datetime import datetime
 
 # ==================== Giữ nguyên các hàm calculate_seo_score, calculate_blog_seo_score ====================
 # (Copy từ file cũ - giữ nguyên 100%)
@@ -474,31 +476,52 @@ def get_image_from_form(form_image_field, field_name='image', folder='uploads'):
 # ==================== LOGIN & LOGOUT ====================
 @admin_bp.route('/login', methods=['GET', 'POST'])
 def login():
-    """Trang đăng nhập admin - KHÔNG CẦN QUYỀN"""
+    """Trang đăng nhập admin - CÓ GIỚI HẠN ATTEMPTS"""
     if current_user.is_authenticated:
-        # Redirect dựa vào role
         if current_user.has_any_permission('manage_users', 'manage_products', 'manage_categories'):
             return redirect(url_for('admin.dashboard'))
         else:
             return redirect(url_for('admin.welcome'))
 
     form = LoginForm()
+
     if form.validate_on_submit():
+        email = form.email.data
+
+        # ✅ LẤY GIỚI HẠN TỪ SETTINGS
+        from app.models import get_setting
+        max_attempts = int(get_setting('login_attempt_limit', '5'))
+        attempt_key = f'login_attempts_{email}'
+        attempts = session.get(attempt_key, 0)
+
+        # Kiểm tra đã quá số lần thử chưa
+        if attempts >= max_attempts:
+            flash(f'⛔ Tài khoản tạm khóa do đăng nhập sai {max_attempts} lần!', 'danger')
+            return render_template('admin/login.html', form=form)
+
         user = User.query.filter_by(email=form.email.data).first()
+
         if user and user.check_password(form.password.data):
             login_user(user, remember=form.remember_me.data)
-            next_page = request.args.get('next')
+            session.pop(attempt_key, None)  # Reset attempts
 
+            next_page = request.args.get('next')
             if next_page:
                 return redirect(next_page)
 
-            # Redirect dựa vào role
             if user.has_any_permission('manage_users', 'manage_products', 'manage_categories'):
                 return redirect(url_for('admin.dashboard'))
             else:
                 return redirect(url_for('admin.welcome'))
         else:
-            flash('Email hoặc mật khẩu không đúng!', 'danger')
+            # Tăng số lần thử sai
+            session[attempt_key] = attempts + 1
+            remaining = max_attempts - attempts - 1
+
+            if remaining > 0:
+                flash(f'⚠️ Email hoặc mật khẩu không đúng! Còn {remaining} lần thử.', 'warning')
+            else:
+                flash(f'⛔ Đã hết lượt thử! Tài khoản tạm khóa.', 'danger')
 
     return render_template('admin/login.html', form=form)
 
@@ -1870,3 +1893,255 @@ def add_permission():
         return redirect(url_for('admin.permissions'))
 
     return render_template('admin/permission_form.html', form=form, title='Thêm quyền')
+
+
+@admin_bp.route('/settings', methods=['GET', 'POST'])
+@permission_required('manage_settings')
+def settings():
+    """Quản lý cài đặt hệ thống"""
+    form = SettingsForm()
+
+    if form.validate_on_submit():
+        # Lưu settings vào DB (sử dụng set_setting)
+        # General Settings
+        set_setting('website_name', form.website_name.data, 'general', 'Tên website')
+        set_setting('slogan', form.slogan.data, 'general', 'Slogan của website')
+        set_setting('address', form.address.data, 'general', 'Địa chỉ công ty')
+        set_setting('email', form.email.data, 'general', 'Email chính')
+        set_setting('hotline', form.hotline.data, 'general', 'Số hotline')
+        set_setting('main_url', form.main_url.data, 'general', 'URL chính của website')
+        set_setting('company_info', form.company_info.data, 'general', 'Thông tin công ty')
+
+        # Theme/UI Settings
+        if form.logo.data:
+            logo_path = save_upload_file(form.logo.data, 'logos')
+            set_setting('logo_url', logo_path, 'theme', 'URL logo website')
+        if form.logo_chatbot.data:
+            chatbot_logo_path = save_upload_file(form.logo_chatbot.data, 'logos')
+            set_setting('logo_chatbot_url', chatbot_logo_path, 'theme', 'URL logo chatbot')
+        set_setting('primary_color', form.primary_color.data, 'theme', 'Màu chủ đạo')
+
+        # SEO & Meta Defaults
+        set_setting('meta_title', form.meta_title.data, 'seo', 'Meta title mặc định')
+        set_setting('meta_description', form.meta_description.data, 'seo', 'Meta description mặc định')
+        set_setting('meta_keywords', form.meta_keywords.data, 'seo', 'Meta keywords mặc định')
+        if form.favicon.data:
+            favicon_path = save_upload_file(form.favicon.data, 'favicons')
+            set_setting('favicon_url', favicon_path, 'seo', 'URL favicon')
+        if form.default_share_image.data:
+            share_image_path = save_upload_file(form.default_share_image.data, 'share_images')
+            set_setting('default_share_image', share_image_path, 'seo', 'Ảnh chia sẻ mặc định')
+        set_setting('og_title', form.meta_title.data, 'seo', 'OG title mặc định')
+        set_setting('og_description', form.meta_description.data, 'seo', 'OG description mặc định')
+        set_setting('og_image', get_setting('default_share_image', ''), 'seo', 'OG image mặc định')
+
+        # Contact & Social Settings
+        set_setting('contact_email', form.contact_email.data, 'contact', 'Email liên hệ')
+        set_setting('facebook_url', form.facebook_url.data, 'contact', 'URL Facebook')
+        set_setting('zalo_url', form.zalo_url.data, 'contact', 'URL Zalo')
+        set_setting('tiktok_url', form.tiktok_url.data, 'contact', 'URL TikTok')
+        set_setting('youtube_url', form.youtube_url.data, 'contact', 'URL YouTube')
+        set_setting('google_maps', form.google_maps.data, 'contact', 'Mã nhúng Google Maps')
+        set_setting('hotline_north', form.hotline_north.data, 'contact', 'Hotline miền Bắc')
+        set_setting('hotline_central', form.hotline_central.data, 'contact', 'Hotline miền Trung')
+        set_setting('hotline_south', form.hotline_south.data, 'contact', 'Hotline miền Nam')
+        set_setting('working_hours', form.working_hours.data, 'contact', 'Giờ làm việc')
+        set_setting('facebook_messenger_url', form.facebook_messenger_url.data, 'contact', 'Facebook Messenger URL')
+        set_setting('index_meta_description', form.index_meta_description.data, 'seo', 'Meta description trang chủ')
+        set_setting('about_meta_description', form.about_meta_description.data, 'seo',
+                    'Meta description trang giới thiệu')
+        set_setting('contact_meta_description', form.contact_meta_description.data, 'seo',
+                    'Meta description trang liên hệ')
+        set_setting('products_meta_description', form.products_meta_description.data, 'seo',
+                    'Meta description trang sản phẩm')
+        set_setting('product_meta_description', form.product_meta_description.data, 'seo',
+                    'Meta description chi tiết sản phẩm')
+        set_setting('blog_meta_description', form.blog_meta_description.data, 'seo',
+                    'Meta description trang blog')
+        set_setting('careers_meta_description', form.careers_meta_description.data, 'seo',
+                    'Meta description trang tuyển dụng')
+        set_setting('faq_meta_description', form.faq_meta_description.data, 'seo',
+                    'Meta description trang FAQ')
+        set_setting('projects_meta_description', form.projects_meta_description.data, 'seo',
+                    'Meta description trang dự án')
+
+        # System & Security Settings
+        set_setting('login_attempt_limit', str(form.login_attempt_limit.data), 'system', 'Giới hạn đăng nhập sai')
+        set_setting('cache_time', str(form.cache_time.data), 'system', 'Thời gian cache (giây)')
+
+        # Integration Settings
+        set_setting('cloudinary_api_key', form.cloudinary_api_key.data, 'integration', 'API Key Cloudinary')
+        set_setting('gemini_api_key', form.gemini_api_key.data, 'integration', 'API Key Gemini/OpenAI')
+        set_setting('google_analytics', form.google_analytics.data, 'integration', 'Google Analytics ID')
+        set_setting('shopee_api', form.shopee_api.data, 'integration', 'Shopee Integration')
+        set_setting('tiktok_api', form.tiktok_api.data, 'integration', 'TikTok Integration')
+        set_setting('zalo_oa', form.zalo_oa.data, 'integration', 'Zalo OA')
+
+        # Content Defaults
+        set_setting('shipping_policy', form.shipping_policy.data, 'content', 'Chính sách vận chuyển')
+        set_setting('return_policy', form.return_policy.data, 'content', 'Chính sách đổi trả')
+        set_setting('warranty_policy', form.warranty_policy.data, 'content', 'Chính sách bảo hành')
+        set_setting('privacy_policy', form.privacy_policy.data, 'content', 'Chính sách bảo mật')
+
+        set_setting('contact_form', form.contact_form.data, 'content', 'Form liên hệ mặc định')
+        set_setting('default_posts_per_page', str(form.default_posts_per_page.data), 'content',
+                    'Số lượng bài viết mặc định')
+
+        # Tạo sitemap.xml và robots.txt động
+        generate_sitemap()
+        generate_robots_txt()
+
+        flash('Cài đặt đã được lưu thành công!', 'success')
+        return redirect(url_for('admin.settings'))
+
+
+
+    # Load dữ liệu hiện tại vào form
+    form.website_name.data = get_setting('website_name', 'Hoangvn')
+    form.slogan.data = get_setting('slogan', '')
+    form.address.data = get_setting('address', '982/l98/a1 Tân Bình, Tân Phú Nhà Bè')
+    form.email.data = get_setting('email', 'info@hoang.vn')
+    form.hotline.data = get_setting('hotline', '098.422.6602')
+    form.main_url.data = get_setting('main_url', request.url_root)
+    form.company_info.data = get_setting('company_info',
+                                         'Chúng tôi là công ty hàng đầu trong lĩnh vực thương mại điện tử.')
+
+    form.primary_color.data = get_setting('primary_color', '#007bff')
+    form.logo_url = get_setting('logo_url', '')  # Hiển thị để preview
+    form.logo_chatbot_url = get_setting('logo_chatbot_url', '')
+
+    form.meta_title.data = get_setting('meta_title', 'Hoangvn - Website doanh nghiệp chuyên nghiệp')
+    form.meta_description.data = get_setting('meta_description',
+                                             'Website doanh nghiệp chuyên nghiệp cung cấp sản phẩm và dịch vụ chất lượng cao.')
+    form.meta_keywords.data = get_setting('meta_keywords', 'thiết kế web, hoangvn, thương mại điện tử')
+    form.favicon_url = get_setting('favicon_url', '/static/img/favicon.ico')
+    form.default_share_image_url = get_setting('default_share_image', '/static/img/default-share.jpg')
+    form.index_meta_description.data = get_setting('index_meta_description',
+                                                   'Khám phá các sản phẩm và dịch vụ chất lượng cao từ Hoangvn.')
+    form.about_meta_description.data = get_setting('about_meta_description',
+                                                   'Giới thiệu về Hoangvn - Công ty hàng đầu trong thương mại điện tử.')
+    form.contact_meta_description.data = get_setting('contact_meta_description',
+                                                     'Liên hệ với Hoangvn để được tư vấn và hỗ trợ nhanh chóng.')
+    form.products_meta_description.data = get_setting('products_meta_description',
+                                                      'Khám phá danh sách sản phẩm chất lượng cao từ Hoangvn.')
+    form.product_meta_description.data = get_setting('product_meta_description',
+                                                     'Mua sản phẩm chất lượng cao từ Hoangvn với giá tốt nhất.')
+    form.blog_meta_description.data = get_setting('blog_meta_description',
+                                                  'Tin tức và kiến thức hữu ích từ Hoangvn.')
+    form.careers_meta_description.data = get_setting('careers_meta_description',
+                                                     'Cơ hội nghề nghiệp tại Hoangvn với môi trường làm việc chuyên nghiệp.')
+    form.faq_meta_description.data = get_setting('faq_meta_description',
+                                                 'Câu hỏi thường gặp về sản phẩm và dịch vụ của Hoangvn.')
+    form.projects_meta_description.data = get_setting('projects_meta_description',
+                                                      'Các dự án tiêu biểu đã được Hoangvn thực hiện thành công.')
+
+
+
+    form.contact_email.data = get_setting('contact_email', 'contact@example.com')
+    form.facebook_url.data = get_setting('facebook_url', '')
+    form.zalo_url.data = get_setting('zalo_url', '')
+    form.tiktok_url.data = get_setting('tiktok_url', '')
+    form.youtube_url.data = get_setting('youtube_url', '')
+    form.google_maps.data = get_setting('google_maps', '')
+    form.hotline_north.data = get_setting('hotline_north', '(024) 2222 2222')
+    form.hotline_central.data = get_setting('hotline_central', '(024) 1111 1113')
+    form.hotline_south.data = get_setting('hotline_south', '(028) 1111 1111')
+    form.working_hours.data = get_setting('working_hours', '8h - 17h30 (Thứ 2 - Thứ 7)')
+    form.facebook_messenger_url.data = get_setting('facebook_messenger_url', '')
+
+    form.login_attempt_limit.data = int(get_setting('login_attempt_limit', '5'))
+    form.cache_time.data = int(get_setting('cache_time', '3600'))
+
+    form.cloudinary_api_key.data = get_setting('cloudinary_api_key', '')
+    form.gemini_api_key.data = get_setting('gemini_api_key', '')
+    form.google_analytics.data = get_setting('google_analytics', '')
+    form.shopee_api.data = get_setting('shopee_api', '')
+    form.tiktok_api.data = get_setting('tiktok_api', '')
+    form.zalo_oa.data = get_setting('zalo_oa', '')
+
+    form.shipping_policy.data = get_setting('shipping_policy', '')
+    form.return_policy.data = get_setting('return_policy', '')
+    form.warranty_policy.data = get_setting('warranty_policy', '')
+    form.privacy_policy.data = get_setting('privacy_policy', '')
+    form.contact_form.data = get_setting('contact_form', '')
+    form.default_posts_per_page.data = int(get_setting('default_posts_per_page', '12'))
+
+    return render_template('admin/settings.html', form=form)
+
+
+def generate_sitemap():
+    """Tạo sitemap.xml động dựa trên settings"""
+    sitemap = ET.Element('urlset', xmlns="http://www.sitemaps.org/schemas/sitemap/0.9")
+
+    # Trang chính
+    url = ET.SubElement(sitemap, 'url')
+    ET.SubElement(url, 'loc').text = get_setting('main_url', request.url_root)
+    ET.SubElement(url, 'lastmod').text = datetime.utcnow().strftime('%Y-%m-%d')
+    ET.SubElement(url, 'changefreq').text = 'daily'
+    ET.SubElement(url, 'priority').text = '1.0'
+
+    # Trang tĩnh
+    static_pages = [
+        ('about', 'weekly', '0.8'),
+        ('products', 'daily', '0.9'),
+        ('contact', 'weekly', '0.7'),
+        ('policy', 'monthly', '0.6'),
+        ('faq', 'weekly', '0.7'),
+        ('careers', 'weekly', '0.7'),
+        ('projects', 'weekly', '0.8'),
+    ]
+    for page, freq, priority in static_pages:
+        url = ET.SubElement(sitemap, 'url')
+        ET.SubElement(url, 'loc').text = url_for('main.' + page, _external=True)
+        ET.SubElement(url, 'lastmod').text = datetime.utcnow().strftime('%Y-%m-%d')
+        ET.SubElement(url, 'changefreq').text = freq
+        ET.SubElement(url, 'priority').text = priority
+
+    # Sản phẩm
+    products = Product.query.filter_by(is_active=True).all()
+    for product in products:
+        url = ET.SubElement(sitemap, 'url')
+        ET.SubElement(url, 'loc').text = url_for('main.product_detail', slug=product.slug, _external=True)
+        ET.SubElement(url, 'lastmod').text = product.updated_at.strftime(
+            '%Y-%m-%d') if product.updated_at else datetime.utcnow().strftime('%Y-%m-%d')
+        ET.SubElement(url, 'changefreq').text = 'weekly'
+        ET.SubElement(url, 'priority').text = '0.8'
+
+    # Blog
+    blogs = Blog.query.filter_by(is_active=True).all()
+    for blog in blogs:
+        url = ET.SubElement(sitemap, 'url')
+        ET.SubElement(url, 'loc').text = url_for('main.blog_detail', slug=blog.slug, _external=True)
+        ET.SubElement(url, 'lastmod').text = blog.updated_at.strftime(
+            '%Y-%m-%d') if blog.updated_at else datetime.utcnow().strftime('%Y-%m-%d')
+        ET.SubElement(url, 'changefreq').text = 'weekly'
+        ET.SubElement(url, 'priority').text = '0.7'
+
+    # Dự án
+    projects = Project.query.filter_by(is_active=True).all()
+    for project in projects:
+        url = ET.SubElement(sitemap, 'url')
+        ET.SubElement(url, 'loc').text = url_for('main.project_detail', slug=project.slug, _external=True)
+        ET.SubElement(url, 'lastmod').text = project.updated_at.strftime(
+            '%Y-%m-%d') if project.updated_at else datetime.utcnow().strftime('%Y-%m-%d')
+        ET.SubElement(url, 'changefreq').text = 'weekly'
+        ET.SubElement(url, 'priority').text = '0.8'
+
+    # Ghi file sitemap.xml
+    sitemap_path = os.path.join(current_app.static_folder, 'sitemap.xml')
+    tree = ET.ElementTree(sitemap)
+    tree.write(sitemap_path)
+
+
+def generate_robots_txt():
+    """Tạo robots.txt dựa trên SEO settings"""
+    robots_content = f"""
+User-agent: *
+Disallow: /admin/
+Allow: /
+
+Sitemap: {get_setting('main_url', request.url_root)}sitemap.xml
+"""
+    robots_path = os.path.join(current_app.static_folder, 'robots.txt')
+    with open(robots_path, 'w') as f:
+        f.write(robots_content)

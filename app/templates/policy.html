@@ -1,88 +1,256 @@
 {% extends "base.html" %}
 
-{% block title %}Chính sách - {{ site_name }}{% endblock %}
+{% block title %}Chính sách - {{ get_setting('website_name', 'Hoangvn') }}{% endblock %}
+{% block meta_description %}Chính sách vận chuyển, đổi trả, bảo hành và bảo mật của {{ get_setting('website_name', 'Hoangvn') }}.{% endblock %}
 
 {% block content %}
+<!-- ==================== BREADCRUMB ==================== -->
 <div class="page-header bg-light py-4">
     <div class="container">
         <h1 class="fw-bold">Chính sách</h1>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('main.index') }}">Trang chủ</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Chính sách</li>
+            </ol>
+        </nav>
     </div>
 </div>
 
-<section class="py-5">
+<!-- ==================== POLICY CONTENT ==================== -->
+<section class="py-5" itemscope itemtype="https://schema.org/WebPage">
     <div class="container">
         <div class="row">
+            <!-- Sidebar Navigation -->
             <div class="col-lg-3 mb-4">
-                <div class="list-group">
-                    <a href="#shipping" class="list-group-item list-group-item-action">
-                        <i class="bi bi-truck"></i> Chính sách vận chuyển
+                <div class="list-group sticky-top" style="top: 100px;">
+                    <a href="#shipping"
+                       class="list-group-item list-group-item-action">
+                        <i class="bi bi-truck text-warning me-2"></i>Chính sách vận chuyển
                     </a>
-                    <a href="#return" class="list-group-item list-group-item-action">
-                        <i class="bi bi-arrow-repeat"></i> Chính sách đổi trả
+                    <a href="#return"
+                       class="list-group-item list-group-item-action">
+                        <i class="bi bi-arrow-repeat text-warning me-2"></i>Chính sách đổi trả
                     </a>
-                    <a href="#warranty" class="list-group-item list-group-item-action">
-                        <i class="bi bi-shield-check"></i> Chính sách bảo hành
+                    <a href="#warranty"
+                       class="list-group-item list-group-item-action">
+                        <i class="bi bi-shield-check text-warning me-2"></i>Chính sách bảo hành
                     </a>
-                    <a href="#privacy" class="list-group-item list-group-item-action">
-                        <i class="bi bi-lock"></i> Chính sách bảo mật
+                    <a href="#privacy"
+                       class="list-group-item list-group-item-action">
+                        <i class="bi bi-lock text-warning me-2"></i>Chính sách bảo mật
                     </a>
                 </div>
             </div>
-            
+
+            <!-- Policy Content -->
             <div class="col-lg-9">
-                <div class="card mb-4" id="shipping">
+                <!-- Chính sách vận chuyển -->
+                <div class="card shadow-sm border-0 mb-4" id="shipping">
+                    <div class="card-header bg-warning">
+                        <h3 class="mb-0">
+                            <i class="bi bi-truck me-2"></i>Chính sách vận chuyển
+                        </h3>
+                    </div>
                     <div class="card-body">
-                        <h3><i class="bi bi-truck text-warning"></i> Chính sách vận chuyển</h3>
-                        <hr>
-                        <p>Chúng tôi cung cấp dịch vụ vận chuyển toàn quốc với các hình thức:</p>
-                        <ul>
-                            <li>Giao hàng tiêu chuẩn: 3-5 ngày</li>
-                            <li>Giao hàng nhanh: 1-2 ngày</li>
-                            <li>Miễn phí vận chuyển cho đơn hàng trên 500.000đ</li>
-                        </ul>
+                        {% set shipping = get_setting('shipping_policy', '') %}
+                        {% if shipping %}
+                            {{ shipping | safe | nl2br }}
+                        {% else %}
+                            <p>Chúng tôi cung cấp dịch vụ vận chuyển toàn quốc với các hình thức:</p>
+                            <ul>
+                                <li><strong>Giao hàng tiêu chuẩn:</strong> 3-5 ngày làm việc</li>
+                                <li><strong>Giao hàng nhanh:</strong> 1-2 ngày làm việc</li>
+                                <li><strong>Miễn phí vận chuyển:</strong> Cho đơn hàng trên 500.000đ</li>
+                                <li><strong>Giao hàng COD:</strong> Thanh toán khi nhận hàng</li>
+                            </ul>
+                            <p class="text-muted mb-0">
+                                <i class="bi bi-info-circle"></i>
+                                Thời gian giao hàng có thể thay đổi tùy theo khu vực và điều kiện vận chuyển.
+                            </p>
+                        {% endif %}
                     </div>
                 </div>
-                
-                <div class="card mb-4" id="return">
+
+                <!-- Chính sách đổi trả -->
+                <div class="card shadow-sm border-0 mb-4" id="return">
+                    <div class="card-header bg-warning">
+                        <h3 class="mb-0">
+                            <i class="bi bi-arrow-repeat me-2"></i>Chính sách đổi trả
+                        </h3>
+                    </div>
                     <div class="card-body">
-                        <h3><i class="bi bi-arrow-repeat text-warning"></i> Chính sách đổi trả</h3>
-                        <hr>
-                        <p>Khách hàng có thể đổi trả sản phẩm trong vòng 7 ngày nếu:</p>
-                        <ul>
-                            <li>Sản phẩm còn nguyên tem, hộp, phụ kiện</li>
-                            <li>Không có dấu hiệu sử dụng</li>
-                            <li>Có hóa đơn mua hàng</li>
-                        </ul>
+                        {% set return_pol = get_setting('return_policy', '') %}
+                        {% if return_pol %}
+                            {{ return_pol | safe | nl2br }}
+                        {% else %}
+                            <p>Khách hàng có thể đổi trả sản phẩm trong vòng <strong>7 ngày</strong> kể từ ngày nhận hàng nếu:</p>
+                            <ul>
+                                <li>Sản phẩm còn nguyên tem mác, hộp, phụ kiện đi kèm</li>
+                                <li>Không có dấu hiệu đã qua sử dụng</li>
+                                <li>Có hóa đơn mua hàng hoặc phiếu giao hàng</li>
+                                <li>Sản phẩm bị lỗi do nhà sản xuất</li>
+                            </ul>
+                            <div class="alert alert-warning">
+                                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                                <strong>Lưu ý:</strong> Chi phí vận chuyển đổi trả do khách hàng chịu (trừ trường hợp sản phẩm lỗi).
+                            </div>
+                        {% endif %}
                     </div>
                 </div>
-                
-                <div class="card mb-4" id="warranty">
+
+                <!-- Chính sách bảo hành -->
+                <div class="card shadow-sm border-0 mb-4" id="warranty">
+                    <div class="card-header bg-warning">
+                        <h3 class="mb-0">
+                            <i class="bi bi-shield-check me-2"></i>Chính sách bảo hành
+                        </h3>
+                    </div>
                     <div class="card-body">
-                        <h3><i class="bi bi-shield-check text-warning"></i> Chính sách bảo hành</h3>
-                        <hr>
-                        <p>Tất cả sản phẩm đều được bảo hành chính hãng:</p>
-                        <ul>
-                            <li>Bảo hành 12 tháng cho lỗi nhà sản xuất</li>
-                            <li>Hỗ trợ kỹ thuật miễn phí trọn đời</li>
-                            <li>Đổi mới trong 30 ngày đầu nếu có lỗi</li>
-                        </ul>
+                        {% set warranty = get_setting('warranty_policy', '') %}
+                        {% if warranty %}
+                            {{ warranty | safe | nl2br }}
+                        {% else %}
+                            <p>Tất cả sản phẩm đều được bảo hành chính hãng theo tiêu chuẩn nhà sản xuất:</p>
+                            <ul>
+                                <li><strong>Bảo hành 12 tháng</strong> cho lỗi kỹ thuật, lỗi nhà sản xuất</li>
+                                <li><strong>Đổi mới trong 30 ngày đầu</strong> nếu sản phẩm có lỗi nghiêm trọng</li>
+                                <li><strong>Hỗ trợ kỹ thuật miễn phí</strong> trọn đời sản phẩm</li>
+                                <li><strong>Bảo trì định kỳ</strong> với chi phí ưu đãi</li>
+                            </ul>
+                            <div class="alert alert-info">
+                                <i class="bi bi-info-circle-fill me-2"></i>
+                                Để được bảo hành, vui lòng giữ <strong>phiếu bảo hành</strong> và <strong>hóa đơn mua hàng</strong>.
+                            </div>
+                        {% endif %}
                     </div>
                 </div>
-                
-                <div class="card" id="privacy">
+
+                <!-- Chính sách bảo mật -->
+                <div class="card shadow-sm border-0 mb-4" id="privacy">
+                    <div class="card-header bg-warning">
+                        <h3 class="mb-0">
+                            <i class="bi bi-lock me-2"></i>Chính sách bảo mật
+                        </h3>
+                    </div>
                     <div class="card-body">
-                        <h3><i class="bi bi-lock text-warning"></i> Chính sách bảo mật</h3>
-                        <hr>
-                        <p>Chúng tôi cam kết bảo mật thông tin khách hàng:</p>
-                        <ul>
-                            <li>Không chia sẻ thông tin cho bên thứ ba</li>
-                            <li>Mã hóa dữ liệu thanh toán</li>
-                            <li>Bảo vệ quyền riêng tư tuyệt đối</li>
-                        </ul>
+                        {% set privacy = get_setting('privacy_policy', '') %}
+                        {% if privacy %}
+                            {{ privacy | safe | nl2br }}
+                        {% else %}
+                            <p>Chúng tôi cam kết bảo vệ thông tin cá nhân của khách hàng:</p>
+                            <ul>
+                                <li><strong>Không chia sẻ thông tin</strong> cho bên thứ ba mà không có sự đồng ý</li>
+                                <li><strong>Mã hóa dữ liệu thanh toán</strong> bằng công nghệ SSL 256-bit</li>
+                                <li><strong>Bảo vệ quyền riêng tư</strong> tuyệt đối theo quy định pháp luật</li>
+                                <li><strong>Chỉ sử dụng thông tin</strong> cho mục đích xử lý đơn hàng và hỗ trợ khách hàng</li>
+                            </ul>
+                            <div class="bg-light p-3 rounded">
+                                <h6 class="fw-bold mb-2">Thông tin chúng tôi thu thập:</h6>
+                                <p class="mb-0 small">
+                                    Họ tên, email, số điện thoại, địa chỉ giao hàng và thông tin thanh toán
+                                    (được mã hóa và bảo mật tuyệt đối).
+                                </p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- CTA Section -->
+                <div class="card shadow-sm border-0 bg-light">
+                    <div class="card-body text-center py-4">
+                        <h5 class="fw-bold mb-3">Bạn còn thắc mắc về chính sách?</h5>
+                        <p class="text-muted mb-4">Liên hệ ngay với chúng tôi để được giải đáp chi tiết</p>
+                        <div class="d-flex gap-2 justify-content-center flex-wrap">
+                            <a href="tel:{{ get_setting('hotline', '0123456789') }}"
+                               class="btn btn-warning">
+                                <i class="bi bi-telephone-fill me-2"></i>
+                                {{ get_setting('hotline', '0123 456 789') }}
+                            </a>
+                            <a href="{{ url_for('main.contact') }}"
+                               class="btn btn-outline-warning">
+                                <i class="bi bi-envelope me-2"></i>
+                                Gửi câu hỏi
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </section>
+
+<!-- ==================== SCHEMA.ORG - WEB PAGE ==================== -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "name": "Chính sách - {{ get_setting('website_name', 'Hoangvn')|e }}",
+  "url": "{{ url_for('main.policy', _external=True) }}",
+  "description": "Chính sách vận chuyển, đổi trả, bảo hành và bảo mật của {{ get_setting('website_name', 'Hoangvn')|e }}",
+  "publisher": {
+    "@type": "Organization",
+    "name": "{{ get_setting('website_name', 'Hoangvn')|e }}",
+    "url": "{{ get_setting('main_url', request.url_root)|e }}"
+  }
+}
+</script>
+
+<!-- ==================== SCHEMA.ORG - BREADCRUMB ==================== -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Trang chủ",
+      "item": "{{ url_for('main.index', _external=True) }}"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Chính sách",
+      "item": "{{ url_for('main.policy', _external=True) }}"
+    }
+  ]
+}
+</script>
+
+<!-- Smooth Scroll Script -->
+<style>
+html {
+    scroll-behavior: smooth;
+}
+.card-header {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%) !important;
+    color: #000 !important;
+}
+
+.card-header h3,
+.card-header h2 {
+    color: #000 !important;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Smooth scroll cho sidebar links
+    document.querySelectorAll('.list-group a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                // Scroll đến vị trí với offset cho sticky header
+                const offsetTop = target.offsetTop - 120;
+                window.scrollTo({
+                    top: offsetTop,
+                    behavior: 'smooth'
+                });
+            }
+        });
+    });
+});
+</script>
 {% endblock %}

@@ -1,0 +1,367 @@
+    <!-- ==================== DYNAMIC THEME COLORS  ==================== -->
+    <style>
+        :root {
+            --primary-color: {{ get_setting('primary_color', '#ffc107') }};
+            --primary-hover: {{ get_setting('primary_color', '#ffc107') }}dd;
+            --primary-light: {{ get_setting('primary_color', '#ffc107') }}22;
+            --primary-dark: {{ get_setting('primary_color', '#ffc107') }}cc;
+        }
+
+        /* ==================== NAVBAR & HEADER ==================== */
+        .bg-warning,
+        .navbar.bg-warning,
+        header.bg-warning {
+            background-color: var(--primary-color) !important;
+        }
+
+        .navbar .nav-link:hover {
+            background-color: var(--primary-light) !important;
+        }
+
+        .navbar .nav-link.active {
+            color: #000 !important;
+            background-color: var(--primary-light) !important;
+        }
+
+        /* ==================== TEXT & ICONS ==================== */
+        .text-warning,
+        .bi.text-warning,
+        i.text-warning {
+            color: var(--primary-color) !important;
+        }
+
+        /* ==================== BUTTONS ==================== */
+        .btn-warning {
+            background-color: var(--primary-color) !important;
+            border-color: var(--primary-color) !important;
+            color: #000 !important;
+        }
+
+        .btn-warning:hover,
+        .btn-warning:focus,
+        .btn-warning:active {
+            background-color: var(--primary-dark) !important;
+            border-color: var(--primary-dark) !important;
+            color: #000 !important;
+            box-shadow: 0 4px 12px var(--primary-light) !important;
+        }
+
+        .btn-outline-warning {
+            color: var(--primary-color) !important;
+            border-color: var(--primary-color) !important;
+            background-color: transparent !important;
+        }
+
+        .btn-outline-warning:hover,
+        .btn-outline-warning:focus,
+        .btn-outline-warning:active {
+            background-color: var(--primary-color) !important;
+            border-color: var(--primary-color) !important;
+            color: #000 !important;
+        }
+
+        /* ==================== BADGES & LABELS ==================== */
+        .badge.bg-warning {
+            background-color: var(--primary-color) !important;
+            color: #000 !important;
+        }
+
+        .badge.text-bg-warning {
+            background-color: var(--primary-color) !important;
+            color: #000 !important;
+        }
+
+        /* ==================== SECTION TITLES ==================== */
+        .title-underline {
+            background: linear-gradient(90deg, var(--primary-color), var(--primary-dark)) !important;
+        }
+
+        .text-primary,
+        h6.text-primary,
+        h5.text-primary {
+            color: var(--primary-color) !important;
+        }
+
+        /* ==================== PRODUCT CARDS ==================== */
+        .product-card:hover {
+            border-color: var(--primary-color) !important;
+            box-shadow: 0 0.75rem 1.5rem var(--primary-light) !important;
+        }
+
+        .product-name a:hover,
+        .product-name:hover {
+            color: var(--primary-color) !important;
+        }
+
+        /* ==================== BLOG CARDS ==================== */
+        .blog-card:hover {
+            box-shadow: 0 1rem 2rem var(--primary-light) !important;
+        }
+
+        .blog-content h5:hover,
+        .blog-content h5 a:hover {
+            color: var(--primary-color) !important;
+        }
+
+        /* ==================== FOOTER ==================== */
+        footer h5,
+        footer h5.text-warning {
+            color: var(--primary-color) !important;
+        }
+
+        footer h5::after {
+            background: var(--primary-color) !important;
+        }
+
+        footer a:hover {
+            color: var(--primary-color) !important;
+        }
+
+        footer .social-links a:hover {
+            background-color: var(--primary-color) !important;
+            color: #212529 !important;
+            box-shadow: 0 4px 8px var(--primary-light) !important;
+        }
+
+        footer .bi-chevron-right.text-warning {
+            color: var(--primary-color) !important;
+        }
+
+        /* ==================== PAGINATION ==================== */
+        .pagination .page-item.active .page-link {
+            background-color: var(--primary-color) !important;
+            border-color: var(--primary-color) !important;
+            color: #000 !important;
+        }
+
+        .pagination .page-link:hover {
+            background-color: var(--primary-light) !important;
+            border-color: var(--primary-color) !important;
+            color: #000 !important;
+        }
+
+        .pagination .page-link:focus {
+            box-shadow: 0 0 0 0.2rem var(--primary-light) !important;
+        }
+
+        /* ==================== TABS ==================== */
+        .nav-tabs .nav-link.active {
+            color: var(--primary-color) !important;
+            border-bottom: 2px solid var(--primary-color) !important;
+        }
+
+        .nav-tabs .nav-link:hover {
+            color: var(--primary-color) !important;
+        }
+
+        /* ==================== DROPDOWN ==================== */
+        .dropdown-item:hover,
+        .dropdown-item:focus {
+            background-color: var(--primary-light) !important;
+            color: #000 !important;
+        }
+
+        .dropdown-item.active {
+            background-color: var(--primary-color) !important;
+            color: #000 !important;
+        }
+
+        /* ==================== FILTER SIDEBAR ==================== */
+        .filter-sidebar ul li a:hover,
+        .filter-sidebar ul li a.active {
+            background: var(--primary-light) !important;
+            color: #000 !important;
+        }
+
+        /* ==================== ALERTS ==================== */
+        .alert-warning {
+            border-left-color: var(--primary-color) !important;
+            background-color: var(--primary-light) !important;
+        }
+
+        /* ==================== FORMS ==================== */
+        .form-control:focus,
+        .form-select:focus {
+            border-color: var(--primary-color) !important;
+            box-shadow: 0 0 0 0.2rem var(--primary-light) !important;
+        }
+
+        .form-check-input:checked {
+            background-color: var(--primary-color) !important;
+            border-color: var(--primary-color) !important;
+        }
+
+        .form-check-input:focus {
+            border-color: var(--primary-color) !important;
+            box-shadow: 0 0 0 0.2rem var(--primary-light) !important;
+        }
+
+        /* ==================== LINKS ==================== */
+        a.text-warning:hover {
+            color: var(--primary-dark) !important;
+        }
+
+        /* ==================== SCROLLBAR ==================== */
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, var(--primary-color), var(--primary-dark)) !important;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, var(--primary-dark), var(--primary-color)) !important;
+        }
+
+        /* ==================== CAROUSEL ==================== */
+        .carousel-indicators button.active {
+            background-color: var(--primary-color) !important;
+        }
+
+        .carousel-control-prev:hover,
+        .carousel-control-next:hover {
+            background-color: var(--primary-light) !important;
+        }
+
+        /* ==================== PROJECTS CAROUSEL ==================== */
+        #featured-projects .dot {
+            background: #dee2e6;
+        }
+
+        #featured-projects .dot:hover {
+            background: var(--primary-light);
+        }
+
+        #featured-projects .dot.active {
+            background: var(--primary-color) !important;
+            border-color: var(--primary-color) !important;
+        }
+
+        /* ==================== FLOATING BUTTONS ==================== */
+        @keyframes pulse {
+            0%, 100% {
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+                transform: scale(1);
+            }
+            50% {
+                box-shadow: 0 4px 20px var(--primary-light),
+                           0 0 0 8px var(--primary-light);
+                transform: scale(1.05);
+            }
+        }
+
+        /* ==================== LOADING STATE ==================== */
+        .loading::after {
+            border-color: var(--primary-color) !important;
+            border-top-color: transparent !important;
+        }
+
+        /* ==================== BORDER & OUTLINE ==================== */
+        .border-warning {
+            border-color: var(--primary-color) !important;
+        }
+
+        .text-decoration-underline {
+            text-decoration-color: var(--primary-color) !important;
+        }
+
+        /* ==================== PROGRESS BAR ==================== */
+        .progress-bar.bg-warning {
+            background-color: var(--primary-color) !important;
+        }
+
+        /* ==================== LIST GROUP ==================== */
+        .list-group-item.active {
+            background-color: var(--primary-color) !important;
+            border-color: var(--primary-color) !important;
+        }
+
+        .list-group-item-warning {
+            background-color: var(--primary-light) !important;
+            border-color: var(--primary-light) !important;
+        }
+
+        /* ==================== CARD HEADER ==================== */
+        .card-header.bg-warning {
+            background-color: var(--primary-color) !important;
+        }
+
+        /* ==================== HOVER EFFECTS ==================== */
+        .hover-warning:hover {
+            color: var(--primary-color) !important;
+        }
+
+        /* ==================== SHADOW EFFECTS ==================== */
+        .shadow-warning {
+            box-shadow: 0 0.5rem 1rem var(--primary-light) !important;
+        }
+
+        /* ==================== CUSTOM CLASSES ==================== */
+        .bg-primary-light {
+            background-color: var(--primary-light) !important;
+        }
+
+        .bg-primary-hover {
+            background-color: var(--primary-hover) !important;
+        }
+
+        .text-primary-hover:hover {
+            color: var(--primary-color) !important;
+        }
+
+        /* ==================== CARD HEADERS WITH BG-WARNING ==================== */
+        .card-header.bg-warning h3,
+        .card-header.bg-warning h2,
+        .card-header.bg-warning h4,
+        .card-header.bg-warning h5,
+        .card-header.bg-warning h6 {
+            color: #000 !important;
+        }
+
+        /* ==================== TEXT WARNING IN HEADINGS ==================== */
+        span.text-warning,
+        h1 span.text-warning,
+        h2 span.text-warning,
+        h3 span.text-warning,
+        h4 span.text-warning,
+        h5 span.text-warning,
+        h6 span.text-warning {
+            color: var(--primary-color) !important;
+        }
+
+        /* ==================== LINKS WITH TEXT-WARNING CLASS ==================== */
+        a.text-warning,
+        a.text-warning:hover,
+        a.text-warning:focus {
+            color: var(--primary-color) !important;
+        }
+
+        /* ==================== SIDEBAR NAVIGATION ACTIVE LINKS ==================== */
+        .list-group-item.active,
+        .list-group-item-action.active {
+            background-color: var(--primary-color) !important;
+            border-color: var(--primary-color) !important;
+            color: #000 !important;
+        }
+
+        /* ==================== CATEGORY SIDEBAR ==================== */
+        .text-decoration-none.text-warning,
+        .text-decoration-none.text-warning.fw-bold {
+            color: var(--primary-color) !important;
+        }
+
+        /* ==================== CTA SECTIONS ==================== */
+        section.bg-warning,
+        div.bg-warning {
+            background-color: var(--primary-color) !important;
+        }
+
+        section.bg-warning h3,
+        section.bg-warning h2,
+        section.bg-warning p {
+            color: #000 !important;
+        }
+
+        /* ==================== GRADIENT HEADERS ==================== */
+        .card-header[style*="linear-gradient"],
+        .card-header[style*="gradient"] {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%) !important;
+        }
+    </style>

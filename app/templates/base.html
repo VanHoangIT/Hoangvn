@@ -3,14 +3,69 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="{% block meta_description %}{{ site_name }} - Chuyên cung cấp sản phẩm chất lượng cao{% endblock %}">
-    <meta name="keywords" content="{% block meta_keywords %}{{ site_name }}, sản phẩm chất lượng{% endblock %}">
-    <title>{% block title %}{{ site_name }}{% endblock %}</title>
+
+    <!-- ==================== META TAGS  ==================== -->
+    <title>{% block title %}{{ get_setting('meta_title', 'Hoangvn') }}{% endblock %}</title>
+    <meta name="description" content="{% block meta_description %}{{ get_setting('meta_description', 'Website doanh nghiệp chuyên nghiệp cung cấp sản phẩm và dịch vụ chất lượng cao.') }}{% endblock %}">
+    <meta name="keywords" content="{{ get_setting('meta_keywords', 'thiết kế web, hoangvn, thương mại điện tử') }}">
 
     <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='img/favicon.ico') }}">
+    <link rel="icon" type="image/x-icon" href="{{ get_setting('favicon_url', url_for('static', filename='img/favicon.ico')) }}">
 
-    <!-- Bootstrap 5 CSS -->
+    <!-- ==================== DYNAMIC THEME COLORS  ==================== -->
+    <style>
+        :root {
+            --primary-color: {{ get_setting('primary_color', '#ffc107') }};
+            --primary-hover: {{ get_setting('primary_color', '#ffc107') }}dd;
+            --primary-light: {{ get_setting('primary_color', '#ffc107') }}22;
+            --primary-dark: {{ get_setting('primary_color', '#ffc107') }}cc;
+        }
+    </style>
+    <!-- ==================== OG TAGS  ==================== -->
+    <meta property="og:title" content="{{ get_setting('og_title', get_setting('meta_title', 'Hoangvn')) }}">
+    <meta property="og:description" content="{{ get_setting('og_description', get_setting('meta_description')) }}">
+    <meta property="og:image" content="{{ get_setting('og_image', get_setting('default_share_image', '/static/img/default-share.jpg')) }}">
+    <meta property="og:url" content="{{ get_setting('main_url', request.url) }}">
+    <meta property="og:type" content="website">
+
+    <!-- ==================== SCHEMA.ORG  ==================== -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Công ty TNHH BRICON Việt Nam",
+      "name": "{{ get_setting('website_name', 'Hoangvn') }}",
+      "url": "{{ get_setting('main_url', request.url_root) }}",
+      "logo": "{{ get_setting('logo_url', url_for('static', filename='img/logo.png', _external=True)) }}",
+      "description": "keo chà ron, keo dán gạch, vật liệu chống thấm và giải pháp xây dựng chất lượng cao tại Việt Nam.",
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "telephone": "{{ get_setting('hotline', '+84-984-226-602') }}",
+        "contactType": "customer service",
+        "email": "{{ get_setting('contact_email', 'info@hoang.vn') }}",
+        "availableLanguage": "Vietnamese"
+      },
+      "sameAs": [
+        "{{ get_setting('facebook_url', '') }}",
+        "{{ get_setting('zalo_url', '') }}",
+        "{{ get_setting('tiktok_url', '') }}",
+        "{{ get_setting('youtube_url', '') }}"
+      ]
+    }
+    </script>
+
+    <!-- ==================== GOOGLE ANALYTICS  ==================== -->
+    {% if get_setting('google_analytics') %}
+    <script async src="https://www.googletagmanager.com/gtag/js?id={{ get_setting('google_analytics') }}"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', '{{ get_setting('google_analytics') }}');
+    </script>
+    {% endif %}
+
+    <!-- ==================== CSS LIBRARIES ==================== -->
+    <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <!-- Bootstrap Icons -->
@@ -23,26 +78,28 @@
 
     <!-- Custom CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/chatbot.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/theme-dynamic.css') }}">
     {% block extra_css %}{% endblock %}
 </head>
+
 <body>
-    <!-- ==================== TOP BAR ==================== -->
+    <!-- ==================== TOP BAR  ==================== -->
     <div class="bg-dark text-white py-2 small d-none d-md-block">
         <div class="container">
             <div class="row align-items-center">
                 <div class="col-md-6">
                     <i class="bi bi-telephone-fill text-warning"></i>
-                    <span class="ms-1">Hotline: <strong>098.422.6602</strong></span>
+                    <span class="ms-1">Hotline: <strong>{{ get_setting('hotline', '098.422.6602') }}</strong></span>
                     <span class="mx-2">|</span>
                     <i class="bi bi-envelope-fill text-warning"></i>
-                    <span class="ms-1">info@hoang.vn</span>
+                    <span class="ms-1">{{ get_setting('contact_email', 'info@hoang.vn') }}</span>
                 </div>
                 <div class="col-md-6 text-end">
-                    <a href="https://zalo.me/0984226602" class="text-white text-decoration-none me-3" target="_blank">
+                    <a href="{{ get_setting('zalo_url', 'https://zalo.me/0984226602') }}" class="text-white text-decoration-none me-3" target="_blank">
                         <i class="bi bi-chat-dots-fill text-warning"></i> Chat Zalo
                     </a>
-                    <a href="https://www.facebook.com/messages/t/873629359158915" class="text-white text-decoration-none" target="_blank">
+                    <a href="{{ get_setting('facebook_messenger_url', '#') }}" class="text-white text-decoration-none" target="_blank">
                         <i class="bi bi-messenger text-warning"></i> Chat Messenger
                     </a>
                 </div>
@@ -50,17 +107,17 @@
         </div>
     </div>
 
-    <!-- ==================== HEADER / NAVBAR ==================== -->
+    <!-- ==================== HEADER / NAVBAR  ==================== -->
     <header class="bg-warning shadow-sm sticky-top">
         <div class="container">
             <nav class="navbar navbar-expand-lg navbar-light py-3">
                 <!-- Logo -->
                 <a class="navbar-brand fw-bold d-flex align-items-center" href="{{ url_for('main.index') }}">
-                    <img src="{{ url_for('static', filename='img/logo.png') }}"
-                         alt="{{ site_name }}"
+                    <img src="{{ get_setting('logo_url', url_for('static', filename='img/logo.png')) }}"
+                         alt="{{ get_setting('website_name', 'Hoangvn') }}"
                          height="50"
-                         class="rounded-circle me-2">
-                    <!-- <span class="d-none d-sm-inline">{{ site_name }}</span> -->
+                         class="rounded-circle me-2"
+                         loading="lazy">
                 </a>
 
                 <!-- Mobile Toggle Button -->
@@ -102,10 +159,9 @@
                                         <i class="bi bi-info-circle me-2"></i>Giới thiệu
                                     </a>
                                 </li>
-                                <!-- Dự án -->
                                 <li>
                                     <a class="dropdown-item" href="{{ url_for('main.projects') }}">
-                                        <i class="bi bi-building"></i> Dự án tiêu biểu
+                                        <i class="bi bi-building me-2"></i>Dự án tiêu biểu
                                     </a>
                                 </li>
                                 <li>
@@ -129,10 +185,13 @@
                                 Sản phẩm
                             </a>
                         </li>
-                         <!-- Tuyển dụng -->
+
+                        <!-- Careers -->
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('main.careers') }}">
-                                <i class="bi bi-briefcase"></i> Tuyển dụng
+                            <a class="nav-link {% if request.endpoint == 'main.careers' %}active fw-bold{% endif %}"
+                               href="{{ url_for('main.careers') }}">
+                                <i class="bi bi-briefcase d-lg-none me-1"></i>
+                                Tuyển dụng
                             </a>
                         </li>
 
@@ -172,7 +231,7 @@
         </div>
     </header>
 
-    <!-- ==================== FLASH MESSAGES ==================== -->
+    <!-- ==================== FLASH MESSAGES  ==================== -->
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             <div class="container mt-4">
@@ -200,7 +259,7 @@
         {% block content %}{% endblock %}
     </main>
 
-    <!-- ==================== FOOTER ==================== -->
+    <!-- ==================== FOOTER  ==================== -->
     <footer class="bg-dark text-white py-5 mt-0">
         <div class="container">
             <div class="row g-4">
@@ -212,19 +271,19 @@
                     <ul class="list-unstyled">
                         <li class="mb-3">
                             <i class="bi bi-geo-alt-fill text-warning me-2"></i>
-                            <strong>Phía Bắc:</strong> (024) 1111 1111
+                            <strong>Phía Bắc:</strong> {{ get_setting('hotline_north', '(024) 2222 2222') }}
                         </li>
                         <li class="mb-3">
                             <i class="bi bi-geo-alt-fill text-warning me-2"></i>
-                            <strong>Phía Trung:</strong> (024) 1111 1113
+                            <strong>Phía Trung:</strong> {{ get_setting('hotline_central', '(024) 1111 1113') }}
                         </li>
                         <li class="mb-3">
                             <i class="bi bi-geo-alt-fill text-warning me-2"></i>
-                            <strong>Phía Nam:</strong> (028) 1111 1111
+                            <strong>Phía Nam:</strong> {{ get_setting('hotline_south', '(028) 1111 1111') }}
                         </li>
                         <li class="mb-3">
                             <i class="bi bi-clock-fill text-warning me-2"></i>
-                            8h - 17h30 (Thứ 2 - Thứ 7)
+                            {{ get_setting('working_hours', '8h - 17h30 (Thứ 2 - Thứ 7)') }}
                         </li>
                     </ul>
                 </div>
@@ -261,7 +320,7 @@
                 <!-- Về công ty -->
                 <div class="col-lg-3 col-md-6">
                     <h5 class="text-warning text-uppercase fw-semibold mb-4">
-                        <i class="bi bi-building me-2"></i>Về {{ site_name }}
+                        <i class="bi bi-building me-2"></i>Về {{ get_setting('website_name', 'Hoangvn') }}
                     </h5>
                     <ul class="list-unstyled">
                         <li class="mb-2">
@@ -295,37 +354,44 @@
                     <ul class="list-unstyled mb-4">
                         <li class="mb-2">
                             <i class="bi bi-envelope-fill text-warning me-2"></i>
-                            <a href="mailto:info@hoang.vn" class="text-white text-decoration-none">
-                                info@hoang.vn
+                            <a href="mailto:{{ get_setting('contact_email', 'info@hoang.vn') }}" class="text-white text-decoration-none">
+                                {{ get_setting('contact_email', 'info@hoang.vn') }}
                             </a>
                         </li>
                         <li class="mb-2">
                             <i class="bi bi-telephone-fill text-warning me-2"></i>
-                            <a href="tel:1900111222" class="text-white text-decoration-none">
-                                1900.111.222
+                            <a href="tel:{{ get_setting('hotline', '1900111222') }}" class="text-white text-decoration-none">
+                                {{ get_setting('hotline', '1900.111.222') }}
                             </a>
                         </li>
                         <li class="mb-2">
                             <i class="bi bi-geo-alt-fill text-warning me-2"></i>
-                            CN 1: 982/l98/a1 Tân Bình<br>
-                            <span class="ms-4">Tân Phú Nhà Bè</span>
+                            {{ get_setting('address', '982/l98/a1 Tân Bình, Tân Phú Nhà Bè') }}
                         </li>
                     </ul>
 
                     <!-- Social Links -->
                     <div class="social-links">
-                        <a href="https://www.facebook.com/hoang.van.vuz/" target="_blank" title="Facebook">
+                        {% if get_setting('facebook_url') %}
+                        <a href="{{ get_setting('facebook_url') }}" target="_blank" title="Facebook" aria-label="Facebook">
                             <i class="bi bi-facebook"></i>
                         </a>
-                        <a href="https://zalo.me/0984226602" target="_blank" title="Zalo">
+                        {% endif %}
+                        {% if get_setting('zalo_url') %}
+                        <a href="{{ get_setting('zalo_url') }}" target="_blank" title="Zalo" aria-label="Zalo">
                             <i class="bi bi-chat-dots-fill"></i>
                         </a>
-                        <!--<a href="#" target="_blank" title="YouTube">
+                        {% endif %}
+                        {% if get_setting('youtube_url') %}
+                        <a href="{{ get_setting('youtube_url') }}" target="_blank" title="YouTube" aria-label="YouTube">
                             <i class="bi bi-youtube"></i>
                         </a>
-                        <a href="#" target="_blank" title="Instagram">
-                            <i class="bi bi-instagram"></i>
-                        </a> -->
+                        {% endif %}
+                        {% if get_setting('tiktok_url') %}
+                        <a href="{{ get_setting('tiktok_url') }}" target="_blank" title="TikTok" aria-label="TikTok">
+                            <i class="bi bi-tiktok"></i>
+                        </a>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -335,22 +401,22 @@
             <div class="row">
                 <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
                     <p class="mb-0">
-                        &copy; {{ current_year|default('2025') }} {{ site_name }}. All Rights Reserved.
+                        &copy; {{ current_year|default('2025') }} {{ get_setting('website_name', 'Hoangvn') }}. All Rights Reserved.
                     </p>
                 </div>
                 <div class="col-md-6 text-center text-md-end">
                     <p class="mb-0">
-                        Designed by {{ site_name }}
+                        Designed by {{ get_setting('website_name', 'Hoangvn') }}
                     </p>
                 </div>
             </div>
         </div>
     </footer>
 
-    <!-- ==================== FLOATING ACTION BUTTONS ==================== -->
+    <!-- ==================== FLOATING ACTION BUTTONS  ==================== -->
     <div class="floating-buttons">
         <!-- Zalo -->
-        <a href="https://zalo.me/0901180094"
+        <a href="{{ get_setting('zalo_url', 'https://zalo.me/0901180094') }}"
            target="_blank"
            class="floating-btn zalo-btn"
            title="Chat Zalo"
@@ -360,63 +426,35 @@
         </a>
 
         <!-- Phone -->
-        <a href="tel:0901180094"
+        <a href="tel:{{ get_setting('hotline', '0901180094') }}"
            class="floating-btn phone-btn"
            title="Gọi điện"
            aria-label="Gọi điện">
             <i class="bi bi-telephone-fill"></i>
         </a>
-
-        <!-- Messenger (Optional) -->
-        <!-- <a href="https://m.me/168331056704131"
+            <!-- Messenger (Optional) -->
+        <a href="{{ get_setting('facebook_messenger_url', 'https://m.me/168331056704131') }}"
            target="_blank"
            class="floating-btn messenger-btn"
            title="Messenger"
            aria-label="Chat Messenger">
             <i class="bi bi-messenger"></i>
-        </a> -->
-    </div>
+        </a>
+        </div>
 
     <!-- ==================== SCRIPTS ==================== -->
-    <!-- Bootstrap Bundle JS (includes Popper) -->
+    <!-- Bootstrap Bundle JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <!-- Custom JS -->
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
-
     <script src="{{ url_for('static', filename='js/projects-carousel.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/chatbot.js') }}"></script>
 
     <!-- Extra JS Block -->
     {% block extra_js %}{% endblock %}
 
     <!-- ==================== CHATBOT WIDGET ==================== -->
     {% include 'components/chatbot_widget.html' %}
-
-    <!-- Chatbot CSS -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/chatbot.css') }}">
-
-    <!-- Chatbot JS -->
-    <script src="{{ url_for('static', filename='js/chatbot.js') }}"></script>
-
-    <!-- Schema.org structured data -->
-    <script type="application/ld+json">
-    {
-        "@context": "https://schema.org",
-        "@type": "Organization",
-        "name": "{{ site_name }}",
-        "url": "{{ request.url_root }}",
-        "logo": "{{ url_for('static', filename='img/logo.png', _external=True) }}",
-        "contactPoint": {
-            "@type": "ContactPoint",
-            "telephone": "+84-984-226-602",
-            "contactType": "Customer Service",
-            "availableLanguage": "Vietnamese"
-        },
-        "sameAs": [
-            "https://www.facebook.com/168331056704131",
-            "https://zalo.me/0901180094"
-        ]
-    }
-    </script>
 </body>
 </html>

@@ -42,7 +42,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // ==================== AUTO DISMISS ALERTS ====================
 document.addEventListener('DOMContentLoaded', function() {
-    const alerts = document.querySelectorAll('.alert');
+    // Chỉ đóng alerts có nút close (alert-dismissible), không đóng các alert tĩnh
+    const alerts = document.querySelectorAll('.alert.alert-dismissible');
     alerts.forEach(alert => {
         setTimeout(() => {
             const bsAlert = new bootstrap.Alert(alert);

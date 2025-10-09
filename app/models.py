@@ -713,3 +713,50 @@ Project.get_media_seo_info = project_get_media_seo_info
 # ==============================================================================
 # HẾT - ĐÃ CẬP NHẬT XONG
 # ==============================================================================
+class Settings(db.Model):
+    """Model lưu cài đặt hệ thống (key-value)"""
+    __tablename__ = 'settings'
+
+    id = db.Column(db.Integer, primary_key=True)
+    key = db.Column(db.String(100), unique=True, nullable=False, index=True)
+    value = db.Column(db.Text, nullable=False)
+    group = db.Column(db.String(50), nullable=False)  # Nhóm: general, theme, seo, v.v.
+    description = db.Column(db.Text)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    def __repr__(self):
+        return f'<Settings {self.key}: {self.value}>'
+
+# Helper function để get/set settings
+def get_setting(key, default=None):
+    """Lấy giá trị setting từ DB"""
+    setting = Settings.query.filter_by(key=key).first()
+    return setting.value if setting else default
+
+
+def set_setting(key, value, group='general', description=''):
+    """Lưu hoặc cập nhật setting"""
+    setting = Settings.query.filter_by(key=key).first()
+    if setting:
+        setting.value = value
+        setting.group = group
+        setting.description = description
+    else:
+        setting = Settings(key=key, value=value, group=group, description=description)
+        db.session.add(setting)
+
+    # Sửa lỗi tuple/dict: Nếu value là tuple (URL, metadata), chỉ lưu URL string
+    if isinstance(setting.value, tuple):
+        if len(setting.value) >= 1:
+            setting.value = str(setting.value[0])  # Lưu URL string
+            # Metadata (dict) có thể lưu vào description nếu cần
+            if len(setting.value) > 1 and isinstance(setting.value[1], dict):
+                setting.description += f" | Metadata: {setting.value[1]}"  # Optional: lưu metadata vào description
+        else:
+            setting.value = str(setting.value)  # Fallback
+
+    # Đảm bảo value là string
+    setting.value = str(setting.value) if not isinstance(setting.value, str) else setting.value
+
+    db.session.commit()
+    return setting

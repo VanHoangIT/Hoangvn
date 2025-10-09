@@ -22,13 +22,31 @@ def create_app(config_class=Config):
     migrate.init_app(app, db)
     login_manager.init_app(app)
 
+    # ✅ ========== BẮT ĐẦU CODE MỚI ==========
+    # Inject get_setting vào tất cả templates
+    from app.models import get_setting
+
+    @app.context_processor
+    def inject_global_settings():
+        """
+        Inject settings vào mọi template
+        Không cần truyền qua render_template nữa
+        """
+        return {
+            'get_setting': get_setting,
+            # Pre-load các settings thường dùng
+            'primary_color': get_setting('primary_color', '#ffc107'),
+            'default_banner': get_setting('default_banner', ''),
+            'per_page': int(get_setting('default_posts_per_page', '12')),
+            'contact_intro': get_setting('contact_form', ''),
+        }
+
+    # ✅ ========== KẾT THÚC CODE MỚI ==========
+
     # Cấu hình Flask-Login
     login_manager.login_view = 'admin.login'
     login_manager.login_message = 'Vui lòng đăng nhập để truy cập trang này.'
     login_manager.login_message_category = 'warning'
-
-    # Import models (để Flask-Migrate nhận diện)
-    from app import models
 
     # Đăng ký blueprints
     from app.main.routes import main_bp
@@ -49,17 +67,27 @@ def create_app(config_class=Config):
     # Khởi tạo cấu hình
     config_class.init_app(app)
 
-    # Context processor - biến toàn cục cho templates
+    # ==================== CONTEXT PROCESSOR - BIẾN TOÀN CỤC ====================
     @app.context_processor
     def inject_globals():
-        from app.models import Category
+        """
+        Inject các biến toàn cục vào tất cả templates
+        - get_setting: Function để lấy settings từ DB
+        - site_name: Tên website
+        - all_categories: Danh sách categories
+        - current_year: Năm hiện tại
+        """
+        from app.models import Category, get_setting as db_get_setting
+        from datetime import datetime
+
         return {
-            'site_name': app.config['SITE_NAME'],
+            'get_setting': db_get_setting,  # ✅ THÊM FUNCTION get_setting
+            'site_name': app.config.get('SITE_NAME', 'Hoangvn'),
             'all_categories': Category.query.filter_by(is_active=True).all(),
-            'current_year': 2025  # Thêm current_year cho footer
+            'current_year': datetime.now().year  # ✅ Lấy năm động thay vì hardcode
         }
 
-    # Custom Jinja2 filters
+    # ==================== CUSTOM JINJA2 FILTERS ====================
     @app.template_filter('format_price')
     def format_price(value):
         """Format giá tiền: 1000000 -> 1.000.000"""
@@ -74,7 +102,7 @@ def create_app(config_class=Config):
             return ''
         return text.replace('\n', '<br>\n')
 
-    # Cấu hình Cloudinary
+    # ==================== CẤU HÌNH CLOUDINARY ====================
     cloudinary.config(
         cloud_name=os.getenv('CLOUDINARY_CLOUD_NAME'),
         api_key=os.getenv('CLOUDINARY_API_KEY'),

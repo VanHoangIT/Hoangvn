@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed
-from wtforms import StringField, TextAreaField, FloatField, BooleanField, PasswordField, SelectField, SubmitField
+from wtforms import StringField, TextAreaField, FloatField, BooleanField, PasswordField, SelectField, SubmitField, ColorField
 from wtforms.fields import DateField
 from wtforms.fields.numeric import IntegerField
 from wtforms.validators import DataRequired, Email, Length, Optional, EqualTo, ValidationError, InputRequired, NumberRange
@@ -384,3 +384,75 @@ class JobForm(FlaskForm):
     is_urgent = BooleanField('Tuyển gấp')
 
     submit = SubmitField('Lưu tin tuyển dụng')
+
+
+class SettingsForm(FlaskForm):
+    """Form quản lý cài đặt hệ thống, chia nhóm"""
+
+    # General Settings
+    website_name = StringField('Tên website', validators=[DataRequired()])
+    slogan = StringField('Slogan', validators=[Optional()])
+    address = StringField('Địa chỉ', validators=[Optional()])
+    email = StringField('Email chính', validators=[Email()])
+    hotline = StringField('Hotline', validators=[Optional()])
+    main_url = StringField('URL chính', validators=[Optional()])
+    company_info = TextAreaField('Thông tin công ty', validators=[Optional()])
+
+
+    # Theme/UI Settings
+    logo = FileField('Logo', validators=[FileAllowed(['jpg', 'png', 'jpeg', 'webp'])])
+    logo_chatbot = FileField('Logo chatbot', validators=[FileAllowed(['jpg', 'png', 'jpeg', 'webp'])])
+    primary_color = ColorField('Màu chủ đạo', validators=[Optional()])
+    # Xem trước giao diện: Xử lý ở frontend JS
+
+    # SEO & Meta Defaults
+    meta_title = StringField('Meta Title mặc định', validators=[DataRequired()])
+    meta_description = TextAreaField('Meta Description mặc định', validators=[DataRequired()])
+    meta_keywords = StringField('Meta Keywords', validators=[Optional()])
+    index_meta_description = TextAreaField('Meta Description Trang Chủ', validators=[Length(max=160)])
+    about_meta_description = TextAreaField('Meta Description Giới Thiệu', validators=[Length(max=160)])
+    contact_meta_description = TextAreaField('Meta Description Liên Hệ', validators=[Length(max=160)])
+    products_meta_description = TextAreaField('Meta Description Sản Phẩm', validators=[Length(max=160)])
+    blog_meta_description = TextAreaField('Meta Description Blog', validators=[Length(max=160)])
+    careers_meta_description = TextAreaField('Meta Description Tuyển Dụng', validators=[Length(max=160)])
+    faq_meta_description = TextAreaField('Meta Description FAQ', validators=[Length(max=160)])
+    projects_meta_description = TextAreaField('Meta Description Dự Án', validators=[Length(max=160)])
+    product_meta_description = TextAreaField('Meta Description Chi Tiết Sản Phẩm', validators=[Length(max=160)])
+    favicon = FileField('Favicon', validators=[FileAllowed(['ico', 'png'])])
+    default_share_image = FileField('Ảnh chia sẻ mặc định', validators=[FileAllowed(['jpg', 'png', 'jpeg'])])
+
+    # Contact & Social Settings
+    contact_email = StringField('Email liên hệ', validators=[Email()])
+    facebook_url = StringField('Facebook', validators=[Optional()])
+    zalo_url = StringField('Zalo', validators=[Optional()])
+    tiktok_url = StringField('TikTok', validators=[Optional()])
+    youtube_url = StringField('YouTube', validators=[Optional()])
+    google_maps = TextAreaField('Bản đồ Google Maps (embed code)', validators=[Optional()])
+    hotline_north = StringField('Hotline Miền Bắc', validators=[Optional()])
+    hotline_central = StringField('Hotline Miền Trung', validators=[Optional()])
+    hotline_south = StringField('Hotline Miền Nam', validators=[Optional()])
+    working_hours = StringField('Giờ làm việc', validators=[Optional()])
+    facebook_messenger_url = StringField('Facebook Messenger', validators=[Optional()])
+
+    # System & Security Settings
+    login_attempt_limit = IntegerField('Giới hạn đăng nhập sai', validators=[NumberRange(min=3, max=10)])
+    cache_time = IntegerField('Thời gian cache dữ liệu (giây)', validators=[NumberRange(min=0)])
+
+    # Integration Settings
+    cloudinary_api_key = StringField('API Key Cloudinary', validators=[Optional()])
+    gemini_api_key = StringField('API Key Gemini/OpenAI', validators=[Optional()])
+    google_analytics = StringField('Google Analytics ID', validators=[Optional()])
+    shopee_api = StringField('Shopee Integration', validators=[Optional()])
+    tiktok_api = StringField('TikTok Integration', validators=[Optional()])
+    zalo_oa = StringField('Zalo OA', validators=[Optional()])
+
+    # Content Defaults
+    shipping_policy = TextAreaField('Chính sách vận chuyển', validators=[Optional()])
+    return_policy = TextAreaField('Chính sách đổi trả', validators=[Optional()])
+    warranty_policy = TextAreaField('Chính sách bảo hành', validators=[Optional()])
+    privacy_policy = TextAreaField('Chính sách bảo mật', validators=[Optional()])
+
+    contact_form = TextAreaField('Form liên hệ mặc định', validators=[Optional()])
+    default_posts_per_page = IntegerField('Số lượng bài viết mặc định', validators=[NumberRange(min=1, max=50)])
+
+    submit = SubmitField('Lưu cài đặt')

@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 
-{% block title %}Sản phẩm - {{ site_name }}{% endblock %}
+{% block title %}{{ get_setting('meta_title', 'Sản phẩm - Hoangvn') }}{% endblock %}
+{% block meta_description %}{{ get_setting('products_meta_description', 'Khám phá danh sách sản phẩm chất lượng cao từ Hoangvn với giá cả cạnh tranh.') }}{% endblock %}
 
 {% block content %}
 <div class="page-header bg-light py-4">
@@ -8,7 +9,7 @@
         <h1 class="fw-bold">Sản phẩm</h1>
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="{{ url_for('main.index') }}">Trang chủ</a></li>
+                <li class="breadcrumb-item"><a href="/">Trang chủ</a></li>
                 <li class="breadcrumb-item active">Sản phẩm</li>
             </ol>
         </nav>
@@ -172,6 +173,36 @@
                 {% endif %}
             </div>
         </div>
+        <!-- Schema ItemList -->
+        <script type="application/ld+json">
+        {
+          "@context": "https://schema.org",
+          "@type": "ItemList",
+          "name": "Sản phẩm {{ get_setting('website_name', 'Hoangvn') }}",
+          "itemListElement": [
+            {% for product in products %}
+            {
+              "@type": "ListItem",
+              "position": {{ loop.index }},
+              "item": {
+                "@type": "Product",
+                "name": "{{ product.name }}",
+                "image": "{{ product.image }}",
+                "description": "{{ product.description or 'Sản phẩm chất lượng cao từ Hoangvn' }}",
+                "url": "{{ url_for('main.product_detail', slug=product.slug, _external=True) }}",
+                "offers": {
+                  "@type": "Offer",
+                  "priceCurrency": "VND",
+                  "price": {{ product.price }},
+                  "availability": "https://schema.org/InStock"
+                }
+              }
+            }{% if not loop.last %},{% endif %}
+            {% endfor %}
+          ]
+        }
+        </script>
+
     </div>
 </section>
 {% endblock %}

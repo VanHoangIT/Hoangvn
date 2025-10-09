@@ -246,6 +246,7 @@ html {
   border-radius: 0.75rem;
   border: 1px solid #e9ecef;
   background: #fff;
+  position: relative;
 }
 
 .product-card .card-body {

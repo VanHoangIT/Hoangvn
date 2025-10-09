@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 
-{% block title %}Tuyển dụng - {{ config.SITE_NAME }}{% endblock %}
+{% block title %}Tuyển dụng - {{ get_setting('website_name', 'Hoangvn') }}{% endblock %}
+{% block meta_description %}{{ get_setting('careers_meta_description', 'Khám phá cơ hội nghề nghiệp tại ' ~ get_setting('website_name', 'Hoangvn') ~ '. Môi trường làm việc chuyên nghiệp, thu nhập hấp dẫn.') }}{% endblock %}
 
 {% block content %}
 <!-- Breadcrumb -->
@@ -19,6 +20,7 @@
 <section class="page-header py-5 bg-gradient" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
     <div class="container text-center text-white">
         <h1 class="display-4 fw-bold mb-3">Cơ hội nghề nghiệp</h1>
+        <p class="lead text-dark">Gia nhập đội ngũ {{ get_setting('website_name', 'Hoangvn') }} và phát triển cùng chúng tôi</p>
     </div>
 </section>
 
@@ -145,7 +147,7 @@
                         <p class="card-text small text-muted">
                             Gửi CV của bạn cho chúng tôi để được xem xét cho các cơ hội trong tương lai
                         </p>
-                        <a href="mailto:vuvanhoang.1607@gmail.com" class="btn btn-warning">
+                        <a href="mailto:{{ get_setting('contact_email', 'info@hoang.vn') }}" class="btn btn-warning">
                             <i class="bi bi-envelope"></i> Gửi CV
                         </a>
                     </div>
@@ -157,7 +159,7 @@
             <i class="bi bi-briefcase display-1 text-muted"></i>
             <p class="text-muted mt-3">Hiện tại chưa có vị trí tuyển dụng nào</p>
             <p class="text-muted">Vui lòng quay lại sau hoặc gửi CV của bạn để được xem xét trong tương lai</p>
-            <a href="mailto:vuvanhoang.1607@gmail.com" class="btn btn-warning">
+            <a href="mailto:{{ get_setting('contact_email', 'info@hoang.vn') }}" class="btn btn-warning">
                 <i class="bi bi-envelope"></i> Gửi CV
             </a>
         </div>
@@ -168,6 +170,11 @@
 <!-- Benefits Section -->
 <section class="benefits-section py-5 bg-light">
     <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="fw-bold mb-3">Tại sao chọn {{ get_setting('website_name', 'Hoangvn') }}</h2>
+            <p class="text-muted">Những lợi ích khi làm việc cùng chúng tôi</p>
+        </div>
+
         <div class="row g-4">
             <div class="col-md-3 col-sm-6">
                 <div class="card border-0 shadow-sm text-center h-100">
@@ -216,6 +223,73 @@
         </div>
     </div>
 </section>
+
+<!-- ==================== SCHEMA.ORG - BREADCRUMB ==================== -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Trang chủ",
+      "item": "{{ url_for('main.index', _external=True) }}"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Tuyển dụng",
+      "item": "{{ url_for('main.careers', _external=True) }}"
+    }
+  ]
+}
+</script>
+
+<!-- ==================== SCHEMA.ORG - JOB POSTINGS ==================== -->
+{% if jobs %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  "itemListElement": [
+    {% for job in jobs %}
+    {
+      "@type": "JobPosting",
+      "position": {{ loop.index }},
+      "title": "{{ job.title|e }}",
+      "description": "{{ (job.description[:200] if job.description else 'Cơ hội việc làm tại ' ~ get_setting('website_name', 'Hoangvn'))|e }}",
+      "datePosted": "{{ job.created_at.strftime('%Y-%m-%d') if job.created_at else '' }}",
+      "validThrough": "{{ job.deadline.strftime('%Y-%m-%d') if job.deadline else '' }}",
+      "employmentType": "{{ job.job_type|e }}",
+      "hiringOrganization": {
+        "@type": "Organization",
+        "name": "{{ get_setting('website_name', 'Hoangvn')|e }}",
+        "sameAs": "{{ get_setting('main_url', request.url_root)|e }}",
+        "logo": "{{ get_setting('logo_url', url_for('static', filename='img/logo.png', _external=True))|e }}"
+      },
+      "jobLocation": {
+        "@type": "Place",
+        "address": {
+          "@type": "PostalAddress",
+          "addressLocality": "{{ job.location|e }}",
+          "addressCountry": "VN"
+        }
+      },
+      "baseSalary": {
+        "@type": "MonetaryAmount",
+        "currency": "VND",
+        "value": {
+          "@type": "QuantitativeValue",
+          "value": "{{ job.salary|e }}"
+        }
+      }
+    }{% if not loop.last %},{% endif %}
+    {% endfor %}
+  ]
+}
+</script>
+{% endif %}
 {% endblock %}
 
 {% block extra_css %}

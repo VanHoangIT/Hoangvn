@@ -176,7 +176,7 @@ def init_default_permissions():
         ('manage_banners', 'Quản lý banners', 'system', 'bi-images'),
         ('manage_faqs', 'Quản lý FAQs', 'system', 'bi-question-circle'),
         ('view_dashboard', 'Xem dashboard', 'system', 'bi-speedometer2'),
-        ('manage_settings', 'Quản lý cài đặt', 'system', 'bi-gear'),
+        ('manage_settings', 'Quản lý cài đặt hệ thống', 'system', 'bi-gear'),
         ('manage_roles', 'Quản lý phân quyền', 'system', 'bi-shield-lock'),
     ]
 

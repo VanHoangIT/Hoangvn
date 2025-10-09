@@ -1,9 +1,11 @@
-from flask import Blueprint, render_template, request, flash, redirect, url_for
+from flask import Blueprint, render_template, request, flash, redirect, url_for, send_from_directory, current_app, abort
 from app import db
-from app.models import Product, Category, Banner, Blog, FAQ, Contact, Project, Job  # ← Thêm Project, Job
+from app.models import Product, Category, Banner, Blog, FAQ, Contact, Project, Job
 from app.forms import ContactForm
 from sqlalchemy import or_
 from app.project_config import PROJECT_TYPES
+import os
+
 
 # Tạo Blueprint cho frontend
 main_bp = Blueprint('main', __name__)
@@ -81,9 +83,12 @@ def products():
         query = query.order_by(Product.views.desc())
 
     # Phân trang
+    from app.models import get_setting
+    per_page = int(get_setting('default_posts_per_page', '12'))
+
     pagination = query.paginate(
         page=page,
-        per_page=12,
+        per_page=per_page,
         error_out=False
     )
 
@@ -98,7 +103,7 @@ def products():
                            current_search=search,
                            current_sort=sort)
 
-
+from datetime import datetime, timedelta
 @main_bp.route('/product/<slug>')
 def product_detail(slug):
     """Trang chi tiết sản phẩm"""
@@ -116,8 +121,10 @@ def product_detail(slug):
     ).limit(4).all()
 
     return render_template('product_detail.html',
-                           product=product,
-                           related_products=related_products)
+                         product=product,
+                         related_products=related_products,
+                         now=datetime.now(),
+                         timedelta=timedelta)
 
 
 # ==================== TIN TỨC / BLOG ====================
@@ -143,9 +150,12 @@ def blog():
     query = query.order_by(Blog.created_at.desc())
 
     # Phân trang
+    from app.models import get_setting
+    per_page = int(get_setting('default_posts_per_page', '9'))
+
     pagination = query.paginate(
         page=page,
-        per_page=9,
+        per_page=per_page,
         error_out=False
     )
 
@@ -253,7 +263,7 @@ def search():
                            products=products,
                            blogs=blogs)
 
-
+# ==================== DỰ ÁN ====================
 @main_bp.route('/projects')
 def projects():
     """Trang danh sách dự án"""
@@ -298,7 +308,7 @@ def project_detail(slug):
                            project=project,
                            related=related)
 
-
+# ==================== TUYỂN DỤNG ====================
 @main_bp.route('/careers')
 def careers():
     """Trang tuyển dụng"""
@@ -342,3 +352,23 @@ def job_detail(slug):
     return render_template('job_detail.html',
                            job=job,
                            other_jobs=other_jobs)
+
+# ==================== SITEMAP.XML ====================
+@main_bp.route('/sitemap.xml')
+def sitemap():
+    """Phục vụ file sitemap.xml"""
+    sitemap_path = os.path.join(current_app.static_folder, 'sitemap.xml')
+    if os.path.exists(sitemap_path):
+        return send_from_directory(current_app.static_folder, 'sitemap.xml', mimetype='application/xml')
+    else:
+        abort(404, description="Sitemap not found")
+
+# ==================== ROBOTS.TXT ====================
+@main_bp.route('/robots.txt')
+def robots_txt():
+    """Phục vụ file robots.txt"""
+    robots_path = os.path.join(current_app.static_folder, 'robots.txt')
+    if os.path.exists(robots_path):
+        return send_from_directory(current_app.static_folder, 'robots.txt', mimetype='text/plain')
+    else:
+        abort(404, description="Robots.txt not found")
