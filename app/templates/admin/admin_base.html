@@ -177,25 +177,23 @@
                 </a>
             </li>
             <!-- ===== Lập trình viên ===== -->
-            <div class="sidebar-section-title"> Developer </div>
                 {% if current_user.has_permission('manage_settings') %}
+            <div class="sidebar-section-title"> Developer </div>
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('admin.settings') }}">
                             <i class="bi bi-gear"></i> Quản trị hệ thống
                         </a>
                     </li>
                 {% endif %}
-            <div class="sidebar-section-title">Thống kê</div>
             <!-- Dashboard / Welcome - Tùy theo role -->
             <li class="nav-item">
                 {% if current_user.has_any_permission('manage_users', 'manage_products', 'manage_categories') %}
-                {# Admin/Editor → Vào Dashboard #}
+                <div class="sidebar-section-title">Thống kê</div>
                 <a class="nav-link {% if request.endpoint == 'admin.dashboard' %}active{% endif %}"
                    href="{{ url_for('admin.dashboard') }}">
                     <i class="bi bi-speedometer2"></i> Dashboard
                 </a>
                 {% else %}
-                {# User thường → Vào Welcome #}
                 <a class="nav-link {% if request.endpoint == 'admin.welcome' %}active{% endif %}"
                    href="{{ url_for('admin.welcome') }}">
                     <i class="bi bi-house-heart"></i> Trang chủ
