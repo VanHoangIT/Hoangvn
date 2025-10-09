@@ -26,6 +26,13 @@
     <div class="container">
         <div class="row align-items-center mb-5">
             <div class="col-lg-6">
+                <img src="{{ get_setting('logo_url', url_for('static', filename='img/logo.png')) }}"
+                     alt="{{ get_setting('website_name', 'Hoangvn') }}"
+                     itemprop="image"
+                     loading="lazy"
+                     class="img-fluid rounded shadow">
+            </div>
+            <div class="col-lg-6">
                 <h2 class="fw-bold mb-4" itemprop="name">Về chúng tôi</h2>
                 <div itemprop="description">
                     <p class="lead">{{ get_setting('company_info', 'Chúng tôi là công ty hàng đầu trong lĩnh vực thương mại điện tử, cung cấp các sản phẩm công nghệ chất lượng cao.') }}</p>
@@ -38,30 +45,10 @@
                     </ul>
                 </div>
             </div>
-            <div class="col-lg-6">
-                <img src="{{ get_setting('logo_url', url_for('static', filename='img/logo.png')) }}"
-                     alt="{{ get_setting('website_name', 'Hoangvn') }}"
-                     itemprop="image"
-                     loading="lazy"
-                     class="img-fluid rounded shadow">
-            </div>
         </div>
 
         <!-- ==================== VIDEO SECTION ==================== -->
         <div class="row align-items-center py-5 bg-light rounded">
-            <div class="col-lg-6">
-                <div class="video-container position-relative rounded overflow-hidden shadow-lg">
-                    <div class="ratio ratio-16x9">
-                        <iframe src="https://www.youtube.com/embed/dE9sptWH8pI"
-                                title="Video giới thiệu {{ get_setting('website_name', 'Hoangvn') }}"
-                                frameborder="0"
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                allowfullscreen>
-                        </iframe>
-                    </div>
-                </div>
-            </div>
-
             <div class="col-lg-6 ps-lg-5 mt-4 mt-lg-0">
                 <h2 class="fw-bold mb-3">
                     Tìm Hiểu Thêm Về
@@ -92,6 +79,18 @@
                 <a href="{{ url_for('main.contact') }}" class="btn btn-warning btn-lg mt-3">
                     <i class="bi bi-telephone"></i> Liên hệ ngay
                 </a>
+            </div>
+            <div class="col-lg-6">
+                <div class="video-container position-relative rounded overflow-hidden shadow-lg">
+                    <div class="ratio ratio-16x9">
+                        <iframe src="https://www.youtube.com/embed/dE9sptWH8pI"
+                                title="Video giới thiệu {{ get_setting('website_name', 'Hoangvn') }}"
+                                frameborder="0"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                allowfullscreen>
+                        </iframe>
+                    </div>
+                </div>
             </div>
         </div>
 
