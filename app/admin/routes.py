@@ -15,10 +15,10 @@ import re
 from html import unescape
 from app.seo_config import MEDIA_KEYWORDS, KEYWORD_SCORES
 import xml.etree.ElementTree as ET
-from datetime import datetime
+from datetime import datetime, timedelta
 
 # ==================== Giữ nguyên các hàm calculate_seo_score, calculate_blog_seo_score ====================
-# (Copy từ file cũ - giữ nguyên 100%)
+
 
 def calculate_seo_score(media):
     """Tính SEO score - dùng config từ seo_config.py"""
@@ -474,9 +474,10 @@ def get_image_from_form(form_image_field, field_name='image', folder='uploads'):
 
 
 # ==================== LOGIN & LOGOUT ====================
+
 @admin_bp.route('/login', methods=['GET', 'POST'])
 def login():
-    """Trang đăng nhập admin - CÓ GIỚI HẠN ATTEMPTS"""
+    """Trang đăng nhập admin - CÓ GIỚI HẠN ATTEMPTS VÀ KHÓA 30 PHÚT"""
     if current_user.is_authenticated:
         if current_user.has_any_permission('manage_users', 'manage_products', 'manage_categories'):
             return redirect(url_for('admin.dashboard'))
@@ -491,19 +492,42 @@ def login():
         # ✅ LẤY GIỚI HẠN TỪ SETTINGS
         from app.models import get_setting
         max_attempts = int(get_setting('login_attempt_limit', '5'))
+
+        # Keys cho session
         attempt_key = f'login_attempts_{email}'
+        lockout_key = f'login_lockout_{email}'
+
+        # Lấy thông tin attempts và lockout time
         attempts = session.get(attempt_key, 0)
+        lockout_until = session.get(lockout_key)
 
-        # Kiểm tra đã quá số lần thử chưa
-        if attempts >= max_attempts:
-            flash(f'⛔ Tài khoản tạm khóa do đăng nhập sai {max_attempts} lần!', 'danger')
-            return render_template('admin/login.html', form=form)
+        # ✅ KIỂM TRA THỜI GIAN KHÓA
+        if lockout_until:
+            lockout_time = datetime.fromisoformat(lockout_until)
+            now = datetime.now()
 
+            if now < lockout_time:
+                # Tính thời gian còn lại
+                remaining_time = lockout_time - now
+                minutes = int(remaining_time.total_seconds() / 60)
+                seconds = int(remaining_time.total_seconds() % 60)
+
+                flash(f'🔒 Tài khoản đang bị khóa! Vui lòng thử lại sau {minutes} phút {seconds} giây.', 'danger')
+                return render_template('admin/login.html', form=form)
+            else:
+                # Hết thời gian khóa - reset
+                session.pop(attempt_key, None)
+                session.pop(lockout_key, None)
+                attempts = 0
+
+        # ✅ KIỂM TRA ĐĂNG NHẬP
         user = User.query.filter_by(email=form.email.data).first()
 
         if user and user.check_password(form.password.data):
+            # Đăng nhập thành công - reset attempts
             login_user(user, remember=form.remember_me.data)
-            session.pop(attempt_key, None)  # Reset attempts
+            session.pop(attempt_key, None)
+            session.pop(lockout_key, None)
 
             next_page = request.args.get('next')
             if next_page:
@@ -514,14 +538,28 @@ def login():
             else:
                 return redirect(url_for('admin.welcome'))
         else:
-            # Tăng số lần thử sai
-            session[attempt_key] = attempts + 1
-            remaining = max_attempts - attempts - 1
+            # ❌ ĐĂNG NHẬP SAI
+            attempts += 1
+            session[attempt_key] = attempts
+            remaining = max_attempts - attempts
 
-            if remaining > 0:
-                flash(f'⚠️ Email hoặc mật khẩu không đúng! Còn {remaining} lần thử.', 'warning')
+            # ✅ HẾT LƯỢT THỬ - KHÓA 30 PHÚT
+            if attempts >= max_attempts:
+                lockout_time = datetime.now() + timedelta(minutes=30)
+                session[lockout_key] = lockout_time.isoformat()
+
+                flash(f'🔒 Tài khoản đã bị khóa 30 phút do đăng nhập sai {max_attempts} lần liên tiếp!', 'danger')
+                return render_template('admin/login.html', form=form)
+
+            # ⚠️ CẢNH BÁO LẦN CUỐI CÙNG
+            elif remaining == 1:
+                flash(
+                    f'⚠️ CẢNH BÁO: Email hoặc mật khẩu không đúng! Đây là lần thử cuối cùng. Tài khoản sẽ bị khóa 30 phút nếu nhập sai.',
+                    'danger')
+
+            # ℹ️ CÒN NHIỀU LƯỢT
             else:
-                flash(f'⛔ Đã hết lượt thử! Tài khoản tạm khóa.', 'danger')
+                flash(f'❌ Email hoặc mật khẩu không đúng! Còn {remaining} lần thử.', 'warning')
 
     return render_template('admin/login.html', form=form)
 
@@ -533,6 +571,33 @@ def logout():
     logout_user()
     flash('Đã đăng xuất thành công!', 'success')
     return redirect(url_for('admin.login'))
+
+
+# ✅ ROUTE KIỂM TRA THỜI GIAN KHÓA (Optional - để user kiểm tra)
+@admin_bp.route('/check-lockout', methods=['POST'])
+def check_lockout():
+    """API kiểm tra thời gian còn lại của lockout"""
+    email = request.json.get('email')
+
+    if not email:
+        return jsonify({'locked': False})
+
+    lockout_key = f'login_lockout_{email}'
+    lockout_until = session.get(lockout_key)
+
+    if lockout_until:
+        lockout_time = datetime.fromisoformat(lockout_until)
+        now = datetime.now()
+
+        if now < lockout_time:
+            remaining = int((lockout_time - now).total_seconds())
+            return jsonify({
+                'locked': True,
+                'remaining_seconds': remaining,
+                'lockout_until': lockout_time.strftime('%Y-%m-%d %H:%M:%S')
+            })
+
+    return jsonify({'locked': False})
 
 
 # ==================== DASHBOARD ====================
