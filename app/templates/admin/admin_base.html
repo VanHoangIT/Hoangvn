@@ -164,11 +164,26 @@
 <body>
     <!-- Sidebar -->
     <div class="sidebar">
-        <div class="sidebar-brand">
+        <div class="sidebar-brand " style="color: #fff;">
             <i class="bi bi-speedometer2"></i> Admin Panel
         </div>
-
         <ul class="sidebar-nav nav flex-column">
+            <!-- ===== PHẦN CHUNG ===== -->
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('main.index') }}" target="_blank">
+                    <i class="bi bi-globe"></i> Xem Website
+                </a>
+            </li>
+            <!-- ===== Lập trình viên ===== -->
+            <div class="sidebar-section-title"> Developer </div>
+                {% if current_user.has_permission('manage_settings') %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('admin.settings') }}">
+                            <i class="bi bi-gear"></i> Quản trị hệ thống
+                        </a>
+                    </li>
+                {% endif %}
+            <div class="sidebar-section-title">Thống kê</div>
             <!-- Dashboard / Welcome - Tùy theo role -->
             <li class="nav-item">
                 {% if current_user.has_any_permission('manage_users', 'manage_products', 'manage_categories') %}
@@ -185,14 +200,6 @@
                 </a>
                 {% endif %}
             </li>
-            <!-- ===== Lập trinhf viên ===== -->
-            {% if current_user.has_permission('manage_settings') %}
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('admin.settings') }}">
-                        <i class="bi bi-gear"></i> Cài đặt
-                    </a>
-                </li>
-            {% endif %}
 
             <!-- ===== QUẢN TRỊ HỆ THỐNG (ADMIN ONLY) ===== -->
             {% if current_user.has_any_permission('manage_users', 'view_users', 'manage_roles') %}
@@ -310,23 +317,6 @@
             </li>
             {% endif %}
             {% endif %}
-
-            <!-- ===== PHẦN CHUNG ===== -->
-            <li class="nav-item mt-3">
-                <hr class="bg-light my-2">
-            </li>
-
-            <li class="nav-item">
-                <a class="nav-link" href="{{ url_for('main.index') }}" target="_blank">
-                    <i class="bi bi-globe"></i> Xem Website
-                </a>
-            </li>
-
-            <li class="nav-item">
-                <a class="nav-link" href="{{ url_for('admin.logout') }}">
-                    <i class="bi bi-box-arrow-right"></i> Đăng xuất
-                </a>
-            </li>
         </ul>
     </div>
 
@@ -353,11 +343,6 @@
                     {% endif %}
                 </button>
                 <ul class="dropdown-menu dropdown-menu-end">
-                    <li>
-                        <a class="dropdown-item" href="{{ url_for('admin.dashboard') }}">
-                            <i class="bi bi-speedometer2"></i> Dashboard
-                        </a>
-                    </li>
                     <li><hr class="dropdown-divider"></li>
                     <li>
                         <a class="dropdown-item" href="{{ url_for('admin.logout') }}">
