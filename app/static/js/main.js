@@ -117,3 +117,26 @@ document.addEventListener('DOMContentLoaded', function() {
         setInterval(showNextSlide, 3000);
     }
 });
+// Xử lý smooth scroll cho links có hash
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('a[href*="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            const href = this.getAttribute('href');
+
+            // Kiểm tra nếu link có hash và đang ở cùng trang
+            if (href.includes('#') && href.split('#')[0] === window.location.pathname) {
+                e.preventDefault();
+                const targetId = href.split('#')[1];
+                const target = document.getElementById(targetId);
+
+                if (target) {
+                    const offsetTop = target.offsetTop - 120;
+                    window.scrollTo({
+                        top: offsetTop,
+                        behavior: 'smooth'
+                    });
+                }
+            }
+        });
+    });
+});

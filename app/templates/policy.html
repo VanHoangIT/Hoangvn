@@ -55,7 +55,7 @@
                     <div class="card-body">
                         {% set shipping = get_setting('shipping_policy', '') %}
                         {% if shipping %}
-                            {{ shipping | safe | nl2br }}
+                            {{ shipping | safe  }}
                         {% else %}
                             <p>Chúng tôi cung cấp dịch vụ vận chuyển toàn quốc với các hình thức:</p>
                             <ul>
@@ -82,7 +82,7 @@
                     <div class="card-body">
                         {% set return_pol = get_setting('return_policy', '') %}
                         {% if return_pol %}
-                            {{ return_pol | safe | nl2br }}
+                            {{ return_pol | safe }}
                         {% else %}
                             <p>Khách hàng có thể đổi trả sản phẩm trong vòng <strong>7 ngày</strong> kể từ ngày nhận hàng nếu:</p>
                             <ul>
@@ -109,7 +109,7 @@
                     <div class="card-body">
                         {% set warranty = get_setting('warranty_policy', '') %}
                         {% if warranty %}
-                            {{ warranty | safe | nl2br }}
+                            {{ warranty | safe  }}
                         {% else %}
                             <p>Tất cả sản phẩm đều được bảo hành chính hãng theo tiêu chuẩn nhà sản xuất:</p>
                             <ul>
@@ -136,7 +136,7 @@
                     <div class="card-body">
                         {% set privacy = get_setting('privacy_policy', '') %}
                         {% if privacy %}
-                            {{ privacy | safe | nl2br }}
+                            {{ privacy | safe  }}
                         {% else %}
                             <p>Chúng tôi cam kết bảo vệ thông tin cá nhân của khách hàng:</p>
                             <ul>
