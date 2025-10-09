@@ -3,6 +3,10 @@
 {% block title %}{{ get_setting('meta_title', 'Giới thiệu - Hoangvn') }}{% endblock %}
 {% block meta_description %}{{ get_setting('about_meta_description', 'Giới thiệu về Hoangvn - Công ty hàng đầu trong lĩnh vực thương mại điện tử, cung cấp sản phẩm công nghệ chất lượng cao.') }}{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/video_about.css') }}">
+{% endblock %}
+
 {% block content %}
 <!-- ==================== BREADCRUMB ==================== -->
 <div class="page-header bg-light py-4">
@@ -182,46 +186,4 @@
   ]
 }
 </script>
-
-<!-- Custom CSS cho video -->
-<style>
-.video-container {
-    background: #000;
-    transition: transform 0.3s ease;
-}
-
-.video-container:hover {
-    transform: scale(1.02);
-}
-
-.play-btn {
-    width: 80px;
-    height: 80px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.3s ease;
-    animation: pulse-play 2s infinite;
-}
-
-.play-btn:hover {
-    transform: scale(1.1);
-    animation: none;
-}
-
-@keyframes pulse-play {
-    0%, 100% {
-        box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.7);
-    }
-    50% {
-        box-shadow: 0 0 0 15px rgba(255, 193, 7, 0);
-    }
-}
-
-@media (max-width: 991px) {
-    .video-container {
-        margin-bottom: 2rem;
-    }
-}
-</style>
 {% endblock %}
