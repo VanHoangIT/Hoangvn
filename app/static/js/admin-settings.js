@@ -1,484 +1,840 @@
-/**
- * ===================================================================
- * ADMIN SETTINGS PAGE - JAVASCRIPT
- * File: static/js/admin-settings.js
- * ===================================================================
- */
+/* ===================================================================
+   ADMIN SETTINGS PAGE - JAVASCRIPT
+   Save this as: static/js/admin-settings.js
+   ================================================================ */
 
 (function() {
     'use strict';
 
-    // ============ GLOBAL VARIABLES ============
-    let formChanged = false;
-    let saveTimeout;
-
-    // ============ WAIT FOR DOM READY ============
+    // ============ KHỞI TẠO KHI TRANG TẢI XONG ============
     document.addEventListener('DOMContentLoaded', function() {
-        initTabs();
+        initTabNavigation();
         initColorPicker();
-        initFileUpload();
+        initImagePreview();
+        initUnsavedChanges();
         initFormValidation();
-        initAutoSaveIndicator();
-        initTextareaAutoResize();
-        initKeyboardShortcuts();
-        initUnsavedChangesWarning();
-        initSuccessMessage();
-        initCharacterCounter();
-        initDragAndDrop();
+        initAutoSave();
+        initTooltips();
     });
 
-    // ============ TAB SWITCHING ============
-    function initTabs() {
+    // ============ QUẢN LÝ ĐIỀU HƯỚNG TAB ============
+    // Xử lý chuyển đổi giữa các tab và lưu trạng thái vào localStorage
+    function initTabNavigation() {
         const tabs = document.querySelectorAll('.settings-tab');
+        const tabPanes = document.querySelectorAll('.tab-pane');
+
+        // Khôi phục tab đã chọn từ localStorage
+        const savedTab = localStorage.getItem('activeSettingsTab') || 'general';
+        activateTab(savedTab);
 
         tabs.forEach(tab => {
             tab.addEventListener('click', function() {
-                // Remove active class from all tabs
-                tabs.forEach(t => t.classList.remove('active'));
-
-                // Add active class to clicked tab
-                this.classList.add('active');
-
-                // Smooth scroll to top of content
-                const content = document.querySelector('.settings-tab-content');
-                if (content) {
-                    content.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }
+                const targetId = this.getAttribute('data-bs-target').substring(1);
+                activateTab(targetId);
+                // Lưu tab hiện tại vào localStorage
+                localStorage.setItem('activeSettingsTab', targetId);
             });
         });
+
+        function activateTab(tabId) {
+            // Xóa active class khỏi tất cả tabs
+            tabs.forEach(t => t.classList.remove('active'));
+            tabPanes.forEach(p => {
+                p.classList.remove('show', 'active');
+            });
+
+            // Thêm active class cho tab được chọn
+            const activeTab = document.querySelector(`[data-bs-target="#${tabId}"]`);
+            const activePane = document.getElementById(tabId);
+
+            if (activeTab && activePane) {
+                activeTab.classList.add('active');
+                activePane.classList.add('show', 'active');
+
+                // Hiệu ứng fade in mượt mà
+                activePane.style.opacity = '0';
+                setTimeout(() => {
+                    activePane.style.transition = 'opacity 0.3s ease-in-out';
+                    activePane.style.opacity = '1';
+                }, 10);
+            }
+        }
     }
 
-    // ============ COLOR PICKER PREVIEW ============
+    // ============ BỘ CHỌN MÀU VÀ PREVIEW ============
+    // Hiển thị preview màu đã chọn và cập nhật giá trị hex
     function initColorPicker() {
-        const primaryColorInput = document.getElementById('primaryColorInput');
+        const colorInput = document.getElementById('primaryColorInput');
+        if (!colorInput) return;
+
         const colorPreview = document.getElementById('colorPreview');
         const colorValue = document.getElementById('colorValue');
 
-        if (!primaryColorInput || !colorPreview || !colorValue) return;
+        // Hàm cập nhật preview màu
+        function updateColorPreview(color) {
+            if (colorPreview) {
+                colorPreview.style.backgroundColor = color;
+                // Thêm hiệu ứng animation khi thay đổi màu
+                colorPreview.style.transform = 'scale(1.1)';
+                setTimeout(() => {
+                    colorPreview.style.transform = 'scale(1)';
+                }, 200);
+            }
+            if (colorValue) {
+                colorValue.textContent = color.toUpperCase();
+            }
+        }
 
-        // Initialize preview
-        updateColorPreview(primaryColorInput.value);
+        // Khởi tạo màu ban đầu
+        if (colorInput.value) {
+            updateColorPreview(colorInput.value);
+        }
 
-        // Update on change
-        primaryColorInput.addEventListener('input', function() {
+        // Lắng nghe sự kiện thay đổi màu
+        colorInput.addEventListener('input', function() {
             updateColorPreview(this.value);
         });
 
-        function updateColorPreview(color) {
-            colorPreview.style.backgroundColor = color;
-            colorValue.textContent = color.toUpperCase();
-
-            // Add pulse animation
-            colorPreview.style.animation = 'none';
-            setTimeout(() => {
-                colorPreview.style.animation = 'pulse 0.5s ease-in-out';
-            }, 10);
-        }
-    }
-
-    // ============ FILE UPLOAD PREVIEW ============
-    function initFileUpload() {
-        const fileInputs = document.querySelectorAll('input[type="file"]');
-
-        fileInputs.forEach(input => {
-            input.addEventListener('change', function() {
-                handleFilePreview(this);
-            });
+        // Lắng nghe sự kiện change (khi người dùng đóng color picker)
+        colorInput.addEventListener('change', function() {
+            updateColorPreview(this.value);
+            showNotification('Màu đã được cập nhật', 'info');
         });
     }
 
-    function handleFilePreview(input) {
-        const file = input.files[0];
+    // ============ PREVIEW ẢNH KHI UPLOAD ============
+    // Hiển thị preview ảnh ngay khi người dùng chọn file
+    function initImagePreview() {
+        const imageInputs = [
+            { input: 'logo', preview: null },
+            { input: 'logo_chatbot', preview: null },
+            { input: 'favicon', preview: null },
+            { input: 'default_share_image', preview: null }
+        ];
 
-        if (!file || !file.type.startsWith('image/')) return;
+        imageInputs.forEach(item => {
+            const input = document.querySelector(`input[name="${item.input}"]`);
+            if (!input) return;
 
-        // Check file size (max 5MB)
-        const maxSize = 5 * 1024 * 1024; // 5MB
-        if (file.size > maxSize) {
-            showAlert('danger', 'File quá lớn! Kích thước tối đa 5MB.');
-            input.value = '';
-            return;
-        }
+            input.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
 
-        const reader = new FileReader();
+                // Kiểm tra loại file
+                if (!file.type.startsWith('image/')) {
+                    showNotification('Vui lòng chọn file ảnh hợp lệ', 'error');
+                    this.value = '';
+                    return;
+                }
 
-        reader.onload = function(e) {
-            displayImagePreview(input, e.target.result);
-        };
+                // Kiểm tra kích thước file (max 5MB)
+                const maxSize = 5 * 1024 * 1024; // 5MB
+                if (file.size > maxSize) {
+                    showNotification('Kích thước ảnh không được vượt quá 5MB', 'error');
+                    this.value = '';
+                    return;
+                }
 
-        reader.readAsDataURL(file);
-    }
+                // Đọc và hiển thị preview
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    createOrUpdatePreview(input, event.target.result, file.name);
+                };
+                reader.readAsDataURL(file);
+            });
+        });
 
-    function displayImagePreview(input, src) {
-        // Find or create preview container
-        let previewContainer = input.parentElement.querySelector('.settings-image-preview');
+        // Tạo hoặc cập nhật preview ảnh
+        function createOrUpdatePreview(input, imageSrc, fileName) {
+            const formGroup = input.closest('.settings-form-group');
+            let previewContainer = formGroup.querySelector('.settings-image-preview');
 
-        if (!previewContainer) {
-            previewContainer = document.createElement('div');
-            previewContainer.className = 'settings-image-preview';
-            input.parentElement.appendChild(previewContainer);
-        }
-
-        // Find or create preview image
-        let previewImg = previewContainer.querySelector('img');
-        if (!previewImg) {
-            previewImg = document.createElement('img');
-            previewImg.className = 'settings-preview-img';
-
-            // Check if this is favicon
-            if (input.name === 'favicon') {
-                previewImg.classList.add('settings-preview-favicon');
-                previewImg.style.maxWidth = '48px';
-            } else {
-                previewImg.style.maxWidth = '200px';
+            // Nếu chưa có preview container, tạo mới
+            if (!previewContainer) {
+                previewContainer = document.createElement('div');
+                previewContainer.className = 'settings-image-preview';
+                input.parentNode.insertBefore(previewContainer, input.nextSibling);
             }
 
-            previewContainer.appendChild(previewImg);
+            // Xác định class cho preview dựa trên loại input
+            let imgClass = 'settings-preview-img';
+            if (input.name === 'favicon') {
+                imgClass = 'settings-preview-favicon';
+            }
+
+            // Cập nhật nội dung preview với nút xóa
+            previewContainer.innerHTML = `
+                <div style="position: relative; display: inline-block;">
+                    <img src="${imageSrc}" alt="Preview" class="${imgClass}" style="max-width: 300px;">
+                    <button type="button" class="remove-preview-btn" title="Xóa ảnh">
+                        <i class="bi bi-x-circle-fill"></i>
+                    </button>
+                    <div class="preview-filename">${fileName}</div>
+                </div>
+            `;
+
+            // Thêm hiệu ứng fade in
+            previewContainer.style.opacity = '0';
+            setTimeout(() => {
+                previewContainer.style.transition = 'opacity 0.3s ease-in-out';
+                previewContainer.style.opacity = '1';
+            }, 10);
+
+            // Xử lý nút xóa preview
+            const removeBtn = previewContainer.querySelector('.remove-preview-btn');
+            removeBtn.addEventListener('click', function() {
+                input.value = '';
+                previewContainer.style.opacity = '0';
+                setTimeout(() => {
+                    previewContainer.remove();
+                }, 300);
+                showNotification('Đã xóa ảnh preview', 'info');
+            });
+
+            showNotification('Ảnh đã được tải lên', 'success');
         }
 
-        previewImg.src = src;
-        previewContainer.style.display = 'block';
-
-        // Add fade-in animation
-        previewContainer.style.animation = 'fadeIn 0.3s ease-in-out';
+        // Thêm CSS cho nút xóa và tên file (inline để tránh xung đột)
+        if (!document.getElementById('preview-styles')) {
+            const style = document.createElement('style');
+            style.id = 'preview-styles';
+            style.textContent = `
+                .remove-preview-btn {
+                    position: absolute;
+                    top: -10px;
+                    right: -10px;
+                    background: #ef4444;
+                    color: white;
+                    border: 2px solid white;
+                    border-radius: 50%;
+                    width: 32px;
+                    height: 32px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    cursor: pointer;
+                    transition: all 0.3s ease;
+                    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+                }
+                .remove-preview-btn:hover {
+                    background: #dc2626;
+                    transform: scale(1.1);
+                }
+                .remove-preview-btn i {
+                    font-size: 1.2rem;
+                }
+                .preview-filename {
+                    margin-top: 0.5rem;
+                    font-size: 0.85rem;
+                    color: #6b7280;
+                    text-align: center;
+                    font-weight: 500;
+                }
+            `;
+            document.head.appendChild(style);
+        }
     }
 
-    // ============ DRAG AND DROP ============
-    function initDragAndDrop() {
-        const fileInputs = document.querySelectorAll('input[type="file"]');
+// ============ THEO DÕI THAY ĐỔI CHƯA LƯU ============
+// Cảnh báo người dùng khi rời trang với dữ liệu chưa lưu
+function initUnsavedChanges() {
+    const form = document.querySelector('.settings-card form');
+    if (!form) return;
 
-        fileInputs.forEach(input => {
-            const parent = input.closest('.settings-form-group');
-            if (!parent) return;
+    let isFormChanged = false;
+    let isSubmitting = false;
+    const cancelBtn = document.querySelector('.settings-btn-secondary');
+    const submitBtn = document.querySelector('.settings-btn-primary');
+    const actionsContainer = document.querySelector('.settings-actions');
 
-            parent.addEventListener('dragover', handleDragOver);
-            parent.addEventListener('dragleave', handleDragLeave);
-            parent.addEventListener('drop', function(e) {
-                handleDrop(e, input);
-            });
+    // Ẩn cả container chứa 2 nút ban đầu
+    if (actionsContainer) {
+        actionsContainer.style.display = 'none';
+    }
+
+    // Theo dõi tất cả các input trong form
+    const inputs = form.querySelectorAll('input, textarea, select');
+    inputs.forEach(input => {
+        input.addEventListener('change', function() {
+            if (!isSubmitting) {
+                isFormChanged = true;
+                showUnsavedBadge();
+                showActionButtons();
+            }
+        });
+
+        // Theo dõi typing cho textarea và text input
+        if (input.type === 'text' || input.type === 'email' || input.tagName === 'TEXTAREA') {
+            input.addEventListener('input', debounce(function() {
+                if (!isSubmitting) {
+                    isFormChanged = true;
+                    showUnsavedBadge();
+                    showActionButtons();
+                }
+            }, 500));
+        }
+    });
+
+    // Hiển thị cả 2 nút khi có thay đổi
+    function showActionButtons() {
+        if (actionsContainer && actionsContainer.style.display === 'none') {
+            actionsContainer.style.display = 'flex';
+            actionsContainer.style.animation = 'slideUpFade 0.4s ease-out';
+        }
+    }
+
+    // Ẩn cả 2 nút khi không có thay đổi
+    function hideActionButtons() {
+        if (actionsContainer) {
+            actionsContainer.style.animation = 'slideDownFade 0.3s ease-out';
+            setTimeout(() => {
+                actionsContainer.style.display = 'none';
+            }, 300);
+        }
+    }
+
+    // Thêm CSS animation cho action buttons
+    if (!document.getElementById('action-buttons-animation')) {
+        const style = document.createElement('style');
+        style.id = 'action-buttons-animation';
+        style.textContent = `
+            @keyframes slideUpFade {
+                from {
+                    opacity: 0;
+                    transform: translateY(20px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+            @keyframes slideDownFade {
+                from {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+                to {
+                    opacity: 0;
+                    transform: translateY(20px);
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    }
+
+    // Xử lý khi submit form
+    form.addEventListener('submit', function() {
+        isSubmitting = true;
+        isFormChanged = false;
+        hideUnsavedBadge();
+        // Không ẩn nút khi submit để người dùng thấy nút đang loading
+    });
+
+    // Xử lý khi click nút hủy - reload trang
+    if (cancelBtn) {
+        cancelBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            if (confirm('Bạn có chắc muốn hủy các thay đổi? Trang sẽ được tải lại.')) {
+                location.reload();
+            }
         });
     }
 
-    function handleDragOver(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        this.style.borderColor = '#4F46E5';
-        this.style.background = '#F3F4F6';
-    }
-
-    function handleDragLeave(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        this.style.borderColor = '';
-        this.style.background = '';
-    }
-
-    function handleDrop(e, input) {
-        e.preventDefault();
-        e.stopPropagation();
-
-        const parent = input.closest('.settings-form-group');
-        if (parent) {
-            parent.style.borderColor = '';
-            parent.style.background = '';
+    // Cảnh báo khi rời trang
+    window.addEventListener('beforeunload', function(e) {
+        if (isFormChanged && !isSubmitting) {
+            e.preventDefault();
+            e.returnValue = 'Bạn có thay đổi chưa lưu. Bạn có chắc muốn rời khỏi trang?';
+            return e.returnValue;
         }
+    });
 
-        const files = e.dataTransfer.files;
-        if (files.length > 0) {
-            input.files = files;
-            input.dispatchEvent(new Event('change'));
+    // Hiển thị badge "Chưa lưu"
+    function showUnsavedBadge() {
+        let badge = document.getElementById('unsaved-badge');
+        if (!badge) {
+            badge = document.createElement('div');
+            badge.id = 'unsaved-badge';
+            badge.innerHTML = `
+                <i class="bi bi-exclamation-circle"></i>
+                <span>Có thay đổi chưa lưu</span>
+            `;
+            document.body.appendChild(badge);
+
+            // Thêm CSS cho badge
+            if (!document.getElementById('unsaved-badge-styles')) {
+                const style = document.createElement('style');
+                style.id = 'unsaved-badge-styles';
+                style.textContent = `
+                    #unsaved-badge {
+                        position: fixed;
+                        bottom: 2rem;
+                        left: 50%;
+                        transform: translateX(-50%);
+                        background: linear-gradient(135deg, #f59e0b, #d97706);
+                        color: white;
+                        padding: 0.75rem 1.5rem;
+                        border-radius: 50px;
+                        box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
+                        display: flex;
+                        align-items: center;
+                        gap: 0.5rem;
+                        font-weight: 600;
+                        z-index: 9999;
+                        animation: slideUp 0.3s ease-out;
+                    }
+                    #unsaved-badge i {
+                        font-size: 1.2rem;
+                        animation: pulse 2s ease-in-out infinite;
+                    }
+                    @keyframes slideUp {
+                        from {
+                            transform: translateX(-50%) translateY(100px);
+                            opacity: 0;
+                        }
+                        to {
+                            transform: translateX(-50%) translateY(0);
+                            opacity: 1;
+                        }
+                    }
+                    @keyframes pulse {
+                        0%, 100% { opacity: 1; }
+                        50% { opacity: 0.5; }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+        }
+        badge.style.display = 'flex';
+    }
+
+    // Ẩn badge
+    function hideUnsavedBadge() {
+        const badge = document.getElementById('unsaved-badge');
+        if (badge) {
+            badge.style.animation = 'slideDown 0.3s ease-out';
+            setTimeout(() => {
+                badge.style.display = 'none';
+            }, 300);
         }
     }
 
-    // ============ FORM VALIDATION ============
+    // Thêm animation slideDown
+    if (!document.getElementById('slidedown-animation')) {
+        const style = document.createElement('style');
+        style.id = 'slidedown-animation';
+        style.textContent = `
+            @keyframes slideDown {
+                from {
+                    transform: translateX(-50%) translateY(0);
+                    opacity: 1;
+                }
+                to {
+                    transform: translateX(-50%) translateY(100px);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    }
+}
+
+    // ============ VALIDATION FORM THỜI GIAN THỰC ============
+    // Kiểm tra và hiển thị lỗi validation ngay khi người dùng nhập
     function initFormValidation() {
-        const form = document.querySelector('form');
-
+        const form = document.querySelector('.settings-card form');
         if (!form) return;
 
-        form.addEventListener('submit', function(e) {
-            const submitBtn = this.querySelector('.settings-btn-primary');
-            if (!submitBtn) return;
+        // Validation cho email
+        const emailInputs = form.querySelectorAll('input[type="email"]');
+        emailInputs.forEach(input => {
+            input.addEventListener('blur', function() {
+                validateEmail(this);
+            });
+        });
 
-            const originalText = submitBtn.innerHTML;
-
-            // Show loading state
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '<span class="settings-loading"></span> Đang lưu...';
-
-            // Disable all form inputs
-            const inputs = form.querySelectorAll('input, textarea, select');
-            inputs.forEach(input => input.disabled = true);
-
-            // Reset formChanged flag
-            formChanged = false;
-
-            // If form doesn't submit after 10 seconds, re-enable (fallback)
-            setTimeout(() => {
-                if (submitBtn.disabled) {
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = originalText;
-                    inputs.forEach(input => input.disabled = false);
+        // Validation cho URL
+        const urlInputs = form.querySelectorAll('input[name$="_url"], input[name="main_url"]');
+        urlInputs.forEach(input => {
+            input.addEventListener('blur', function() {
+                if (this.value) {
+                    validateURL(this);
                 }
-            }, 10000);
-        });
-    }
-
-    // ============ AUTO-SAVE INDICATOR ============
-    function initAutoSaveIndicator() {
-        const inputs = document.querySelectorAll('.settings-form-control');
-
-        inputs.forEach(input => {
-            input.addEventListener('input', function() {
-                clearTimeout(saveTimeout);
-                showUnsavedIndicator();
             });
         });
-    }
 
-    function showUnsavedIndicator() {
-        // Remove existing indicator
-        const existingIndicator = document.getElementById('unsaved-indicator');
-        if (existingIndicator) {
-            existingIndicator.remove();
-        }
-
-        // Create new indicator
-        const indicator = document.createElement('span');
-        indicator.className = 'badge bg-warning ms-2';
-        indicator.textContent = 'Chưa lưu';
-        indicator.id = 'unsaved-indicator';
-        indicator.style.animation = 'pulse 2s ease-in-out infinite';
-
-        const submitBtn = document.querySelector('.settings-btn-primary');
-        if (submitBtn) {
-            submitBtn.parentElement.insertBefore(indicator, submitBtn);
-        }
-    }
-
-    // ============ SMOOTH SCROLL TO ERROR ============
-    function scrollToError() {
-        const errorElements = document.querySelectorAll('.text-danger');
-        if (errorElements.length > 0) {
-            errorElements[0].scrollIntoView({
-                behavior: 'smooth',
-                block: 'center'
+        // Validation cho số
+        const numberInputs = form.querySelectorAll('input[type="number"]');
+        numberInputs.forEach(input => {
+            input.addEventListener('blur', function() {
+                validateNumber(this);
             });
+        });
 
-            // Highlight the field with error
-            const errorField = errorElements[0].closest('.settings-form-group');
-            if (errorField) {
-                errorField.style.animation = 'shake 0.5s ease-in-out';
+        function validateEmail(input) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (input.value && !emailRegex.test(input.value)) {
+                showFieldError(input, 'Email không hợp lệ');
+                return false;
+            } else {
+                clearFieldError(input);
+                return true;
             }
         }
-    }
 
-    // ============ TEXTAREA AUTO-RESIZE ============
-    function initTextareaAutoResize() {
-        const textareas = document.querySelectorAll('textarea.settings-form-control');
-
-        textareas.forEach(textarea => {
-            // Add input listener
-            textarea.addEventListener('input', function() {
-                autoResize(this);
-            });
-
-            // Initialize
-            autoResize(textarea);
-        });
-    }
-
-    function autoResize(textarea) {
-        textarea.style.height = 'auto';
-        textarea.style.height = (textarea.scrollHeight) + 'px';
-    }
-
-    // ============ KEYBOARD SHORTCUTS ============
-    function initKeyboardShortcuts() {
-        document.addEventListener('keydown', function(e) {
-            // Ctrl/Cmd + S to save
-            if ((e.ctrlKey || e.metaKey) && e.key === 's') {
-                e.preventDefault();
-                const submitBtn = document.querySelector('.settings-btn-primary');
-                if (submitBtn && !submitBtn.disabled) {
-                    submitBtn.click();
-                    showAlert('info', 'Đang lưu cài đặt... (Ctrl+S)');
-                }
+        function validateURL(input) {
+            try {
+                new URL(input.value);
+                clearFieldError(input);
+                return true;
+            } catch (e) {
+                showFieldError(input, 'URL không hợp lệ');
+                return false;
             }
+        }
 
-            // Esc to cancel
-            if (e.key === 'Escape') {
-                const cancelBtn = document.querySelector('.settings-btn-secondary');
-                if (cancelBtn) {
-                    if (confirm('Bạn có chắc muốn hủy bỏ các thay đổi?')) {
-                        cancelBtn.click();
+        function validateNumber(input) {
+            const value = parseInt(input.value);
+            const min = parseInt(input.min);
+            const max = parseInt(input.max);
+
+            if (isNaN(value)) {
+                showFieldError(input, 'Vui lòng nhập số hợp lệ');
+                return false;
+            }
+            if (min && value < min) {
+                showFieldError(input, `Giá trị tối thiểu là ${min}`);
+                return false;
+            }
+            if (max && value > max) {
+                showFieldError(input, `Giá trị tối đa là ${max}`);
+                return false;
+            }
+            clearFieldError(input);
+            return true;
+        }
+
+        function showFieldError(input, message) {
+            clearFieldError(input);
+            input.classList.add('is-invalid');
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'field-error-message';
+            errorDiv.textContent = message;
+            input.parentNode.appendChild(errorDiv);
+
+            // Thêm CSS cho error message nếu chưa có
+            if (!document.getElementById('field-error-styles')) {
+                const style = document.createElement('style');
+                style.id = 'field-error-styles';
+                style.textContent = `
+                    .is-invalid {
+                        border-color: #ef4444 !important;
                     }
+                    .field-error-message {
+                        color: #ef4444;
+                        font-size: 0.85rem;
+                        margin-top: 0.25rem;
+                        display: flex;
+                        align-items: center;
+                        gap: 0.25rem;
+                        animation: fadeIn 0.2s ease-in;
+                    }
+                    .field-error-message::before {
+                        content: "⚠";
+                        font-size: 1rem;
+                    }
+                    @keyframes fadeIn {
+                        from { opacity: 0; transform: translateY(-5px); }
+                        to { opacity: 1; transform: translateY(0); }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+        }
+
+        function clearFieldError(input) {
+            input.classList.remove('is-invalid');
+            const errorMsg = input.parentNode.querySelector('.field-error-message');
+            if (errorMsg) {
+                errorMsg.remove();
+            }
+        }
+    }
+
+    // ============ TỰ ĐỘNG LƯU BẢN NHÁP (OPTIONAL) ============
+    // Tự động lưu dữ liệu form vào localStorage mỗi 30 giây
+    // Có thể xóa chức năng này nếu không cần thiết
+    function initAutoSave() {
+        const form = document.querySelector('.settings-card form');
+        if (!form) return;
+
+        const AUTO_SAVE_KEY = 'settings_autosave';
+        const AUTO_SAVE_INTERVAL = 30000; // 30 giây
+
+        // Khôi phục dữ liệu đã lưu
+        restoreAutoSave();
+
+        // Tự động lưu định kỳ
+        setInterval(function() {
+            saveFormData();
+        }, AUTO_SAVE_INTERVAL);
+
+        function saveFormData() {
+            const formData = new FormData(form);
+            const data = {};
+
+            // Chỉ lưu text fields, không lưu files
+            for (let [key, value] of formData.entries()) {
+                const input = form.querySelector(`[name="${key}"]`);
+                if (input && input.type !== 'file' && input.type !== 'hidden') {
+                    data[key] = value;
                 }
             }
-        });
-    }
 
-    // ============ UNSAVED CHANGES WARNING ============
-    function initUnsavedChangesWarning() {
-        const inputs = document.querySelectorAll('.settings-form-control');
-
-        inputs.forEach(input => {
-            input.addEventListener('change', function() {
-                formChanged = true;
-            });
-        });
-
-        window.addEventListener('beforeunload', function(e) {
-            if (formChanged) {
-                e.preventDefault();
-                e.returnValue = 'Bạn có thay đổi chưa được lưu. Bạn có chắc muốn rời khỏi trang?';
-                return e.returnValue;
-            }
-        });
-
-        // Reset flag on form submit
-        const form = document.querySelector('form');
-        if (form) {
-            form.addEventListener('submit', function() {
-                formChanged = false;
-            });
-        }
-    }
-
-    // ============ SUCCESS MESSAGE ============
-    function initSuccessMessage() {
-        // Check URL for success parameter
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.get('saved') === 'true') {
-            showAlert('success', 'Cài đặt đã được lưu thành công!', true);
-
-            // Remove parameter from URL
-            window.history.replaceState({}, document.title, window.location.pathname);
+            localStorage.setItem(AUTO_SAVE_KEY, JSON.stringify({
+                data: data,
+                timestamp: new Date().toISOString()
+            }));
         }
 
-        // Scroll to error if exists
-        setTimeout(scrollToError, 500);
-    }
+        function restoreAutoSave() {
+            const saved = localStorage.getItem(AUTO_SAVE_KEY);
+            if (!saved) return;
 
-    // ============ CHARACTER COUNTER ============
-    function initCharacterCounter() {
-        const textareasWithLimit = document.querySelectorAll('textarea[maxlength]');
+            try {
+                const { data, timestamp } = JSON.parse(saved);
+                const savedDate = new Date(timestamp);
+                const now = new Date();
+                const hoursDiff = (now - savedDate) / (1000 * 60 * 60);
 
-        textareasWithLimit.forEach(textarea => {
-            const maxLength = parseInt(textarea.getAttribute('maxlength'));
-            const counter = document.createElement('small');
-            counter.className = 'settings-help-text';
-            counter.style.marginTop = '0.25rem';
+                // Chỉ khôi phục nếu dữ liệu được lưu trong vòng 24 giờ
+                if (hoursDiff > 24) {
+                    localStorage.removeItem(AUTO_SAVE_KEY);
+                    return;
+                }
 
-            const updateCounter = () => {
-                const remaining = maxLength - textarea.value.length;
-                counter.innerHTML = `<i class="bi bi-text-left"></i> ${remaining} ký tự còn lại`;
-
-                if (remaining < 20) {
-                    counter.style.color = '#EF4444';
-                } else if (remaining < 50) {
-                    counter.style.color = '#F59E0B';
+                // Hiển thị thông báo xác nhận khôi phục
+                if (confirm(`Tìm thấy bản lưu tự động từ ${savedDate.toLocaleString('vi-VN')}. Bạn có muốn khôi phục không?`)) {
+                    Object.keys(data).forEach(key => {
+                        const input = form.querySelector(`[name="${key}"]`);
+                        if (input && input.type !== 'file') {
+                            input.value = data[key];
+                        }
+                    });
+                    showNotification('Đã khôi phục bản lưu tự động', 'success');
                 } else {
-                    counter.style.color = '#6B7280';
+                    localStorage.removeItem(AUTO_SAVE_KEY);
                 }
-            };
+            } catch (e) {
+                console.error('Error restoring autosave:', e);
+                localStorage.removeItem(AUTO_SAVE_KEY);
+            }
+        }
 
-            textarea.addEventListener('input', updateCounter);
-            textarea.parentElement.appendChild(counter);
-            updateCounter();
+        // Xóa autosave khi submit thành công
+        form.addEventListener('submit', function() {
+            localStorage.removeItem(AUTO_SAVE_KEY);
         });
     }
 
-    // ============ ALERT HELPER ============
-    function showAlert(type, message, autoHide = false) {
-        // Remove existing alerts
-        const existingAlerts = document.querySelectorAll('.settings-alert-custom');
-        existingAlerts.forEach(alert => alert.remove());
+    // ============ TOOLTIPS (OPTIONAL) ============
+    // Hiển thị tooltips cho các icon và help text
+    // Có thể xóa nếu không cần
+    function initTooltips() {
+        const tooltipElements = document.querySelectorAll('[title]');
 
-        // Create new alert
-        const alert = document.createElement('div');
-        alert.className = `settings-alert settings-alert-${type} settings-alert-custom`;
+        tooltipElements.forEach(element => {
+            element.addEventListener('mouseenter', function(e) {
+                showTooltip(this, this.getAttribute('title'));
+            });
 
-        let icon = 'info-circle-fill';
-        if (type === 'success') icon = 'check-circle-fill';
-        if (type === 'warning') icon = 'exclamation-triangle-fill';
-        if (type === 'danger') icon = 'x-circle-fill';
+            element.addEventListener('mouseleave', function() {
+                hideTooltip();
+            });
+        });
 
-        alert.innerHTML = `
+        function showTooltip(element, text) {
+            hideTooltip(); // Xóa tooltip cũ nếu có
+
+            const tooltip = document.createElement('div');
+            tooltip.id = 'custom-tooltip';
+            tooltip.textContent = text;
+            document.body.appendChild(tooltip);
+
+            const rect = element.getBoundingClientRect();
+            const tooltipRect = tooltip.getBoundingClientRect();
+
+            // Tính toán vị trí
+            let top = rect.top - tooltipRect.height - 10;
+            let left = rect.left + (rect.width / 2) - (tooltipRect.width / 2);
+
+            // Đảm bảo tooltip không ra ngoài viewport
+            if (top < 0) {
+                top = rect.bottom + 10;
+            }
+            if (left < 0) {
+                left = 10;
+            }
+            if (left + tooltipRect.width > window.innerWidth) {
+                left = window.innerWidth - tooltipRect.width - 10;
+            }
+
+            tooltip.style.top = top + window.scrollY + 'px';
+            tooltip.style.left = left + 'px';
+
+            // Thêm CSS nếu chưa có
+            if (!document.getElementById('tooltip-styles')) {
+                const style = document.createElement('style');
+                style.id = 'tooltip-styles';
+                style.textContent = `
+                    #custom-tooltip {
+                        position: absolute;
+                        background: #1f2937;
+                        color: white;
+                        padding: 0.5rem 0.75rem;
+                        border-radius: 6px;
+                        font-size: 0.85rem;
+                        z-index: 10000;
+                        pointer-events: none;
+                        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                        animation: tooltipFadeIn 0.2s ease-out;
+                        max-width: 250px;
+                    }
+                    @keyframes tooltipFadeIn {
+                        from { opacity: 0; transform: translateY(-5px); }
+                        to { opacity: 1; transform: translateY(0); }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+        }
+
+        function hideTooltip() {
+            const tooltip = document.getElementById('custom-tooltip');
+            if (tooltip) {
+                tooltip.remove();
+            }
+        }
+    }
+
+    // ============ HÀM TIỆN ÍCH ============
+
+    // Debounce function - Trì hoãn thực thi hàm
+    function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
+
+    // Hiển thị thông báo
+    function showNotification(message, type = 'info') {
+        // Xóa notification cũ nếu có
+        const oldNotification = document.querySelector('.settings-notification');
+        if (oldNotification) {
+            oldNotification.remove();
+        }
+
+        const notification = document.createElement('div');
+        notification.className = `settings-notification settings-notification-${type}`;
+
+        const icon = {
+            'success': 'check-circle-fill',
+            'error': 'x-circle-fill',
+            'warning': 'exclamation-triangle-fill',
+            'info': 'info-circle-fill'
+        }[type] || 'info-circle-fill';
+
+        notification.innerHTML = `
             <i class="bi bi-${icon}"></i>
-            <div>
-                <strong>${getAlertTitle(type)}:</strong> ${message}
-            </div>
+            <span>${message}</span>
         `;
 
-        // Insert at top of content
-        const container = document.querySelector('.settings-tab-content');
-        if (container) {
-            container.insertBefore(alert, container.firstChild);
+        document.body.appendChild(notification);
 
-            // Smooth scroll to alert
-            alert.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        // Tự động ẩn sau 3 giây
+        setTimeout(() => {
+            notification.style.animation = 'notificationSlideOut 0.3s ease-out';
+            setTimeout(() => {
+                notification.remove();
+            }, 300);
+        }, 3000);
 
-            // Auto-hide
-            if (autoHide) {
-                setTimeout(() => {
-                    alert.style.transition = 'opacity 0.5s, transform 0.5s';
-                    alert.style.opacity = '0';
-                    alert.style.transform = 'translateY(-20px)';
-                    setTimeout(() => alert.remove(), 500);
-                }, 5000);
-            }
+        // Thêm CSS cho notification nếu chưa có
+        if (!document.getElementById('notification-styles')) {
+            const style = document.createElement('style');
+            style.id = 'notification-styles';
+            style.textContent = `
+                .settings-notification {
+                    position: fixed;
+                    top: 2rem;
+                    right: 2rem;
+                    padding: 1rem 1.5rem;
+                    border-radius: 8px;
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                    display: flex;
+                    align-items: center;
+                    gap: 0.75rem;
+                    z-index: 10000;
+                    font-weight: 500;
+                    animation: notificationSlideIn 0.3s ease-out;
+                    min-width: 300px;
+                }
+                .settings-notification i {
+                    font-size: 1.5rem;
+                }
+                .settings-notification-success {
+                    background: #10b981;
+                    color: white;
+                }
+                .settings-notification-error {
+                    background: #ef4444;
+                    color: white;
+                }
+                .settings-notification-warning {
+                    background: #f59e0b;
+                    color: white;
+                }
+                .settings-notification-info {
+                    background: #3b82f6;
+                    color: white;
+                }
+                @keyframes notificationSlideIn {
+                    from {
+                        transform: translateX(400px);
+                        opacity: 0;
+                    }
+                    to {
+                        transform: translateX(0);
+                        opacity: 1;
+                    }
+                }
+                @keyframes notificationSlideOut {
+                    from {
+                        transform: translateX(0);
+                        opacity: 1;
+                    }
+                    to {
+                        transform: translateX(400px);
+                        opacity: 0;
+                    }
+                }
+                @media (max-width: 576px) {
+                    .settings-notification {
+                        top: 1rem;
+                        right: 1rem;
+                        left: 1rem;
+                        min-width: auto;
+                    }
+                }
+            `;
+            document.head.appendChild(style);
         }
     }
-
-    function getAlertTitle(type) {
-        switch(type) {
-            case 'success': return 'Thành công';
-            case 'warning': return 'Cảnh báo';
-            case 'danger': return 'Lỗi';
-            default: return 'Thông tin';
-        }
-    }
-
-    // ============ BOOTSTRAP TOOLTIP INITIALIZATION ============
-    function initTooltips() {
-        const tooltipTriggerList = [].slice.call(
-            document.querySelectorAll('[data-bs-toggle="tooltip"]')
-        );
-
-        tooltipTriggerList.map(function (tooltipTriggerEl) {
-            return new bootstrap.Tooltip(tooltipTriggerEl);
-        });
-    }
-
-    // Initialize tooltips if Bootstrap is available
-    if (typeof bootstrap !== 'undefined') {
-        initTooltips();
-    }
-
-    // ============ EXPORT FOR TESTING ============
-    window.SettingsJS = {
-        showAlert: showAlert,
-        scrollToError: scrollToError
-    };
 
 })();
-
-// ============ CSS ANIMATIONS (Add to CSS if not exists) ============
-/*
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(-10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes shake {
-    0%, 100% { transform: translateX(0); }
-    25% { transform: translateX(-10px); }
-    75% { transform: translateX(10px); }
-}
-
-@keyframes pulse {
-    0%, 100% { transform: scale(1); opacity: 1; }
-    50% { transform: scale(1.05); opacity: 0.8; }
-}
-*/

@@ -193,116 +193,118 @@
 
                     <!-- ============ SEO TAB ============ -->
                     <div class="tab-pane fade" id="seo" role="tabpanel">
-                        <div class="settings-grid settings-grid-2">
-                            <!-- Meta chung -->
-                            <div class="settings-section-card">
-                                <h6 class="settings-section-title">
-                                    <i class="bi bi-search"></i>
-                                    Meta chung
-                                </h6>
+                    <!-- Meta chung - Full width ở trên -->
+                    <div class="settings-section-card">
+                        <h6 class="settings-section-title">
+                            <i class="bi bi-search"></i>
+                            Meta chung
+                        </h6>
 
-                                <div class="settings-form-group">
-                                    <label class="settings-form-label">
-                                        {{ form.meta_title.label.text }}
-                                    </label>
-                                    {{ form.meta_title(class="settings-form-control", placeholder="Meta title mặc định") }}
-                                </div>
-
-                                <div class="settings-form-group">
-                                    <label class="settings-form-label">
-                                        {{ form.meta_description.label.text }}
-                                    </label>
-                                    {{ form.meta_description(class="settings-form-control", rows="3", placeholder="Meta description mặc định") }}
-                                </div>
-
-                                <div class="settings-form-group">
-                                    <label class="settings-form-label">
-                                        {{ form.meta_keywords.label.text }}
-                                    </label>
-                                    {{ form.meta_keywords(class="settings-form-control", placeholder="keyword1, keyword2, keyword3") }}
-                                </div>
+                        <div class="settings-grid settings-grid-3">
+                            <div class="settings-form-group">
+                                <label class="settings-form-label">
+                                    {{ form.meta_title.label.text }}
+                                </label>
+                                {{ form.meta_title(class="settings-form-control", placeholder="Meta title mặc định") }}
                             </div>
 
-                            <!-- Meta từng trang -->
-                            <div class="settings-section-card">
-                                <h6 class="settings-section-title">
-                                    <i class="bi bi-file-earmark-text"></i>
-                                    Meta từng trang
-                                </h6>
+                            <div class="settings-form-group">
+                                <label class="settings-form-label">
+                                    {{ form.meta_description.label.text }}
+                                </label>
+                                {{ form.meta_description(class="settings-form-control", rows="3", placeholder="Meta description mặc định") }}
+                            </div>
 
-                                <div class="settings-form-group">
-                                    <label class="settings-form-label">
-                                        <i class="bi bi-house"></i>
-                                        {{ form.index_meta_description.label.text }}
-                                    </label>
-                                    {{ form.index_meta_description(class="settings-form-control", rows="2", placeholder="Meta cho trang chủ") }}
-                                </div>
-
-                                <div class="settings-form-group">
-                                    <label class="settings-form-label">
-                                        <i class="bi bi-info-circle"></i>
-                                        {{ form.about_meta_description.label.text }}
-                                    </label>
-                                    {{ form.about_meta_description(class="settings-form-control", rows="2", placeholder="Meta cho trang giới thiệu") }}
-                                </div>
-
-                                <div class="settings-form-group">
-                                    <label class="settings-form-label">
-                                        <i class="bi bi-envelope"></i>
-                                        {{ form.contact_meta_description.label.text }}
-                                    </label>
-                                    {{ form.contact_meta_description(class="settings-form-control", rows="2", placeholder="Meta cho trang liên hệ") }}
-                                </div>
-
-                                <div class="settings-form-group">
-                                    <label class="settings-form-label">
-                                        <i class="bi bi-box"></i>
-                                        {{ form.products_meta_description.label.text }}
-                                    </label>
-                                    {{ form.products_meta_description(class="settings-form-control", rows="2", placeholder="Meta cho trang sản phẩm") }}
-                                </div>
-
-                                <div class="settings-form-group">
-                                    <label class="settings-form-label">
-                                        <i class="bi bi-box-seam"></i>
-                                        {{ form.product_meta_description.label.text }}
-                                    </label>
-                                    {{ form.product_meta_description(class="settings-form-control", rows="2", placeholder="Meta cho chi tiết sản phẩm") }}
-                                </div>
-
-                                <div class="settings-form-group">
-                                    <label class="settings-form-label">
-                                        <i class="bi bi-newspaper"></i>
-                                        {{ form.blog_meta_description.label.text }}
-                                    </label>
-                                    {{ form.blog_meta_description(class="settings-form-control", rows="2", placeholder="Meta cho trang blog") }}
-                                </div>
-
-                                <div class="settings-form-group">
-                                    <label class="settings-form-label">
-                                        <i class="bi bi-briefcase"></i>
-                                        {{ form.careers_meta_description.label.text }}
-                                    </label>
-                                    {{ form.careers_meta_description(class="settings-form-control", rows="2", placeholder="Meta cho trang tuyển dụng") }}
-                                </div>
-
-                                <div class="settings-form-group">
-                                    <label class="settings-form-label">
-                                        <i class="bi bi-question-circle"></i>
-                                        {{ form.faq_meta_description.label.text }}
-                                    </label>
-                                    {{ form.faq_meta_description(class="settings-form-control", rows="2", placeholder="Meta cho trang FAQ") }}
-                                </div>
-
-                                <div class="settings-form-group">
-                                    <label class="settings-form-label">
-                                        <i class="bi bi-folder"></i>
-                                        {{ form.projects_meta_description.label.text }}
-                                    </label>
-                                    {{ form.projects_meta_description(class="settings-form-control", rows="2", placeholder="Meta cho trang dự án") }}
-                                </div>
+                            <div class="settings-form-group">
+                                <label class="settings-form-label">
+                                    {{ form.meta_keywords.label.text }}
+                                </label>
+                                {{ form.meta_keywords(class="settings-form-control", placeholder="keyword1, keyword2, keyword3") }}
                             </div>
                         </div>
+                    </div>
+
+                    <!-- Meta từng trang - Grid 3 cột -->
+                    <div class="settings-section-card">
+                        <h6 class="settings-section-title">
+                            <i class="bi bi-file-earmark-text"></i>
+                            Meta từng trang
+                        </h6>
+
+                        <div class="settings-grid settings-grid-3">
+                            <div class="settings-form-group">
+                                <label class="settings-form-label">
+                                    <i class="bi bi-house"></i>
+                                    {{ form.index_meta_description.label.text }}
+                                </label>
+                                {{ form.index_meta_description(class="settings-form-control", rows="2", placeholder="Meta cho trang chủ") }}
+                            </div>
+
+                            <div class="settings-form-group">
+                                <label class="settings-form-label">
+                                    <i class="bi bi-info-circle"></i>
+                                    {{ form.about_meta_description.label.text }}
+                                </label>
+                                {{ form.about_meta_description(class="settings-form-control", rows="2", placeholder="Meta cho trang giới thiệu") }}
+                            </div>
+
+                            <div class="settings-form-group">
+                                <label class="settings-form-label">
+                                    <i class="bi bi-envelope"></i>
+                                    {{ form.contact_meta_description.label.text }}
+                                </label>
+                                {{ form.contact_meta_description(class="settings-form-control", rows="2", placeholder="Meta cho trang liên hệ") }}
+                            </div>
+
+                            <div class="settings-form-group">
+                                <label class="settings-form-label">
+                                    <i class="bi bi-box"></i>
+                                    {{ form.products_meta_description.label.text }}
+                                </label>
+                                {{ form.products_meta_description(class="settings-form-control", rows="2", placeholder="Meta cho trang sản phẩm") }}
+                            </div>
+
+                            <div class="settings-form-group">
+                                <label class="settings-form-label">
+                                    <i class="bi bi-box-seam"></i>
+                                    {{ form.product_meta_description.label.text }}
+                                </label>
+                                {{ form.product_meta_description(class="settings-form-control", rows="2", placeholder="Meta cho chi tiết sản phẩm") }}
+                            </div>
+
+                            <div class="settings-form-group">
+                                <label class="settings-form-label">
+                                    <i class="bi bi-newspaper"></i>
+                                    {{ form.blog_meta_description.label.text }}
+                                </label>
+                                {{ form.blog_meta_description(class="settings-form-control", rows="2", placeholder="Meta cho trang blog") }}
+                            </div>
+
+                            <div class="settings-form-group">
+                                <label class="settings-form-label">
+                                    <i class="bi bi-briefcase"></i>
+                                    {{ form.careers_meta_description.label.text }}
+                                </label>
+                                {{ form.careers_meta_description(class="settings-form-control", rows="2", placeholder="Meta cho trang tuyển dụng") }}
+                            </div>
+
+                            <div class="settings-form-group">
+                                <label class="settings-form-label">
+                                    <i class="bi bi-question-circle"></i>
+                                    {{ form.faq_meta_description.label.text }}
+                                </label>
+                                {{ form.faq_meta_description(class="settings-form-control", rows="2", placeholder="Meta cho trang FAQ") }}
+                            </div>
+
+                            <div class="settings-form-group">
+                                <label class="settings-form-label">
+                                    <i class="bi bi-folder"></i>
+                                    {{ form.projects_meta_description.label.text }}
+                                </label>
+                                {{ form.projects_meta_description(class="settings-form-control", rows="2", placeholder="Meta cho trang dự án") }}
+                            </div>
+                        </div>
+                    </div>
 
                         <!-- Hình ảnh SEO -->
                         <div class="settings-section-card">
@@ -698,7 +700,7 @@
 
                 <!-- Action Buttons -->
                 <div class="settings-actions">
-                    <button type="button" class="settings-btn settings-btn-secondary" onclick="window.history.back()">
+                    <button type="button" class="settings-btn settings-btn-secondary">
                         <i class="bi bi-x-circle"></i>
                         Hủy bỏ
                     </button>

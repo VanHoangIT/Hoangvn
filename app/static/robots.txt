@@ -3,4 +3,4 @@ User-agent: *
 Disallow: /admin/
 Allow: /
 
-Sitemap: http://127.0.0.1:5000/sitemap.xml
+Sitemap: https://hoangvn.onrender.com/sitemap.xml

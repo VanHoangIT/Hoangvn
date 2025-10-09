@@ -403,7 +403,11 @@ class SettingsForm(FlaskForm):
     logo = FileField('Logo', validators=[FileAllowed(['jpg', 'png', 'jpeg', 'webp'])])
     logo_chatbot = FileField('Logo chatbot', validators=[FileAllowed(['jpg', 'png', 'jpeg', 'webp'])])
     primary_color = ColorField('Màu chủ đạo', validators=[Optional()])
-    # Xem trước giao diện: Xử lý ở frontend JS
+
+    logo_url = None
+    logo_chatbot_url = None
+    favicon_url = None
+    default_share_image_url = None
 
     # SEO & Meta Defaults
     meta_title = StringField('Meta Title mặc định', validators=[DataRequired()])
