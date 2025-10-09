@@ -2001,6 +2001,34 @@ def settings():
         set_setting('meta_description', form.meta_description.data, 'seo', 'Meta description mặc định')
         set_setting('meta_keywords', form.meta_keywords.data, 'seo', 'Meta keywords mặc định')
 
+        # 1. Favicon .ico
+        if form.favicon_ico.data:
+            favicon_ico_path = save_upload_file(form.favicon_ico.data, 'favicons')
+            if isinstance(favicon_ico_path, tuple):
+                favicon_ico_path = favicon_ico_path[0]
+            set_setting('favicon_ico_url', favicon_ico_path, 'seo', 'Favicon .ico')
+
+        # 2. Favicon PNG 96x96
+        if form.favicon_png.data:
+            favicon_png_path = save_upload_file(form.favicon_png.data, 'favicons')
+            if isinstance(favicon_png_path, tuple):
+                favicon_png_path = favicon_png_path[0]
+            set_setting('favicon_png_url', favicon_png_path, 'seo', 'Favicon PNG 96x96')
+
+        # 3. Favicon SVG
+        if form.favicon_svg.data:
+            favicon_svg_path = save_upload_file(form.favicon_svg.data, 'favicons')
+            if isinstance(favicon_svg_path, tuple):
+                favicon_svg_path = favicon_svg_path[0]
+            set_setting('favicon_svg_url', favicon_svg_path, 'seo', 'Favicon SVG')
+
+        # 4. Apple Touch Icon
+        if form.apple_touch_icon.data:
+            apple_icon_path = save_upload_file(form.apple_touch_icon.data, 'favicons')
+            if isinstance(apple_icon_path, tuple):
+                apple_icon_path = apple_icon_path[0]
+            set_setting('apple_touch_icon_url', apple_icon_path, 'seo', 'Apple Touch Icon')
+
         # ✅ Xử lý favicon upload
         if form.favicon.data:
             favicon_path = save_upload_file(form.favicon.data, 'favicons')
@@ -2084,6 +2112,10 @@ def settings():
         # Để hiển thị ảnh preview sau khi submit
         form.logo_url = get_setting('logo_url', '')
         form.logo_chatbot_url = get_setting('logo_chatbot_url', '')
+        form.favicon_ico_url = get_setting('favicon_ico_url', '')
+        form.favicon_png_url = get_setting('favicon_png_url', '')
+        form.favicon_svg_url = get_setting('favicon_svg_url', '')
+        form.apple_touch_icon_url = get_setting('apple_touch_icon_url', '')
         form.favicon_url = get_setting('favicon_url', '/static/img/favicon.ico')
         form.default_share_image_url = get_setting('default_share_image', '/static/img/default-share.jpg')
 
@@ -2112,6 +2144,10 @@ def settings():
     form.meta_keywords.data = get_setting('meta_keywords', 'thiết kế web, hoangvn, thương mại điện tử')
 
     # ✅ SEO - LOAD PREVIEW IMAGES
+    form.favicon_ico_url = get_setting('favicon_ico_url', '/static/img/favicon.ico')
+    form.favicon_png_url = get_setting('favicon_png_url', '/static/img/favicon-96x96.png')
+    form.favicon_svg_url = get_setting('favicon_svg_url', '/static/img/favicon.svg')
+    form.apple_touch_icon_url = get_setting('apple_touch_icon_url', '/static/img/apple-touch-icon.png')
     form.favicon_url = get_setting('favicon_url', '/static/img/favicon.ico')
     form.default_share_image_url = get_setting('default_share_image', '/static/img/default-share.jpg')
 

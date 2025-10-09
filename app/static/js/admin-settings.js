@@ -109,6 +109,10 @@
             { input: 'logo', preview: null },
             { input: 'logo_chatbot', preview: null },
             { input: 'favicon', preview: null },
+            { input: 'favicon_ico', preview: null },
+            { input: 'favicon_png', preview: null },
+            { input: 'favicon_svg', preview: null },
+            { input: 'apple_touch_icon', preview: null },
             { input: 'default_share_image', preview: null }
         ];
 
@@ -564,78 +568,78 @@ function initUnsavedChanges() {
     // ============ TỰ ĐỘNG LƯU BẢN NHÁP (OPTIONAL) ============
     // Tự động lưu dữ liệu form vào localStorage mỗi 30 giây
     // Có thể xóa chức năng này nếu không cần thiết
-    function initAutoSave() {
-        const form = document.querySelector('.settings-card form');
-        if (!form) return;
-
-        const AUTO_SAVE_KEY = 'settings_autosave';
-        const AUTO_SAVE_INTERVAL = 30000; // 30 giây
-
-        // Khôi phục dữ liệu đã lưu
-        restoreAutoSave();
-
-        // Tự động lưu định kỳ
-        setInterval(function() {
-            saveFormData();
-        }, AUTO_SAVE_INTERVAL);
-
-        function saveFormData() {
-            const formData = new FormData(form);
-            const data = {};
-
-            // Chỉ lưu text fields, không lưu files
-            for (let [key, value] of formData.entries()) {
-                const input = form.querySelector(`[name="${key}"]`);
-                if (input && input.type !== 'file' && input.type !== 'hidden') {
-                    data[key] = value;
-                }
-            }
-
-            localStorage.setItem(AUTO_SAVE_KEY, JSON.stringify({
-                data: data,
-                timestamp: new Date().toISOString()
-            }));
-        }
-
-        function restoreAutoSave() {
-            const saved = localStorage.getItem(AUTO_SAVE_KEY);
-            if (!saved) return;
-
-            try {
-                const { data, timestamp } = JSON.parse(saved);
-                const savedDate = new Date(timestamp);
-                const now = new Date();
-                const hoursDiff = (now - savedDate) / (1000 * 60 * 60);
-
-                // Chỉ khôi phục nếu dữ liệu được lưu trong vòng 24 giờ
-                if (hoursDiff > 24) {
-                    localStorage.removeItem(AUTO_SAVE_KEY);
-                    return;
-                }
-
-                // Hiển thị thông báo xác nhận khôi phục
-                if (confirm(`Tìm thấy bản lưu tự động từ ${savedDate.toLocaleString('vi-VN')}. Bạn có muốn khôi phục không?`)) {
-                    Object.keys(data).forEach(key => {
-                        const input = form.querySelector(`[name="${key}"]`);
-                        if (input && input.type !== 'file') {
-                            input.value = data[key];
-                        }
-                    });
-                    showNotification('Đã khôi phục bản lưu tự động', 'success');
-                } else {
-                    localStorage.removeItem(AUTO_SAVE_KEY);
-                }
-            } catch (e) {
-                console.error('Error restoring autosave:', e);
-                localStorage.removeItem(AUTO_SAVE_KEY);
-            }
-        }
-
-        // Xóa autosave khi submit thành công
-        form.addEventListener('submit', function() {
-            localStorage.removeItem(AUTO_SAVE_KEY);
-        });
-    }
+//    function initAutoSave() {
+//        const form = document.querySelector('.settings-card form');
+//        if (!form) return;
+//
+//        const AUTO_SAVE_KEY = 'settings_autosave';
+//        const AUTO_SAVE_INTERVAL = 30000; // 30 giây
+//
+//        // Khôi phục dữ liệu đã lưu
+//        restoreAutoSave();
+//
+//        // Tự động lưu định kỳ
+//        setInterval(function() {
+//            saveFormData();
+//        }, AUTO_SAVE_INTERVAL);
+//
+//        function saveFormData() {
+//            const formData = new FormData(form);
+//            const data = {};
+//
+//            // Chỉ lưu text fields, không lưu files
+//            for (let [key, value] of formData.entries()) {
+//                const input = form.querySelector(`[name="${key}"]`);
+//                if (input && input.type !== 'file' && input.type !== 'hidden') {
+//                    data[key] = value;
+//                }
+//            }
+//
+//            localStorage.setItem(AUTO_SAVE_KEY, JSON.stringify({
+//                data: data,
+//                timestamp: new Date().toISOString()
+//            }));
+//        }
+//
+//        function restoreAutoSave() {
+//            const saved = localStorage.getItem(AUTO_SAVE_KEY);
+//            if (!saved) return;
+//
+//            try {
+//                const { data, timestamp } = JSON.parse(saved);
+//                const savedDate = new Date(timestamp);
+//                const now = new Date();
+//                const hoursDiff = (now - savedDate) / (1000 * 60 * 60);
+//
+//                // Chỉ khôi phục nếu dữ liệu được lưu trong vòng 24 giờ
+//                if (hoursDiff > 24) {
+//                    localStorage.removeItem(AUTO_SAVE_KEY);
+//                    return;
+//                }
+//
+//                // Hiển thị thông báo xác nhận khôi phục
+//                if (confirm(`Tìm thấy bản lưu tự động từ ${savedDate.toLocaleString('vi-VN')}. Bạn có muốn khôi phục không?`)) {
+//                    Object.keys(data).forEach(key => {
+//                        const input = form.querySelector(`[name="${key}"]`);
+//                        if (input && input.type !== 'file') {
+//                            input.value = data[key];
+//                        }
+//                    });
+//                    showNotification('Đã khôi phục bản lưu tự động', 'success');
+//                } else {
+//                    localStorage.removeItem(AUTO_SAVE_KEY);
+//                }
+//            } catch (e) {
+//                console.error('Error restoring autosave:', e);
+//                localStorage.removeItem(AUTO_SAVE_KEY);
+//            }
+//        }
+//
+//        // Xóa autosave khi submit thành công
+//        form.addEventListener('submit', function() {
+//            localStorage.removeItem(AUTO_SAVE_KEY);
+//        });
+//    }
 
     // ============ TOOLTIPS (OPTIONAL) ============
     // Hiển thị tooltips cho các icon và help text

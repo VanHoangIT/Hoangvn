@@ -9,8 +9,25 @@
     <meta name="description" content="{% block meta_description %}{{ get_setting('meta_description', 'Website doanh nghiệp chuyên nghiệp cung cấp sản phẩm và dịch vụ chất lượng cao.') }}{% endblock %}">
     <meta name="keywords" content="{{ get_setting('meta_keywords', 'thiết kế web, hoangvn, thương mại điện tử') }}">
 
-    <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="{{ get_setting('favicon_url', url_for('static', filename='img/favicon.ico')) }}">
+     <!-- ==================== FAVICON - MULTIPLE FORMATS ==================== -->
+    <!-- ICO: Ưu tiên mới → fallback cũ → mặc định -->
+    <link rel="icon" type="image/x-icon" sizes="any"
+          href="{{ get_setting('favicon_ico_url', get_setting('favicon_url', url_for('static', filename='img/favicon.ico'))) }}">
+
+    <!-- SVG: Tối ưu cho màn hình Retina -->
+    <link rel="icon" type="image/svg+xml"
+          href="{{ get_setting('favicon_svg_url', url_for('static', filename='img/favicon.svg')) }}">
+
+    <!-- PNG: Fallback hiện đại -->
+    <link rel="icon" type="image/png" sizes="96x96"
+          href="{{ get_setting('favicon_png_url', url_for('static', filename='img/favicon-96x96.png')) }}">
+
+    <!-- Apple Touch Icon -->
+    <link rel="apple-touch-icon" sizes="180x180"
+          href="{{ get_setting('apple_touch_icon_url', url_for('static', filename='img/apple-touch-icon.png')) }}">
+
+    <!-- Web App Manifest -->
+    <link rel="manifest" href="{{ url_for('static', filename='site.webmanifest') }}">
 
     <!-- ==================== DYNAMIC THEME COLORS  ==================== -->
     <style>

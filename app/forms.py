@@ -404,15 +404,18 @@ class SettingsForm(FlaskForm):
     logo_chatbot = FileField('Logo chatbot', validators=[FileAllowed(['jpg', 'png', 'jpeg', 'webp'])])
     primary_color = ColorField('Màu chủ đạo', validators=[Optional()])
 
-    logo_url = None
-    logo_chatbot_url = None
-    favicon_url = None
-    default_share_image_url = None
-
     # SEO & Meta Defaults
     meta_title = StringField('Meta Title mặc định', validators=[DataRequired()])
     meta_description = TextAreaField('Meta Description mặc định', validators=[DataRequired()])
     meta_keywords = StringField('Meta Keywords', validators=[Optional()])
+
+    # ✅ THÊM CÁC TRƯỜNG FAVICON MỚI
+    favicon_ico = FileField('Favicon (.ico)', validators=[FileAllowed(['ico'])])
+    favicon_png = FileField('Favicon PNG (96x96)', validators=[FileAllowed(['png'])])
+    favicon_svg = FileField('Favicon SVG', validators=[FileAllowed(['svg'])])
+    apple_touch_icon = FileField('Apple Touch Icon (180x180)', validators=[FileAllowed(['png'])])
+
+
     index_meta_description = TextAreaField('Meta Description Trang Chủ', validators=[Length(max=160)])
     about_meta_description = TextAreaField('Meta Description Giới Thiệu', validators=[Length(max=160)])
     contact_meta_description = TextAreaField('Meta Description Liên Hệ', validators=[Length(max=160)])
@@ -423,7 +426,7 @@ class SettingsForm(FlaskForm):
     projects_meta_description = TextAreaField('Meta Description Dự Án', validators=[Length(max=160)])
     product_meta_description = TextAreaField('Meta Description Chi Tiết Sản Phẩm', validators=[Length(max=160)])
     favicon = FileField('Favicon', validators=[FileAllowed(['ico', 'png'])])
-    default_share_image = FileField('Ảnh chia sẻ mặc định', validators=[FileAllowed(['jpg', 'png', 'jpeg'])])
+    default_share_image = FileField('Ảnh chia sẻ mặc định', validators=[FileAllowed(['jpg', 'png', 'jpeg', 'webp'])])
 
     # Contact & Social Settings
     contact_email = StringField('Email liên hệ', validators=[Email()])
@@ -458,5 +461,15 @@ class SettingsForm(FlaskForm):
 
     contact_form = TextAreaField('Form liên hệ mặc định', validators=[Optional()])
     default_posts_per_page = IntegerField('Số lượng bài viết mặc định', validators=[NumberRange(min=1, max=50)])
+
+    logo_url = None
+    logo_chatbot_url = None
+    favicon_url = None
+    default_share_image_url = None
+    favicon_ico_url = None
+    favicon_png_url = None
+    favicon_svg_url = None
+    apple_touch_icon_url = None
+
 
     submit = SubmitField('Lưu cài đặt')
