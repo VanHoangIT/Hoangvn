@@ -25,7 +25,11 @@
             <ol class="breadcrumb mb-0">
                 <li class="breadcrumb-item"><a href="{{ url_for('main.index') }}">Trang chủ</a></li>
                 <li class="breadcrumb-item"><a href="{{ url_for('main.products') }}">Sản phẩm</a></li>
-                <li class="breadcrumb-item"><a href="{{ url_for('main.products', category=product.category_id) }}">{{ product.category.name }}</a></li>
+                <li class="breadcrumb-item">
+                    <a href="{{ url_for('main.products', category_slug=product.category.slug) }}">
+                        {{ product.category.name }}
+                    </a>
+                </li>
                 <li class="breadcrumb-item active" aria-current="page">{{ product.name }}</li>
             </ol>
         </nav>
@@ -357,7 +361,7 @@
       "@type": "ListItem",
       "position": 3,
       "name": "{{ product.category.name|e }}",
-      "item": "{{ url_for('main.products', category=product.category_id, _external=True) }}"
+      "item": "{{ url_for('main.products', category_slug=product.category.slug, _external=True) }}"
     },
     {
       "@type": "ListItem",

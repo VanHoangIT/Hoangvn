@@ -444,24 +444,24 @@ html {
 /* ==================== FLOATING ACTION BUTTONS ==================== */
 .floating-buttons {
   position: fixed;
-  right: 1.25rem;
-  bottom: 1.25rem;
+  right: 1rem;
+  bottom: 1rem;
   z-index: 1030;
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 0.5rem;
 }
 
 .floating-btn {
-  width: 56px;
-  height: 56px;
+  width: 46px;
+  height: 46px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   color: #fff;
-  font-size: 1.5rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  font-size: 1.2rem;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   animation: pulse 2.5s infinite ease-in-out;
   border: none;
@@ -469,9 +469,9 @@ html {
 }
 
 .floating-btn:hover {
-  transform: scale(1.15);
+  transform: scale(1.1);
   animation: none;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
 }
 
 .zalo-btn {
@@ -489,26 +489,26 @@ html {
 @keyframes pulse {
   0%,
   100% {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
     transform: scale(1);
   }
   50% {
-    box-shadow: 0 4px 20px rgba(255, 193, 7, 0.5),
-      0 0 0 8px rgba(255, 193, 7, 0.1);
-    transform: scale(1.05);
+    box-shadow: 0 3px 15px rgba(255, 193, 7, 0.4),
+      0 0 0 6px rgba(255, 193, 7, 0.1);
+    transform: scale(1.03);
   }
 }
 
 @media (max-width: 768px) {
   .floating-buttons {
-    right: 1rem;
-    bottom: 1rem;
+    right: 0.75rem;
+    bottom: 0.75rem;
   }
 
   .floating-btn {
-    width: 50px;
-    height: 50px;
-    font-size: 1.25rem;
+    width: 42px;
+    height: 42px;
+    font-size: 1.1rem;
   }
 }
 
@@ -700,20 +700,16 @@ footer ul li:last-child {
 
 /* ==================== CUSTOM SCROLLBAR ==================== */
 ::-webkit-scrollbar {
-  width: 10px;
+  width: 0px;
+  display: none;
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  display: none;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #ffc107, #ffb300);
-  border-radius: 5px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, #ffb300, #ffa000);
+  display: none;
 }
 
 /* ==================== ALERT MESSAGES ==================== */
@@ -1074,5 +1070,81 @@ footer ul li:last-child {
   #featured-projects .project-meta {
     flex-direction: column;
     gap: 0.5rem;
+  }
+}
+/* ==================== SCROLL TO TOP BUTTON WITH PROGRESS ==================== */
+.scroll-to-top {
+  position: fixed;
+  bottom: 180px;
+  right: 1rem;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+  z-index: 1029;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: none;
+}
+
+.scroll-to-top.show {
+  opacity: 1;
+  visibility: visible;
+}
+
+.scroll-to-top:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
+.scroll-to-top svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.scroll-to-top svg circle {
+  fill: none;
+  stroke: #e9ecef;
+  stroke-width: 2.5;
+}
+
+.scroll-to-top svg circle.progress {
+  stroke: #ffc107;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.1s linear;
+}
+
+.scroll-to-top .icon {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 1.2rem;
+  color: #212529;
+  transition: color 0.3s ease;
+}
+
+.scroll-to-top:hover .icon {
+  color: #ffc107;
+}
+
+@media (max-width: 768px) {
+  .scroll-to-top {
+    bottom: 150px;
+    right: 0.75rem;
+    width: 42px;
+    height: 42px;
+  }
+
+  .scroll-to-top .icon {
+    font-size: 1.1rem;
   }
 }

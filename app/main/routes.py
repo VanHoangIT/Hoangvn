@@ -6,7 +6,6 @@ from sqlalchemy import or_
 from app.project_config import PROJECT_TYPES
 import os
 
-
 # Tạo Blueprint cho frontend
 main_bp = Blueprint('main', __name__)
 
@@ -35,7 +34,8 @@ def index():
         is_active=True
     ).limit(3).all()
 
-    featured_projects = Project.query.filter_by(is_featured=True, is_active=True).order_by(Project.created_at.desc()).all()
+    featured_projects = Project.query.filter_by(is_featured=True, is_active=True).order_by(
+        Project.created_at.desc()).all()
 
     return render_template('index.html',
                            banners=banners,
@@ -46,27 +46,68 @@ def index():
 
 
 # ==================== GIỚI THIỆU ====================
-@main_bp.route('/about')
+@main_bp.route('/gioi-thieu')
 def about():
     """Trang giới thiệu"""
     return render_template('about.html')
 
 
 # ==================== SẢN PHẨM ====================
-@main_bp.route('/products')
-def products():
+@main_bp.route('/san-pham')
+@main_bp.route('/loai-san-pham/<category_slug>')
+def products(category_slug=None):
     """Trang danh sách sản phẩm với filter"""
     page = request.args.get('page', 1, type=int)
-    category_id = request.args.get('category', type=int)
     search = request.args.get('search', '')
     sort = request.args.get('sort', 'latest')
 
+    # Xử lý backward compatibility cho URL cũ
+    old_category_id = request.args.get('category', type=int)
+    if old_category_id:
+        category = Category.query.get(old_category_id)
+        if category and category.is_active:
+            # Redirect 301 (permanent) đến URL mới với slug
+            return redirect(url_for('main.products',
+                                    category_slug=category.slug,
+                                    search=search if search else None,
+                                    sort=sort if sort != 'latest' else None,
+                                    page=page if page > 1 else None),
+                            code=301)
+        elif not category:
+            # Category không tồn tại, chuyển về trang products chung
+            flash('Danh mục không tồn tại.', 'warning')
+            return redirect(url_for('main.products'))
+
+    # Redirect URL cũ /products sang /san-pham
+    if request.path == '/products' or request.path.startswith('/products/category/'):
+        # Lấy category_slug từ path cũ nếu có
+        old_path_parts = request.path.split('/')
+        if len(old_path_parts) > 3 and old_path_parts[2] == 'category':
+            old_slug = old_path_parts[3]
+            return redirect(url_for('main.products',
+                                    category_slug=old_slug,
+                                    search=search if search else None,
+                                    sort=sort if sort != 'latest' else None,
+                                    page=page if page > 1 else None),
+                            code=301)
+        else:
+            return redirect(url_for('main.products',
+                                    search=search if search else None,
+                                    sort=sort if sort != 'latest' else None,
+                                    page=page if page > 1 else None),
+                            code=301)
+
     # Query cơ bản
     query = Product.query.filter_by(is_active=True)
+    current_category = None
 
-    # Filter theo danh mục
-    if category_id:
-        query = query.filter_by(category_id=category_id)
+    # Filter theo danh mục slug
+    if category_slug:
+        current_category = Category.query.filter_by(
+            slug=category_slug,
+            is_active=True
+        ).first_or_404()
+        query = query.filter_by(category_id=current_category.id)
 
     # Search theo tên
     if search:
@@ -99,12 +140,15 @@ def products():
                            products=products,
                            categories=categories,
                            pagination=pagination,
-                           current_category=category_id,
+                           current_category=current_category,
                            current_search=search,
                            current_sort=sort)
 
+
 from datetime import datetime, timedelta
-@main_bp.route('/product/<slug>')
+
+
+@main_bp.route('/san-pham/<slug>')
 def product_detail(slug):
     """Trang chi tiết sản phẩm"""
     product = Product.query.filter_by(slug=slug, is_active=True).first_or_404()
@@ -121,14 +165,21 @@ def product_detail(slug):
     ).limit(4).all()
 
     return render_template('product_detail.html',
-                         product=product,
-                         related_products=related_products,
-                         now=datetime.now(),
-                         timedelta=timedelta)
+                           product=product,
+                           related_products=related_products,
+                           now=datetime.now(),
+                           timedelta=timedelta)
+
+
+# Route cũ redirect sang mới
+@main_bp.route('/product/<slug>')
+def old_product_detail(slug):
+    """Redirect URL cũ sang URL mới"""
+    return redirect(url_for('main.product_detail', slug=slug), code=301)
 
 
 # ==================== TIN TỨC / BLOG ====================
-@main_bp.route('/blog')
+@main_bp.route('/tin-tuc')
 def blog():
     """Trang danh sách blog"""
     page = request.args.get('page', 1, type=int)
@@ -174,7 +225,7 @@ def blog():
                            current_search=search)
 
 
-@main_bp.route('/blog/<slug>')
+@main_bp.route('/tin-tuc/<slug>')
 def blog_detail(slug):
     """Trang chi tiết blog"""
     blog = Blog.query.filter_by(slug=slug, is_active=True).first_or_404()
@@ -194,8 +245,21 @@ def blog_detail(slug):
                            related_blogs=related_blogs)
 
 
+# Route cũ redirect sang mới
+@main_bp.route('/blog')
+def old_blog():
+    """Redirect URL cũ sang URL mới"""
+    return redirect(url_for('main.blog'), code=301)
+
+
+@main_bp.route('/blog/<slug>')
+def old_blog_detail(slug):
+    """Redirect URL cũ sang URL mới"""
+    return redirect(url_for('main.blog_detail', slug=slug), code=301)
+
+
 # ==================== LIÊN HỆ ====================
-@main_bp.route('/contact', methods=['GET', 'POST'])
+@main_bp.route('/lien-he', methods=['GET', 'POST'])
 def contact():
     """Trang liên hệ"""
     form = ContactForm()
@@ -219,23 +283,44 @@ def contact():
     return render_template('contact.html', form=form)
 
 
+# Route cũ redirect sang mới
+@main_bp.route('/contact', methods=['GET', 'POST'])
+def old_contact():
+    """Redirect URL cũ sang URL mới"""
+    return redirect(url_for('main.contact'), code=301)
+
+
 # ==================== CHÍNH SÁCH ====================
-@main_bp.route('/policy')
+@main_bp.route('/chinh-sach')
 def policy():
     """Trang chính sách"""
     return render_template('policy.html')
 
 
+# Route cũ redirect sang mới
+@main_bp.route('/policy')
+def old_policy():
+    """Redirect URL cũ sang URL mới"""
+    return redirect(url_for('main.policy'), code=301)
+
+
 # ==================== FAQ ====================
-@main_bp.route('/faq')
+@main_bp.route('/cau-hoi-thuong-gap')
 def faq():
     """Trang câu hỏi thường gặp"""
     faqs = FAQ.query.filter_by(is_active=True).order_by(FAQ.order).all()
     return render_template('faq.html', faqs=faqs)
 
 
+# Route cũ redirect sang mới
+@main_bp.route('/faq')
+def old_faq():
+    """Redirect URL cũ sang URL mới"""
+    return redirect(url_for('main.faq'), code=301)
+
+
 # ==================== SEARCH ====================
-@main_bp.route('/search')
+@main_bp.route('/tim-kiem')
 def search():
     """Trang tìm kiếm tổng hợp"""
     keyword = request.args.get('q', '')
@@ -263,8 +348,17 @@ def search():
                            products=products,
                            blogs=blogs)
 
+
+# Route cũ redirect sang mới
+@main_bp.route('/search')
+def old_search():
+    """Redirect URL cũ sang URL mới"""
+    keyword = request.args.get('q', '')
+    return redirect(url_for('main.search', q=keyword), code=301)
+
+
 # ==================== DỰ ÁN ====================
-@main_bp.route('/projects')
+@main_bp.route('/du-an')
 def projects():
     """Trang danh sách dự án"""
     page = request.args.get('page', 1, type=int)
@@ -288,7 +382,7 @@ def projects():
                            current_type=project_type)
 
 
-@main_bp.route('/projects/<slug>')
+@main_bp.route('/du-an/<slug>')
 def project_detail(slug):
     """Trang chi tiết dự án"""
     project = Project.query.filter_by(slug=slug, is_active=True).first_or_404()
@@ -308,8 +402,22 @@ def project_detail(slug):
                            project=project,
                            related=related)
 
+
+# Route cũ redirect sang mới
+@main_bp.route('/projects')
+def old_projects():
+    """Redirect URL cũ sang URL mới"""
+    return redirect(url_for('main.projects'), code=301)
+
+
+@main_bp.route('/projects/<slug>')
+def old_project_detail(slug):
+    """Redirect URL cũ sang URL mới"""
+    return redirect(url_for('main.project_detail', slug=slug), code=301)
+
+
 # ==================== TUYỂN DỤNG ====================
-@main_bp.route('/careers')
+@main_bp.route('/tuyen-dung')
 def careers():
     """Trang tuyển dụng"""
     department = request.args.get('dept', '')
@@ -334,7 +442,7 @@ def careers():
                            locations=[l[0] for l in locations if l[0]])
 
 
-@main_bp.route('/careers/<slug>')
+@main_bp.route('/tuyen-dung/<slug>')
 def job_detail(slug):
     """Trang chi tiết tuyển dụng"""
     job = Job.query.filter_by(slug=slug, is_active=True).first_or_404()
@@ -353,6 +461,20 @@ def job_detail(slug):
                            job=job,
                            other_jobs=other_jobs)
 
+
+# Route cũ redirect sang mới
+@main_bp.route('/careers')
+def old_careers():
+    """Redirect URL cũ sang URL mới"""
+    return redirect(url_for('main.careers'), code=301)
+
+
+@main_bp.route('/careers/<slug>')
+def old_job_detail(slug):
+    """Redirect URL cũ sang URL mới"""
+    return redirect(url_for('main.job_detail', slug=slug), code=301)
+
+
 # ==================== SITEMAP.XML ====================
 @main_bp.route('/sitemap.xml')
 def sitemap():
@@ -362,6 +484,7 @@ def sitemap():
         return send_from_directory(current_app.static_folder, 'sitemap.xml', mimetype='application/xml')
     else:
         abort(404, description="Sitemap not found")
+
 
 # ==================== ROBOTS.TXT ====================
 @main_bp.route('/robots.txt')

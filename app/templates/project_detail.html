@@ -155,106 +155,102 @@
                 {% endif %}
             </div>
 
-            <!-- Sidebar -->
-            <div class="col-lg-4">
-                <!-- Project Info Card -->
-                <div class="card border-0 shadow-sm mb-4 sticky-top" style="top: 100px;">
-                    <div class="card-header bg-warning">
-                        <h5 class="mb-0">
-                            <i class="bi bi-info-circle me-2"></i>Thông tin dự án
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <table class="table table-sm table-borderless mb-0">
-                            {% if project.client %}
-                            <tr>
-                                <td class="text-muted">
-                                    <i class="bi bi-building text-warning"></i> Khách hàng:
-                                </td>
-                                <td><strong>{{ project.client }}</strong></td>
-                            </tr>
-                            {% endif %}
-                            <tr>
-                                <td class="text-muted">
-                                    <i class="bi bi-geo-alt text-warning"></i> Địa điểm:
-                                </td>
-                                <td><strong>{{ project.location }}</strong></td>
-                            </tr>
-                            {% if project.year %}
-                            <tr>
-                                <td class="text-muted">
-                                    <i class="bi bi-calendar text-warning"></i> Năm:
-                                </td>
-                                <td><strong>{{ project.year }}</strong></td>
-                            </tr>
-                            {% endif %}
-                            <tr>
-                                <td class="text-muted">
-                                    <i class="bi bi-tag text-warning"></i> Loại:
-                                </td>
-                                <td>
-                                    <span class="badge bg-secondary">
-                                        {% if project.project_type == 'residential' %}
-                                            Nhà ở
-                                        {% elif project.project_type == 'office' %}
-                                            Văn phòng
-                                        {% elif project.project_type == 'hotel' %}
-                                            Khách sạn
-                                        {% elif project.project_type == 'restaurant' %}
-                                            Nhà hàng
-                                        {% elif project.project_type == 'hospital' %}
-                                            Bệnh viện
-                                        {% else %}
-                                            {{ project.project_type }}
-                                        {% endif %}
-                                    </span>
-                                </td>
-                            </tr>
-                            {% if project.area %}
-                            <tr>
-                                <td class="text-muted">
-                                    <i class="bi bi-arrows-angle-expand text-warning"></i> Diện tích:
-                                </td>
-                                <td><strong>{{ project.area }}</strong></td>
-                            </tr>
-                            {% endif %}
-                        </table>
+                <!-- Sidebar -->
+                <div class="col-lg-4">
+                    <!-- Combined Info & CTA Card -->
+                    <div class="card border-0 shadow-sm mb-4 sticky-top" style="top: 120px; z-index: 100;">
+                        <!-- Project Info Section -->
+                        <div class="card-header bg-warning">
+                            <h5 class="mb-0">
+                                <i class="bi bi-info-circle me-2"></i>Thông tin dự án
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <table class="table table-sm table-borderless mb-0">
+                                {% if project.client %}
+                                <tr>
+                                    <td class="text-muted">
+                                        <i class="bi bi-building text-warning"></i> Khách hàng:
+                                    </td>
+                                    <td><strong>{{ project.client }}</strong></td>
+                                </tr>
+                                {% endif %}
+                                <tr>
+                                    <td class="text-muted">
+                                        <i class="bi bi-geo-alt text-warning"></i> Địa điểm:
+                                    </td>
+                                    <td><strong>{{ project.location }}</strong></td>
+                                </tr>
+                                {% if project.year %}
+                                <tr>
+                                    <td class="text-muted">
+                                        <i class="bi bi-calendar text-warning"></i> Năm:
+                                    </td>
+                                    <td><strong>{{ project.year }}</strong></td>
+                                </tr>
+                                {% endif %}
+                                <tr>
+                                    <td class="text-muted">
+                                        <i class="bi bi-tag text-warning"></i> Loại:
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-secondary">
+                                            {% if project.project_type == 'residential' %}
+                                                Nhà ở
+                                            {% elif project.project_type == 'office' %}
+                                                Văn phòng
+                                            {% elif project.project_type == 'hotel' %}
+                                                Khách sạn
+                                            {% elif project.project_type == 'restaurant' %}
+                                                Nhà hàng
+                                            {% elif project.project_type == 'hospital' %}
+                                                Bệnh viện
+                                            {% else %}
+                                                {{ project.project_type }}
+                                            {% endif %}
+                                        </span>
+                                    </td>
+                                </tr>
+                                {% if project.area %}
+                                <tr>
+                                    <td class="text-muted">
+                                        <i class="bi bi-arrows-angle-expand text-warning"></i> Diện tích:
+                                    </td>
+                                    <td><strong>{{ project.area }}</strong></td>
+                                </tr>
+                                {% endif %}
+                            </table>
 
-                        {% if project.products_used %}
-                        <hr>
-                        <h6 class="mb-2">
-                            <i class="bi bi-box-seam text-warning me-1"></i>Sản phẩm sử dụng:
-                        </h6>
-                        <p class="small text-muted mb-0">{{ project.products_used }}</p>
-                        {% endif %}
-                    </div>
-                    <div class="card-footer bg-white">
-                        <a href="{{ url_for('main.contact') }}"
-                           class="btn btn-warning w-100">
-                            <i class="bi bi-envelope"></i> Liên hệ tư vấn
-                        </a>
+                            {% if project.products_used %}
+                            <hr>
+                            <h6 class="mb-2">
+                                <i class="bi bi-box-seam text-warning me-1"></i>Sản phẩm sử dụng:
+                            </h6>
+                            <p class="small text-muted mb-0">{{ project.products_used }}</p>
+                            {% endif %}
+                        </div>
+
+                        <!-- Divider -->
+                        <hr class="my-0">
+
+                        <!-- CTA Section -->
+                        <div class="card-body text-center p-4">
+                            <i class="bi bi-lightbulb text-warning fs-1 mb-3 d-block"></i>
+                            <h5 class="card-title fw-bold mb-3">Bạn có dự án tương tự?</h5>
+                            <p class="card-text small text-muted mb-4">
+                                Liên hệ với chúng tôi để được tư vấn giải pháp phù hợp nhất
+                            </p>
+                            <a href="tel:{{ get_setting('hotline', '0123456789') }}"
+                               class="btn btn-warning w-100 mb-2">
+                                <i class="bi bi-telephone"></i> {{ get_setting('hotline', '0123 456 789') }}
+                            </a>
+                            <a href="{{ url_for('main.contact') }}"
+                               class="btn btn-outline-warning w-100">
+                                <i class="bi bi-envelope"></i> Gửi yêu cầu
+                            </a>
+                        </div>
                     </div>
                 </div>
-
-                <!-- CTA Card -->
-                <div class="card border-0 shadow-sm bg-light">
-                    <div class="card-body text-center p-4">
-                        <i class="bi bi-lightbulb text-warning fs-1 mb-3 d-block"></i>
-                        <h5 class="card-title fw-bold">Bạn có dự án tương tự?</h5>
-                        <p class="card-text small text-muted mb-4">
-                            Liên hệ với chúng tôi để được tư vấn giải pháp phù hợp nhất
-                        </p>
-                        <a href="tel:{{ get_setting('hotline', '0123456789') }}"
-                           class="btn btn-warning w-100 mb-2">
-                            <i class="bi bi-telephone"></i> {{ get_setting('hotline', '0123 456 789') }}
-                        </a>
-                        <a href="{{ url_for('main.contact') }}"
-                           class="btn btn-outline-warning w-100">
-                            <i class="bi bi-envelope"></i> Gửi yêu cầu
-                        </a>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 </section>

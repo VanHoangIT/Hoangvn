@@ -84,23 +84,23 @@
                         </h5>
                     </div>
                     <div class="card-body">
-                        <p class="mb-3">
+                        <p class="mb-3 text-center">
                             <i class="bi bi-telephone-fill text-warning me-2"></i>
-                            <strong>Hotline:</strong><br>
-                            <a href="tel:{{ get_setting('hotline', '098.422.6602') }}" class="text-decoration-none">
+                            <strong>Hotline:</strong>
+                            <a href="tel:{{ get_setting('hotline', '098.422.6602') }}" class="text-decoration-none text-primary fw-bold">
                                 {{ get_setting('hotline', '098.422.6602') }}
                             </a>
                         </p>
-                        <p class="mb-3">
+                        <p class="mb-3 text-center">
                             <i class="bi bi-envelope-fill text-warning me-2"></i>
-                            <strong>Email:</strong><br>
-                            <a href="mailto:{{ get_setting('contact_email', 'info@hoang.vn') }}" class="text-decoration-none">
+                            <strong>Email:</strong>
+                            <a href="mailto:{{ get_setting('contact_email', 'info@hoang.vn') }}" class="text-decoration-none text-primary fw-bold">
                                 {{ get_setting('contact_email', 'info@hoang.vn') }}
                             </a>
                         </p>
-                        <p class="mb-0">
+                        <p class="mb-0 text-center">
                             <i class="bi bi-clock-fill text-warning me-2"></i>
-                            <strong>Giờ làm việc:</strong><br>
+                            <strong>Giờ làm việc:</strong>
                             {{ get_setting('working_hours', '8h - 17h30 (Thứ 2 - Thứ 7)') }}
                         </p>
                         <hr>
@@ -249,6 +249,13 @@
 
 .accordion-item:hover {
     transform: translateX(5px);
+}
+</style>
+<style>
+a.text-primary.fw-bold:hover {
+  color: #004085 !important; /* xanh đậm hơn khi hover */
+  text-decoration: underline; /* nếu anh muốn có gạch chân nhẹ */
+  transition: 0.2s ease;
 }
 </style>
 {% endblock %}

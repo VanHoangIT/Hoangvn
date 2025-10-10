@@ -23,7 +23,7 @@
         <div class="row">
             <!-- Sidebar Navigation -->
             <div class="col-lg-3 mb-4">
-                <div class="list-group sticky-top" style="top: 100px;">
+                <div class="list-group sticky-top" style="top: 100px; z-index: 10;">
                     <a href="#shipping"
                        class="list-group-item list-group-item-action">
                         <i class="bi bi-truck text-warning me-2"></i>Chính sách vận chuyển
@@ -236,20 +236,51 @@ html {
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Smooth scroll cho sidebar links
-    document.querySelectorAll('.list-group a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function (e) {
-            e.preventDefault();
-            const target = document.querySelector(this.getAttribute('href'));
+    // Xử lý scroll khi trang load với hash
+    if (window.location.hash) {
+        setTimeout(function() {
+            const target = document.querySelector(window.location.hash);
             if (target) {
-                // Scroll đến vị trí với offset cho sticky header
-                const offsetTop = target.offsetTop - 120;
+                const offsetTop = target.getBoundingClientRect().top + window.pageYOffset - 140;
                 window.scrollTo({
                     top: offsetTop,
                     behavior: 'smooth'
                 });
             }
+        }, 100);
+    }
+
+    // Smooth scroll cho sidebar links
+    document.querySelectorAll('.list-group a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const targetId = this.getAttribute('href');
+            const target = document.querySelector(targetId);
+
+            if (target) {
+                // Scroll đến vị trí với offset cho sticky header (140px = navbar + padding)
+                const offsetTop = target.getBoundingClientRect().top + window.pageYOffset - 140;
+                window.scrollTo({
+                    top: offsetTop,
+                    behavior: 'smooth'
+                });
+
+                // Update URL hash
+                history.pushState(null, null, targetId);
+            }
         });
+    });
+
+    // Xử lý khi click từ footer (external links)
+    window.addEventListener('hashchange', function() {
+        const target = document.querySelector(window.location.hash);
+        if (target) {
+            const offsetTop = target.getBoundingClientRect().top + window.pageYOffset - 140;
+            window.scrollTo({
+                top: offsetTop,
+                behavior: 'smooth'
+            });
+        }
     });
 });
 </script>

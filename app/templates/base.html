@@ -101,6 +101,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/chatbot.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/theme-dynamic.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/scale-down.css') }}">
     {% block extra_css %}{% endblock %}
 </head>
 
@@ -472,6 +473,14 @@
             <i class="bi bi-messenger"></i>
         </a>
         </div>
+    <!-- ==================== SCROLL TO TOP BUTTON ==================== -->
+        <button class="scroll-to-top" id="scrollToTop" aria-label="Scroll to top">
+            <svg viewBox="0 0 56 56">
+                <circle cx="28" cy="28" r="26"></circle>
+                <circle class="progress" cx="28" cy="28" r="26"></circle>
+            </svg>
+            <i class="bi bi-arrow-up icon"></i>
+        </button>
 
     <!-- ==================== SCRIPTS ==================== -->
     <!-- Bootstrap Bundle JS -->
