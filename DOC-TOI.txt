@@ -30,9 +30,18 @@ __pycache__/
 Thumbs.db
 
 ---------------------------------------------------
+Thiết lập môi trường trong render
 
-
-
+DATABASE_URL=
+SECRET_KEY=
+FLASK_ENV=production
+FLASK_DEBUG=0
+CLOUDINARY_CLOUD_NAME=
+CLOUDINARY_API_KEY=
+CLOUDINARY_API_SECRET=
+GEMINI_API_KEY=
+CLOUDINARY_URL=
+PYTHON_VERSION=3.11.9
 
 
 
