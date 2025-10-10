@@ -26,7 +26,7 @@ class Config:
     UPLOAD_FOLDER = os.path.join(BASE_DIR, 'static', 'uploads')
 
     MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # Max 16MB
-    ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
+    ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp', 'ico', 'svg'}
 
     # Pagination
     POSTS_PER_PAGE = 12
