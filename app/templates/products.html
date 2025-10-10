@@ -92,7 +92,7 @@
                 {% if products %}
                 <div class="row g-4">
                     {% for product in products %}
-                    <div class="col-lg-4 col-md-6 col-sm-6">
+                    <div class="col-lg-4 col-md-6 col-sm-6 col-6">
                         <div class="product-card">
                             <div class="product-image">
                                 {% set media_info = product.get_media_seo_info() if product.image else None %}

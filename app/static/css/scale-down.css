@@ -58,22 +58,64 @@ section h2 {
 }
 
 /* ==================== PRODUCT CARDS ==================== */
+/* ==================== PRODUCT CARDS ==================== */
 .product-image {
-  height: 210px !important;
+  height: 210px; /* Loại bỏ !important để linh hoạt */
 }
 
 .product-name {
   font-size: 1rem !important;
-  height: 45px !important;
+  height: auto !important; /* Loại bỏ height cố định để tránh cắt nội dung */
+  -webkit-line-clamp: 3 !important; /* Tăng lên 3 dòng để hiển thị đầy đủ hơn */
 }
 
 .product-price .price {
   font-size: 1.2rem !important;
 }
 
+/* Thêm media query cho mobile nhỏ */
+@media (max-width: 576px) {
+  .product-image {
+    height: 140px !important; /* Giảm height để fit 2 cột */
+  }
+
+  .product-name {
+    font-size: 0.9rem !important; /* Giảm font để fit */
+    -webkit-line-clamp: 2 !important; /* 2 dòng trên mobile để tiết kiệm không gian */
+  }
+
+  .product-price .price {
+    font-size: 1rem !important; /* Giảm font giá */
+  }
+
+  .product-price .old-price {
+    font-size: 0.8rem !important; /* Giảm font giá cũ */
+  }
+
+  .product-card .btn {
+    font-size: 0.85rem !important; /* Giảm font nút */
+    padding: 0.4rem 0.8rem !important;
+  }
+
+  .row.g-4 {
+    gap: 0.5rem !important; /* Giảm gutter để fit 2 cột */
+  }
+
+  .container {
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important; /* Đảm bảo không overflow */
+  }
+}
+
+/* Cập nhật media query hiện có */
 @media (max-width: 768px) {
   .product-image {
-    height: 180px !important;
+    height: 160px !important; /* Giảm nhẹ để fit tốt hơn */
+  }
+
+  .product-name {
+    font-size: 0.95rem !important;
+    height: auto !important; /* Loại bỏ height cố định */
   }
 }
 
