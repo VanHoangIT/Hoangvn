@@ -78,23 +78,6 @@ if ('loading' in HTMLImageElement.prototype) {
     script.src = 'https://cdnjs.cloudflare.com/ajax/libs/lazysizes/5.3.2/lazysizes.min.js';
     document.body.appendChild(script);
 }
-
-// ==================== SMOOTH SCROLL ====================
-document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-    anchor.addEventListener('click', function (e) {
-        const href = this.getAttribute('href');
-        if (href !== '#') {
-            e.preventDefault();
-            const target = document.querySelector(href);
-            if (target) {
-                target.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'start'
-                });
-            }
-        }
-    });
-});
 // ==================== BANNER AUTO SLIDE ====================
 document.addEventListener('DOMContentLoaded', function() {
     const slides = document.querySelectorAll('.swiper-slide');
@@ -117,19 +100,32 @@ document.addEventListener('DOMContentLoaded', function() {
         setInterval(showNextSlide, 3000);
     }
 });
-// Xử lý smooth scroll cho links có hash
+// ==================== SMOOTH SCROLL - FIXED ====================
+// Chỉ áp dụng cho links KHÔNG phải Bootstrap tabs
 document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('a[href*="#"]').forEach(anchor => {
         anchor.addEventListener('click', function (e) {
+            // BỎ QUA nếu là Bootstrap tab hoặc có data-bs-toggle
+            if (this.hasAttribute('data-bs-toggle')) {
+                return;
+            }
+
             const href = this.getAttribute('href');
 
-            // Kiểm tra nếu link có hash và đang ở cùng trang
-            if (href.includes('#') && href.split('#')[0] === window.location.pathname) {
-                e.preventDefault();
-                const targetId = href.split('#')[1];
+            // BỎ QUA nếu href chỉ là "#" đơn thuần
+            if (href === '#') {
+                return;
+            }
+
+            // Kiểm tra nếu target element tồn tại
+            const targetId = href.includes('#') ? href.split('#')[1] : null;
+
+            if (targetId) {
                 const target = document.getElementById(targetId);
 
+                // Chỉ scroll nếu element thực sự tồn tại
                 if (target) {
+                    e.preventDefault();
                     const offsetTop = target.offsetTop - 120;
                     window.scrollTo({
                         top: offsetTop,

@@ -9,7 +9,11 @@
     <meta name="description" content="{% block meta_description %}{{ get_setting('meta_description', 'Website doanh nghiệp chuyên nghiệp cung cấp sản phẩm và dịch vụ chất lượng cao.') }}{% endblock %}">
     <meta name="keywords" content="{{ get_setting('meta_keywords', 'thiết kế web, hoangvn, thương mại điện tử') }}">
 
-     <!-- ==================== FAVICON - MULTIPLE FORMATS ==================== -->
+    <!-- ==================== META ROBOTS - QUAN TRỌNG CHO SEO ==================== -->
+    <meta name="robots" content="{% block meta_robots %}index, follow{% endblock %}">
+    <meta name="googlebot" content="{% block meta_googlebot %}index, follow{% endblock %}">
+
+    <!-- ==================== FAVICON - MULTIPLE FORMATS ==================== -->
     <!-- ICO: Ưu tiên mới → fallback cũ → mặc định -->
     <link rel="icon" type="image/x-icon" sizes="any"
           href="{{ get_setting('favicon_ico_url', get_setting('favicon_url', url_for('static', filename='img/favicon.ico'))) }}">
@@ -483,5 +487,14 @@
 
     <!-- ==================== CHATBOT WIDGET ==================== -->
     {% include 'components/chatbot_widget.html' %}
+
+    <!--<script>
+    document.addEventListener('contextmenu', event => event.preventDefault());
+    document.onkeydown = function(e) {
+        if (e.keyCode == 123) return false; // F12
+        if (e.ctrlKey && e.shiftKey && (e.keyCode == 73 || e.keyCode == 74)) return false; // Ctrl+Shift+I/J
+        if (e.ctrlKey && e.keyCode == 85) return false; // Ctrl+U
+    };
+    </script> -->
 </body>
 </html>

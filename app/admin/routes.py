@@ -1960,8 +1960,8 @@ def add_permission():
     return render_template('admin/permission_form.html', form=form, title='Thêm quyền')
 
 
-# ==================== TRONG FILE app/admin/routes.py ====================
-# Tìm đến hàm settings() và SỬA như sau:
+# ==================== MANAGE_SETTING ====================
+
 
 @admin_bp.route('/settings', methods=['GET', 'POST'])
 @permission_required('manage_settings')
