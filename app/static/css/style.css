@@ -698,7 +698,7 @@ footer ul li:last-child {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
-/* ==================== CUSTOM SCROLLBAR ==================== */
+/* ==================== CUSTOM SCROLLBAR ẨN ĐANG TẮT ====================
 ::-webkit-scrollbar {
   width: 0px;
   display: none;
@@ -710,7 +710,27 @@ footer ul li:last-child {
 
 ::-webkit-scrollbar-thumb {
   display: none;
+} */
+
+/* ==================== CUSTOM SCROLLBAR ==================== */
+::-webkit-scrollbar {
+  width: 8px; /* Độ rộng thanh cuộn */
 }
+
+::-webkit-scrollbar-track {
+  background: #f0f0f0; /* Nền của vùng cuộn */
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #bfbfbf; /* Màu xám nhạt cho thanh kéo */
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a6a6a6; /* Màu đậm hơn khi hover */
+}
+
 
 /* ==================== ALERT MESSAGES ==================== */
 .alert {
@@ -1147,4 +1167,34 @@ footer ul li:last-child {
   .scroll-to-top .icon {
     font-size: 1.1rem;
   }
+}
+/* ==================== FORCE GRAY SCROLLBAR - OVERRIDE ALL ==================== */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #bfbfbf #f0f0f0 !important;
+}
+
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+*::-webkit-scrollbar-track {
+  background: #f0f0f0 !important;
+  border-radius: 10px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: #bfbfbf !important;
+  border-radius: 10px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: #a6a6a6 !important;
+}
+
+/* Override for body and html */
+html::-webkit-scrollbar-thumb,
+body::-webkit-scrollbar-thumb {
+  background: #bfbfbf !important;
 }

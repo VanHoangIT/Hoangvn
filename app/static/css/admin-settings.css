@@ -123,7 +123,7 @@
   gap: 0.5rem;
   overflow-x: auto;
   scrollbar-width: thin;
-  scrollbar-color: var(--primary-color) var(--border-color);
+  scrollbar-color: #bfbfbf #f0f0f0;
 }
 
 .settings-tabs::-webkit-scrollbar {
@@ -131,12 +131,17 @@
 }
 
 .settings-tabs::-webkit-scrollbar-track {
-  background: var(--border-color);
+  background: #f0f0f0;
+  border-radius: 3px;
 }
 
 .settings-tabs::-webkit-scrollbar-thumb {
-  background: var(--primary-color);
+  background: #bfbfbf;
   border-radius: 3px;
+}
+
+.settings-tabs::-webkit-scrollbar-thumb:hover {
+  background: #a6a6a6;
 }
 
 .settings-tab {
@@ -632,7 +637,7 @@ textarea.settings-form-control {
 /* ============ SCROLLBAR STYLING ============ */
 .settings-tab-content {
   scrollbar-width: thin;
-  scrollbar-color: var(--primary-color) var(--border-color);
+  scrollbar-color: #bfbfbf #f0f0f0;
 }
 
 .settings-tab-content::-webkit-scrollbar {
@@ -640,17 +645,17 @@ textarea.settings-form-control {
 }
 
 .settings-tab-content::-webkit-scrollbar-track {
-  background: var(--border-color);
+  background: #f0f0f0;
   border-radius: 4px;
 }
 
 .settings-tab-content::-webkit-scrollbar-thumb {
-  background: var(--primary-color);
+  background: #bfbfbf;
   border-radius: 4px;
 }
 
 .settings-tab-content::-webkit-scrollbar-thumb:hover {
-  background: var(--primary-hover);
+  background: #a6a6a6;
 }
 
 /* ============ PRINT STYLES ============ */

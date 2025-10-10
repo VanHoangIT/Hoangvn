@@ -441,6 +441,8 @@ class SettingsForm(FlaskForm):
     working_hours = StringField('Giờ làm việc', validators=[Optional()])
     facebook_messenger_url = StringField('Facebook Messenger', validators=[Optional()])
 
+    branch_addresses = TextAreaField('Danh sách chi nhánh', validators=[Optional()])
+
     # System & Security Settings
     login_attempt_limit = IntegerField('Giới hạn đăng nhập sai', validators=[NumberRange(min=3, max=10)])
     cache_time = IntegerField('Thời gian cache dữ liệu (giây)', validators=[NumberRange(min=0)])
@@ -454,6 +456,7 @@ class SettingsForm(FlaskForm):
     zalo_oa = StringField('Zalo OA', validators=[Optional()])
 
     # Content Defaults
+    terms_of_service = TextAreaField('Điều khoản dịch vụ', validators=[Optional()])
     shipping_policy = TextAreaField('Chính sách vận chuyển', validators=[Optional()])
     return_policy = TextAreaField('Chính sách đổi trả', validators=[Optional()])
     warranty_policy = TextAreaField('Chính sách bảo hành', validators=[Optional()])

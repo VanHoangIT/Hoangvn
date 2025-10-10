@@ -482,6 +482,26 @@
                                     {{ form.working_hours(class="settings-form-control", placeholder="8h - 17h30 (Thứ 2 - Thứ 7)") }}
                                 </div>
                             </div>
+                            <div class="settings-section-card">
+                                <h6 class="settings-section-title">
+                                    <i class="bi bi-building"></i>
+                                    Địa chỉ chi nhánh
+                                </h6>
+
+                                <div class="settings-form-group">
+                                    <label class="settings-form-label">
+                                        <i class="bi bi-geo-alt"></i>
+                                        {{ form.branch_addresses.label.text }}
+                                    </label>
+                                    {{ form.branch_addresses(class="settings-form-control", rows="6",
+                                       placeholder="Mỗi dòng là 1 chi nhánh:\n982/l98/a1 Tân Bình, Tân Phú, Nhà Bè\n123 Đường ABC, Quận 1, TP.HCM\n456 Đường XYZ, Quận 3, TP.HCM") }}
+
+                                    <small class="settings-help-text">
+                                        <i class="bi bi-info-circle"></i>
+                                        Mỗi dòng là một địa chỉ chi nhánh. Nếu có từ 3 chi nhánh trở lên sẽ tự động hiển thị dạng dropdown.
+                                    </small>
+                                </div>
+                            </div>
 
                             <hr class="settings-hotline-divider">
 
@@ -716,6 +736,22 @@
                         </div>
 
                         <div class="settings-grid settings-grid-2">
+                            <div class="settings-section-card">
+                                <h6 class="settings-section-title">
+                                    <i class="bi bi-file-earmark-text"></i>
+                                    Điều khoản dịch vụ
+                                </h6>
+                                <div class="settings-form-group">
+                                    <label class="settings-form-label">
+                                        {{ form.terms_of_service.label.text }}
+                                    </label>
+                                    {{ form.terms_of_service(class="settings-form-control", rows="8", placeholder="Nội dung điều khoản dịch vụ...") }}
+                                    <small class="settings-help-text">
+                                        <i class="bi bi-code-slash"></i>
+                                        Hỗ trợ HTML. Sẽ hiển thị trên trang /policy
+                                    </small>
+                                </div>
+                            </div>
                             <!-- Vận chuyển & Đổi trả -->
                             <div class="settings-section-card">
                                 <h6 class="settings-section-title">

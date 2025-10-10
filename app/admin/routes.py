@@ -2077,6 +2077,7 @@ def settings():
         set_setting('hotline_central', form.hotline_central.data, 'contact', 'Hotline miền Trung')
         set_setting('hotline_south', form.hotline_south.data, 'contact', 'Hotline miền Nam')
         set_setting('working_hours', form.working_hours.data, 'contact', 'Giờ làm việc')
+        set_setting('branch_addresses', form.branch_addresses.data, 'contact', 'Danh sách địa chỉ chi nhánh')
 
         # ==================== SYSTEM & SECURITY SETTINGS ====================
         set_setting('login_attempt_limit', str(form.login_attempt_limit.data), 'system', 'Giới hạn đăng nhập sai')
@@ -2091,6 +2092,7 @@ def settings():
         set_setting('zalo_oa', form.zalo_oa.data, 'integration', 'Zalo OA')
 
         # ==================== CONTENT DEFAULTS ====================
+        set_setting('terms_of_service', form.terms_of_service.data, 'content', 'Điều khoản dịch vụ')
         set_setting('shipping_policy', form.shipping_policy.data, 'content', 'Chính sách vận chuyển')
         set_setting('return_policy', form.return_policy.data, 'content', 'Chính sách đổi trả')
         set_setting('warranty_policy', form.warranty_policy.data, 'content', 'Chính sách bảo hành')
@@ -2182,6 +2184,8 @@ def settings():
     form.hotline_central.data = get_setting('hotline_central', '(024) 1111 1113')
     form.hotline_south.data = get_setting('hotline_south', '(028) 1111 1111')
     form.working_hours.data = get_setting('working_hours', '8h - 17h30 (Thứ 2 - Thứ 7)')
+    form.branch_addresses.data = get_setting('branch_addresses',
+        '982/l98/a1 Tân Bình, Tân Phú, Nhà Bè\n123 Đường ABC, Quận 1, TP.HCM\n456 Đường XYZ, Quận 3, TP.HCM')
 
     # System & Security Settings
     form.login_attempt_limit.data = int(get_setting('login_attempt_limit', '5'))

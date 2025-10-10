@@ -101,6 +101,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/chatbot.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/theme-dynamic.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/chi-nhanh-footer.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/scale-down.css') }}">
     {% block extra_css %}{% endblock %}
 </head>
@@ -398,7 +399,49 @@
                         </li>
                         <li class="mb-2">
                             <i class="bi bi-geo-alt-fill text-warning me-2"></i>
-                            {{ get_setting('address', '982/l98/a1 Tân Bình, Tân Phú Nhà Bè') }}
+
+                            {% set branch_text = get_setting('branch_addresses', '982/l98/a1 Tân Bình, Tân Phú, Nhà Bè') %}
+                            {% set branches = branch_text.strip().split('\n') %}
+
+                            {# Đếm số chi nhánh hợp lệ #}
+                            {% set valid_branches = [] %}
+                            {% for b in branches %}
+                                {% if b.strip() %}
+                                    {% set _ = valid_branches.append(b.strip()) %}
+                                {% endif %}
+                            {% endfor %}
+
+                            {% if valid_branches|length == 1 %}
+                                <!-- Chỉ 1 chi nhánh: hiển thị thẳng -->
+                                {{ valid_branches[0] }}
+
+                            {% elif valid_branches|length == 2 %}
+                                <!-- 2 chi nhánh: hiển thị cả 2 -->
+                                <div>{{ valid_branches[0] }}</div>
+                                <div class="ms-4 mt-1">{{ valid_branches[1] }}</div>
+
+                            {% elif valid_branches|length > 2 %}
+                                <!-- 3+ chi nhánh: dropdown -->
+                                <div class="dropdown d-inline-block">
+                                    <a class="text-white text-decoration-none dropdown-toggle"
+                                       href="#"
+                                       role="button"
+                                       id="branchDropdown"
+                                       data-bs-toggle="dropdown"
+                                       aria-expanded="false">
+                                        {{ valid_branches|length }} chi nhánh
+                                    </a>
+                                    <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="branchDropdown">
+                                        {% for branch in valid_branches %}
+                                        <li>
+                                            <a class="dropdown-item">
+                                                <i class="bi bi-geo-alt"></i> {{ branch }}
+                                            </a>
+                                        </li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            {% endif %}
                         </li>
                     </ul>
 

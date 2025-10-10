@@ -24,25 +24,77 @@
             <!-- Sidebar Navigation -->
             <div class="col-lg-3 mb-4">
                 <div class="list-group sticky-top" style="top: 100px; z-index: 10;">
-                    <a href="#shipping"
-                       class="list-group-item list-group-item-action">
+                    <a href="#terms" class="list-group-item list-group-item-action">
+                        <i class="bi bi-file-earmark-text text-warning me-2"></i>Điều khoản dịch vụ
+                    </a>
+                    <a href="#shipping" class="list-group-item list-group-item-action">
                         <i class="bi bi-truck text-warning me-2"></i>Chính sách vận chuyển
                     </a>
-                    <a href="#return"
-                       class="list-group-item list-group-item-action">
+                    <a href="#return" class="list-group-item list-group-item-action">
                         <i class="bi bi-arrow-repeat text-warning me-2"></i>Chính sách đổi trả
                     </a>
-                    <a href="#warranty"
-                       class="list-group-item list-group-item-action">
+                    <a href="#warranty" class="list-group-item list-group-item-action">
                         <i class="bi bi-shield-check text-warning me-2"></i>Chính sách bảo hành
                     </a>
-                    <a href="#privacy"
-                       class="list-group-item list-group-item-action">
+                    <a href="#privacy" class="list-group-item list-group-item-action">
                         <i class="bi bi-lock text-warning me-2"></i>Chính sách bảo mật
                     </a>
                 </div>
             </div>
 
+            <!-- Policy Content -->
+            <div class="col-lg-9">
+                <!-- ✅ ĐIỀU KHOẢN DỊCH VỤ -->
+                <div class="card shadow-sm border-0 mb-4" id="terms">
+                    <div class="card-header bg-warning">
+                        <h3 class="mb-0">
+                            <i class="bi bi-file-earmark-text me-2"></i>Điều khoản dịch vụ
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        {% set terms = get_setting('terms_of_service', '') %}
+                        {% if terms %}
+                            {{ terms | safe }}
+                        {% else %}
+                            <p>Chào mừng bạn đến với {{ get_setting('website_name', 'Hoangvn') }}. Khi sử dụng dịch vụ của chúng tôi, bạn đồng ý với các điều khoản sau:</p>
+                            <h6 class="fw-bold mt-3">1. Điều khoản chung</h6>
+                            <ul>
+                                <li>Bạn phải từ 18 tuổi trở lên để sử dụng dịch vụ</li>
+                                <li>Thông tin cá nhân phải chính xác và đầy đủ</li>
+                                <li>Không sử dụng dịch vụ cho mục đích bất hợp pháp</li>
+                            </ul>
+
+                            <h6 class="fw-bold mt-3">2. Quyền và nghĩa vụ của khách hàng</h6>
+                            <ul>
+                                <li>Được cung cấp thông tin đầy đủ về sản phẩm/dịch vụ</li>
+                                <li>Được bảo vệ thông tin cá nhân theo luật định</li>
+                                <li>Tuân thủ quy định khi sử dụng sản phẩm/dịch vụ</li>
+                                <li>Thanh toán đầy đủ các khoản phí phát sinh</li>
+                            </ul>
+
+                            <h6 class="fw-bold mt-3">3. Quyền và nghĩa vụ của {{ get_setting('website_name', 'Hoangvn') }}</h6>
+                            <ul>
+                                <li>Cung cấp sản phẩm/dịch vụ đúng chất lượng cam kết</li>
+                                <li>Bảo mật thông tin khách hàng</li>
+                                <li>Hỗ trợ khách hàng kịp thời</li>
+                                <li>Từ chối phục vụ nếu phát hiện hành vi vi phạm</li>
+                            </ul>
+
+                            <h6 class="fw-bold mt-3">4. Giới hạn trách nhiệm</h6>
+                            <p>Chúng tôi không chịu trách nhiệm cho:</p>
+                            <ul>
+                                <li>Thiệt hại do sử dụng sai mục đích</li>
+                                <li>Lỗi từ bên thứ ba (vận chuyển, thanh toán...)</li>
+                                <li>Trường hợp bất khả kháng</li>
+                            </ul>
+
+                            <div class="alert alert-info mt-3">
+                                <i class="bi bi-info-circle-fill me-2"></i>
+                                Điều khoản có thể được cập nhật mà không cần báo trước. Vui lòng kiểm tra thường xuyên.
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
             <!-- Policy Content -->
             <div class="col-lg-9">
                 <!-- Chính sách vận chuyển -->
