@@ -10,12 +10,7 @@ from flask_login import current_user
 
 def admin_required(f):
     """
-    Decorator yêu cầu quyền admin (giữ lại để tương thích code cũ)
-
-    Usage:
-        @admin_required
-        def manage_users():
-            ...
+    Đã chuyển qua permissions rồi giữ code để tránh lỗi :D
     """
 
     @wraps(f)
