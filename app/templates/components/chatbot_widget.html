@@ -1,11 +1,12 @@
 <!-- Chatbot Widget Component -->
 
 <!-- Nút mở chat (floating button) -->
-<!-- Nút mở chat (floating button) -->
 <button class="chatbot-button" id="chatbotButton" aria-label="Mở chat tư vấn">
-    <img src="{{ url_for('static', filename='img/chatbot_logo.png') }}" alt="Chatbot">
+  <img
+    src="{{ get_setting('logo_chatbot_url', url_for('static', filename='img/chatbot_logo.png')) }}"
+    alt="Chatbot {{ get_setting('website_name', '#') }}"
+  />
 </button>
-
 <!-- Cửa sổ chat -->
 <div class="chatbot-widget" id="chatbotWidget">
     <!-- Header -->
