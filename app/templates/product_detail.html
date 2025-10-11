@@ -105,17 +105,6 @@
                         {% endif %}
                     {% endif %}
                 </div>
-
-                <!-- Short Description -->
-                <div class="mb-4">
-                    <h5 class="fw-semibold mb-3">
-                        <i class="bi bi-info-circle text-warning me-2"></i>Mô tả sản phẩm:
-                    </h5>
-                    <p itemprop="description">
-                        {{ product.description | nl2br | safe if product.description else 'Đang cập nhật thông tin sản phẩm...' }}
-                    </p>
-                </div>
-
                 <!-- CTA Buttons -->
                 <div class="d-grid gap-2 mb-4">
                     <a href="tel:{{ get_setting('hotline', '0123456789') }}"
@@ -132,7 +121,7 @@
                             </a>
                         </div>
                         <div class="col-6">
-                            <a href="{{ get_setting('facebook_url', '#') }}"
+                            <a href="{{ get_setting('facebook_messenger_url', '#') }}"
                                target="_blank"
                                class="btn btn-outline-primary btn-lg w-100">
                                 <i class="bi bi-messenger me-1"></i>Messenger
@@ -141,30 +130,6 @@
                     </div>
                 </div>
 
-                <!-- Policies -->
-                <div class="bg-light p-4 rounded mb-4">
-                    <h6 class="fw-bold mb-3">
-                        <i class="bi bi-shield-check text-success me-2"></i>Chính sách bán hàng:
-                    </h6>
-                    <ul class="list-unstyled mb-0">
-                        <li class="mb-2">
-                            <i class="bi bi-check-circle-fill text-success me-2"></i>
-                            Bảo hành chính hãng 12 tháng
-                        </li>
-                        <li class="mb-2">
-                            <i class="bi bi-check-circle-fill text-success me-2"></i>
-                            Đổi trả miễn phí trong 7 ngày
-                        </li>
-                        <li class="mb-2">
-                            <i class="bi bi-check-circle-fill text-success me-2"></i>
-                            Miễn phí vận chuyển toàn quốc
-                        </li>
-                        <li class="mb-0">
-                            <i class="bi bi-check-circle-fill text-success me-2"></i>
-                            Hỗ trợ trả góp 0% lãi suất
-                        </li>
-                    </ul>
-                </div>
 
                 <!-- Social Share -->
                 <div class="border-top pt-3">
@@ -208,7 +173,7 @@
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" data-bs-toggle="tab" href="#policy">
-                            <i class="bi bi-shield-check me-1"></i>Chính sách
+                            <i class="bi bi-shield-check me-1"></i>Chính sách đổi trả
                         </a>
                     </li>
                 </ul>
@@ -248,7 +213,7 @@
                     <!-- Chính sách -->
                     <div class="tab-pane fade" id="policy">
                         <div class="bg-light p-4 rounded">
-                            {{ get_setting('privacy_policy', '<p>Chính sách đang được cập nhật...</p>') | safe }}
+                            {{ get_setting('return_policy', '<p>Chính sách đang được cập nhật...</p>') | safe }}
                         </div>
                     </div>
                 </div>
