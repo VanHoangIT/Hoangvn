@@ -283,11 +283,11 @@
                         <!-- Meta Info -->
                         <div class="d-flex align-items-center text-muted small mb-3">
                             <span class="me-3">
-                                <i class="bi bi-calendar3 text-warning"></i>
+                                <i class="bi bi-calendar3"></i>
                                 {{ blog.created_at.strftime('%d/%m/%Y') }}
                             </span>
                             <span>
-                                <i class="bi bi-eye text-warning"></i>
+                                <i class="bi bi-eye"></i>
                                 {{ blog.views }}
                             </span>
                         </div>
@@ -308,7 +308,7 @@
                         <!-- Read More Button -->
                         <div class="mt-auto">
                             <a href="{{ url_for('main.blog_detail', slug=blog.slug) }}"
-                               class="btn btn-warning btn-sm">
+                               class="btn btn-warning btn-sm fw-bold">
                                 Đọc thêm <i class="bi bi-arrow-right ms-1"></i>
                             </a>
                         </div>
@@ -330,7 +330,7 @@
 
 
 <!-- ==================== CALL TO ACTION ==================== -->
-<section class="py-5 bg-warning">
+<section class="py-5" style="background-color: #6C7B8B;">
     <div class="container">
         <div class="row align-items-center">
             <div class="col-lg-8 text-center text-lg-start mb-4 mb-lg-0">

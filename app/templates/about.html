@@ -21,107 +21,156 @@
     </div>
 </div>
 
-<!-- ==================== ABOUT CONTENT ==================== -->
-<section class="py-5" itemscope itemtype="https://schema.org/AboutPage">
+<!-- ==================== ABOUT HERO - LOGO BANNER ==================== -->
+<section class="about-hero" itemscope itemtype="https://schema.org/AboutPage">
     <div class="container">
-        <div class="row align-items-center mb-5">
-            <div class="col-lg-6">
-                <img src="{{ get_setting('logo_url', url_for('static', filename='img/logo.png')) }}"
-                     alt="{{ get_setting('website_name', 'Hoangvn') }}"
-                     itemprop="image"
-                     loading="lazy"
-                     class="img-fluid rounded shadow">
-            </div>
-            <div class="col-lg-6">
-                <h2 class="fw-bold mb-4" itemprop="name">Về chúng tôi</h2>
-                <div itemprop="description">
-                    <p class="lead">{{ get_setting('company_info', 'Chúng tôi là công ty hàng đầu trong lĩnh vực thương mại điện tử, cung cấp các sản phẩm công nghệ chất lượng cao.') }}</p>
-                    <p>Với hơn 10 năm kinh nghiệm, chúng tôi tự hào mang đến cho khách hàng:</p>
-                    <ul>
-                        <li>Sản phẩm chính hãng 100%</li>
-                        <li>Giá cả cạnh tranh nhất thị trường</li>
-                        <li>Dịch vụ khách hàng tận tâm 24/7</li>
-                        <li>Bảo hành chính hãng toàn quốc</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-
-        <!-- ==================== VIDEO SECTION ==================== -->
-        <div class="row align-items-center py-5 bg-light rounded">
-            <div class="col-lg-6 ps-lg-5 mt-4 mt-lg-0">
-                <h2 class="fw-bold mb-3">
-                    Tìm Hiểu Thêm Về
-                    <span class="text-warning">{{ get_setting('website_name', 'Hoangvn')|upper }}</span>
-                </h2>
-                <p class="lead mb-4">
-                    Khám phá công nghệ hiện đại và quy trình kiểm soát chất lượng nghiêm ngặt
-                    tại nhà máy {{ get_setting('website_name', 'Hoangvn') }} để tạo ra những vật liệu xây dựng tốt nhất.
-                </p>
-                <ul class="list-unstyled">
-                    <li class="mb-2">
-                        <i class="bi bi-check-circle-fill text-warning me-2"></i>
-                        Công nghệ sản xuất tiên tiến nhất
-                    </li>
-                    <li class="mb-2">
-                        <i class="bi bi-check-circle-fill text-warning me-2"></i>
-                        Kiểm soát chất lượng 100% sản phẩm
-                    </li>
-                    <li class="mb-2">
-                        <i class="bi bi-check-circle-fill text-warning me-2"></i>
-                        Đội ngũ kỹ sư chuyên nghiệp
-                    </li>
-                    <li class="mb-2">
-                        <i class="bi bi-check-circle-fill text-warning me-2"></i>
-                        Cam kết chất lượng vượt trội
-                    </li>
-                </ul>
-                <a href="{{ url_for('main.contact') }}" class="btn btn-warning btn-lg mt-3">
-                    <i class="bi bi-telephone"></i> Liên hệ ngay
-                </a>
-            </div>
-            <div class="col-lg-6">
-                <div class="video-container position-relative rounded overflow-hidden shadow-lg">
-                    <div class="ratio ratio-16x9">
-                        <iframe src="https://www.youtube.com/embed/dE9sptWH8pI"
-                                title="Video giới thiệu {{ get_setting('website_name', 'Hoangvn') }}"
-                                frameborder="0"
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                allowfullscreen>
-                        </iframe>
+        <!-- Logo ở trên -->
+        <div class="row justify-content-center mb-5">
+            <div class="col-lg-10 col-md-11">
+                <div class="about-logo-container">
+                    <div class="about-logo-wrapper">
+                        <img src="{{ get_setting('logo_url', url_for('static', filename='img/logo.png')) }}"
+                             alt="{{ get_setting('website_name', 'Hoangvn') }}"
+                             itemprop="image"
+                             loading="lazy">
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- ==================== STATISTICS ==================== -->
-        <div class="row g-4 mt-5">
-            <div class="col-md-3 text-center">
-                <div class="bg-light p-4 rounded">
-                    <i class="bi bi-trophy text-warning fs-1"></i>
-                    <h3 class="mt-3">10+</h3>
-                    <p class="text-muted">Năm kinh nghiệm</p>
+        <!-- Nội dung text ở dưới -->
+        <div class="row justify-content-center">
+            <div class="col-lg-11">
+                <div class="company-info-section text-center">
+                    <h2 itemprop="name">Về chúng tôi</h2>
+                    <div itemprop="description" class="company-description">
+                        {% if get_setting('company_info') %}
+                        <p class="intro-text">
+                            {{ get_setting('company_info', '') }}
+                        </p>
+                        {% endif %}
+
+                        <p class="intro-text">
+                            Lời đầu, <strong>Công Ty TNHH Bricon Việt Nam</strong> xin gửi đến Quý khách hàng và đối tác lời chúc sức khỏe, thành công và thịnh vượng. Chúng tôi xin cảm ơn Quý khách hàng đã tín nhiệm, tin dùng và đồng hành cùng sự phát triển của Công ty trong thời gian qua.
+                        </p>
+
+                        <p>
+                            Chúng tôi chuyên <strong>sản xuất và phân phối Keo xây dựng</strong>: Keo dán gạch, Keo chà ron, Xi măng chống thấm, vữa khô trộn sẵn, vữa xây tô,... và Chống thấm.
+                        </p>
+
+                        <p>
+                            Với diện tích sản xuất và kho chứa <strong>hơn 10.000m²</strong> phân bổ ở 5 chi nhánh và 1 nhà máy. Chúng tôi cung ứng giải pháp thương mại giá sỉ cho các Đại lý, Nhà phân phối, Chủ đầu tư, Thầu xây dựng,... Đáp ứng nhu cầu về sản lượng cho các công trình lớn trong và ngoài nước.
+                        </p>
+
+                        <p>
+                            Hệ thống <strong>KCS bài bản</strong> với phòng thí nghiệm độc lập cùng các kỹ sư nghiên cứu dày dặn kinh nghiệm. Chúng tôi chủ động về công nghệ, đảm bảo về chất lượng của các công trình.
+                        </p>
+
+                        <p>
+                            Hệ thống phân phối của BRICON với <strong>7.820 khách hàng</strong> trên cả nước. Hệ thống vận chuyển đáp ứng nhiều đầu xe và là đối tác của các hãng vận chuyển uy tín Bắc Nam.
+                        </p>
+
+                        <p>
+                            Kết hợp chặt chẽ với các trang bán hàng thương mại điện tử để đáp ứng các nhu cầu nhỏ lẻ từ các khách hàng có lượng cầu nhỏ nhất.
+                        </p>
+
+                        <p class="highlight-text">
+                            BRICON luôn đặt chất lượng sản phẩm, lấy sự hài lòng của Quý khách hàng làm tôn chỉ hành động. Theo tiêu chí <strong>"Số 1 là chất lượng"</strong>. BRICON tin rằng với giải pháp tối ưu cùng chất lượng vượt trội sẽ làm hài lòng Quý khách hàng.
+                        </p>
+
+                        <p class="closing-text">
+                            <em>BRICON xin trân trọng gửi lời chào và lời cảm tạ Quý khách đã giành thời gian thăm website của chúng tôi.</em>
+                        </p>
+                    </div>
                 </div>
             </div>
-            <div class="col-md-3 text-center">
-                <div class="bg-light p-4 rounded">
-                    <i class="bi bi-people text-warning fs-1"></i>
-                    <h3 class="mt-3">50K+</h3>
-                    <p class="text-muted">Khách hàng hài lòng</p>
+        </div>
+    </div>
+</section>
+
+<!-- ==================== VIDEO SECTION ==================== -->
+<section class="py-5">
+    <div class="container">
+        <div class="video-section">
+            <div class="row align-items-center">
+                <div class="col-lg-6 order-lg-2">
+                    <div class="video-container">
+                        <div class="ratio ratio-16x9">
+                            <iframe src="https://www.youtube.com/embed/dE9sptWH8pI"
+                                    title="Video giới thiệu {{ get_setting('website_name', 'Hoangvn') }}"
+                                    frameborder="0"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                    allowfullscreen>
+                            </iframe>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6 order-lg-1 ps-lg-4 mt-4 mt-lg-0">
+                    <h2 class="fw-bold">
+                        Tìm Hiểu Thêm Về
+                        <span class="text-warning">{{ get_setting('website_name', 'Hoangvn')|upper }}</span>
+                    </h2>
+                    <p class="lead mb-4">
+                        Khám phá công nghệ hiện đại và quy trình kiểm soát chất lượng nghiêm ngặt
+                        tại nhà máy {{ get_setting('website_name', 'Hoangvn') }} để tạo ra những vật liệu xây dựng tốt nhất.
+                    </p>
+                    <ul class="video-features">
+                        <li>
+                            <i class="bi bi-check-circle-fill text-warning"></i>
+                            Công nghệ sản xuất tiên tiến nhất
+                        </li>
+                        <li>
+                            <i class="bi bi-check-circle-fill text-warning"></i>
+                            Kiểm soát chất lượng 100% sản phẩm
+                        </li>
+                        <li>
+                            <i class="bi bi-check-circle-fill text-warning"></i>
+                            Đội ngũ kỹ sư chuyên nghiệp
+                        </li>
+                        <li>
+                            <i class="bi bi-check-circle-fill text-warning"></i>
+                            Cam kết chất lượng vượt trội
+                        </li>
+                    </ul>
+                    <a href="{{ url_for('main.contact') }}" class="btn btn-warning btn-lg mt-3">
+                        <i class="bi bi-telephone"></i> Liên hệ ngay
+                    </a>
                 </div>
             </div>
-            <div class="col-md-3 text-center">
-                <div class="bg-light p-4 rounded">
-                    <i class="bi bi-box-seam text-warning fs-1"></i>
-                    <h3 class="mt-3">100+</h3>
-                    <p class="text-muted">Sản phẩm đa dạng</p>
+        </div>
+    </div>
+</section>
+
+<!-- ==================== STATISTICS ==================== -->
+<section class="statistics-section py-5">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-md-3 col-6">
+                <div class="stat-card">
+                    <i class="bi bi-trophy"></i>
+                    <h3>10+</h3>
+                    <p>Năm kinh nghiệm</p>
                 </div>
             </div>
-            <div class="col-md-3 text-center">
-                <div class="bg-light p-4 rounded">
-                    <i class="bi bi-award text-warning fs-1"></i>
-                    <h3 class="mt-3">20+</h3>
-                    <p class="text-muted">Giải thưởng</p>
+            <div class="col-md-3 col-6">
+                <div class="stat-card">
+                    <i class="bi bi-people"></i>
+                    <h3>50K+</h3>
+                    <p>Khách hàng hài lòng</p>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="stat-card">
+                    <i class="bi bi-box-seam"></i>
+                    <h3>100+</h3>
+                    <p>Sản phẩm đa dạng</p>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="stat-card">
+                    <i class="bi bi-award"></i>
+                    <h3>20+</h3>
+                    <p>Giải thưởng</p>
                 </div>
             </div>
         </div>

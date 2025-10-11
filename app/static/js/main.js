@@ -1,15 +1,3 @@
-// ==================== SCROLL TO TOP ====================
-//window.addEventListener('scroll', function() {
-    //const floatingButtons = document.querySelector('.floating-buttons');
-    //if (floatingButtons) {
-        //if (window.scrollY > 300) {
-            //floatingButtons.style.display = 'flex';
-        //} else {
-            //floatingButtons.style.display = 'none';
-        //}
-    //}
-//});
-
 window.addEventListener('scroll', function() {
     const floatingButtons = document.querySelector('.floating-buttons');
     if (floatingButtons) {
@@ -96,8 +84,8 @@ document.addEventListener('DOMContentLoaded', function() {
             slides[currentIndex].style.display = 'block';
         }
 
-        // Gọi interval chạy đều mỗi 3 giây
-        setInterval(showNextSlide, 3000);
+        // Gọi interval chạy đều mỗi 1 giây
+        setInterval(showNextSlide, 1000);
     }
 });
 // ==================== SMOOTH SCROLL - FIXED ====================
