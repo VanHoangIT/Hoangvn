@@ -241,8 +241,9 @@
             <p class="mb-2 text-center">
                 <i class="bi bi-telephone text-warning"></i>
                 <strong>Hotline:</strong>
-                <a href="tel:{{ get_setting('hotline', '098.422.6602') }}" class="text-decoration-none text-primary fw-bold">
-                    {{ get_setting('hotline', '098.422.6602') }}
+                <a href="tel:{{ get_setting('hotline', '0984226602')|replace('.', '')|replace(' ', '') }}"
+                   class="text-decoration-none text-primary fw-bold">
+                   {{ get_setting('hotline', '0984.226.602') }}
                 </a>
             </p>
             <p class="mb-2 text-center">

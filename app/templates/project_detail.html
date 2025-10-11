@@ -240,7 +240,7 @@
                             <p class="card-text small text-muted mb-4">
                                 Liên hệ với chúng tôi để được tư vấn giải pháp phù hợp nhất
                             </p>
-                            <a href="tel:{{ get_setting('hotline', '0123456789') }}"
+                            <a href="tel:{{ get_setting('hotline', '0123456789')|replace('.', '')|replace(' ', '') }}"
                                class="btn btn-warning w-100 mb-2">
                                 <i class="bi bi-telephone"></i> {{ get_setting('hotline', '0123 456 789') }}
                             </a>

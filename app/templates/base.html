@@ -60,7 +60,7 @@
       "description": "keo chà ron, keo dán gạch, vật liệu chống thấm và giải pháp xây dựng chất lượng cao tại Việt Nam.",
       "contactPoint": {
         "@type": "ContactPoint",
-        "telephone": "{{ get_setting('hotline', '+84-984-226-602') }}",
+        "telephone": "+84984226602",
         "contactType": "customer service",
         "email": "{{ get_setting('contact_email', 'info@hoang.vn') }}",
         "availableLanguage": "Vietnamese"
@@ -423,7 +423,7 @@
                         </li>
                         <li class="mb-2">
                             <i class="bi bi-telephone-fill text-warning me-2"></i>
-                            <a href="tel:{{ get_setting('hotline', '1900111222') }}" class="text-white text-decoration-none">
+                            <a href="tel:{{ get_setting('hotline', '1900111222')|replace('.', '')|replace(' ', '') }}" class="text-white text-decoration-none">
                                 {{ get_setting('hotline', '1900.111.222') }}
                             </a>
                         </li>
@@ -531,7 +531,7 @@
         </a>
 
         <!-- Phone -->
-        <a href="tel:{{ get_setting('hotline', '0901180094') }}"
+        <a href="tel:{{ get_setting('hotline', '0901180094')|replace('.', '')|replace(' ', '') }}"
            class="floating-btn phone-btn"
            title="Gọi điện"
            aria-label="Gọi điện">

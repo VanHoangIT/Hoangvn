@@ -67,7 +67,7 @@
                         <a href="{{ url_for('main.contact') }}" class="btn btn-warning btn-lg">
                             <i class="bi bi-envelope"></i> Liên hệ với chúng tôi
                         </a>
-                        <a href="tel:{{ get_setting('hotline', '098.422.6602') }}" class="btn btn-outline-warning btn-lg">
+                        <a href="tel:{{ get_setting('hotline', '098.422.6602')|replace('.', '')|replace(' ', '') }}" class="btn btn-outline-warning btn-lg">
                             <i class="bi bi-telephone"></i> Gọi {{ get_setting('hotline', '098.422.6602') }}
                         </a>
                     </div>
@@ -87,7 +87,7 @@
                         <p class="mb-3 text-center">
                             <i class="bi bi-telephone-fill text-warning me-2"></i>
                             <strong>Hotline:</strong>
-                            <a href="tel:{{ get_setting('hotline', '098.422.6602') }}" class="text-decoration-none text-primary fw-bold">
+                            <a href="tel:{{ get_setting('hotline', '098.422.6602')|replace('.', '')|replace(' ', '') }}" class="text-decoration-none text-primary fw-bold">
                                 {{ get_setting('hotline', '098.422.6602') }}
                             </a>
                         </p>

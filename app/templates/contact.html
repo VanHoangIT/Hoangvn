@@ -110,7 +110,7 @@
                                 <div>
                                     <h6 class="fw-bold mb-1">Điện thoại</h6>
                                     <p class="text-muted mb-0">
-                                        <a href="tel:{{ get_setting('hotline', '0123456789') }}"
+                                        <a href="tel:{{ get_setting('hotline', '0123456789')|replace('.', '')|replace(' ', '') }}"
                                            class="text-decoration-none text-muted"
                                            itemprop="telephone">
                                             {{ get_setting('hotline', '0123 456 789') }}
@@ -245,7 +245,7 @@
   "name": "{{ get_setting('website_name', 'Hoangvn')|e }}",
   "image": "{{ get_setting('logo_url', url_for('static', filename='img/logo.png', _external=True))|e }}",
   "url": "{{ get_setting('main_url', request.url_root)|e }}",
-  "telephone": "{{ get_setting('hotline', '0123456789')|e }}",
+  "telephone": "{{ get_setting('hotline', '0123456789')|replace('.', '')|replace(' ', '')|e }}",
   "email": "{{ get_setting('contact_email', 'contact@example.com')|e }}",
   "address": {
     "@type": "PostalAddress",

@@ -107,7 +107,7 @@
                 </div>
                 <!-- CTA Buttons -->
                 <div class="d-grid gap-2 mb-4">
-                    <a href="tel:{{ get_setting('hotline', '0123456789') }}"
+                    <a href="tel:{{ get_setting('hotline', '0123456789')|replace('.', '')|replace(' ', '') }}"
                        class="btn btn-warning btn-lg">
                         <i class="bi bi-telephone-fill me-2"></i>
                         Gọi ngay: {{ get_setting('hotline', '0123 456 789') }}
