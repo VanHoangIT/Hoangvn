@@ -317,36 +317,66 @@
                         <i class="bi bi-headset me-2"></i>Hỗ trợ khách hàng
                     </h5>
                     <ul class="list-unstyled">
+                        {% set terms = get_setting('terms_of_service', '') %}
+                        {% set shipping = get_setting('shipping_policy', '') %}
+                        {% set warranty = get_setting('warranty_policy', '') %}
+                        {% set return_pol = get_setting('return_policy', '') %}
+                        {% set privacy = get_setting('privacy_policy', '') %}
+
+                        {% if terms %}
                         <li class="mb-2">
-                            <a href="{{ url_for('main.policy') }}" class="text-white text-decoration-none">
+                            <a href="{{ url_for('main.policy') }}#terms" class="text-white text-decoration-none">
                                 Điều khoản dịch vụ
                             </a>
                         </li>
+                        {% endif %}
+
+                        {% if shipping %}
                         <li class="mb-2">
                             <a href="{{ url_for('main.policy') }}#shipping" class="text-white text-decoration-none">
                                 Chính sách vận chuyển
                             </a>
                         </li>
+                        {% endif %}
+
+                        {% if warranty %}
                         <li class="mb-2">
                             <a href="{{ url_for('main.policy') }}#warranty" class="text-white text-decoration-none">
                                 Chính sách bảo hành
                             </a>
                         </li>
+                        {% endif %}
+
+                        {% if return_pol %}
                         <li class="mb-2">
                             <a href="{{ url_for('main.policy') }}#return" class="text-white text-decoration-none">
                                 Chính sách đổi trả
                             </a>
                         </li>
+                        {% endif %}
+
+                        {% if privacy %}
                         <li class="mb-2">
                             <a href="{{ url_for('main.policy') }}#privacy" class="text-white text-decoration-none">
                                 Chính sách bảo mật
                             </a>
                         </li>
+                        {% endif %}
+
                         <li class="mb-2">
                             <a href="{{ url_for('main.faq') }}" class="text-white text-decoration-none">
                                 Câu hỏi thường gặp
                             </a>
                         </li>
+
+                        {# Fallback: Nếu không có chính sách nào, hiển thị link trang chính sách #}
+                        {% if not (terms or shipping or warranty or return_pol or privacy) %}
+                        <li class="mb-2">
+                            <a href="{{ url_for('main.policy') }}" class="text-white text-decoration-none">
+                                Chính sách
+                            </a>
+                        </li>
+                        {% endif %}
                     </ul>
                 </div>
 

@@ -20,215 +20,174 @@
 <!-- ==================== POLICY CONTENT ==================== -->
 <section class="py-5" itemscope itemtype="https://schema.org/WebPage">
     <div class="container">
-        <div class="row">
-            <!-- Sidebar Navigation -->
-            <div class="col-lg-3 mb-4">
-                <div class="list-group sticky-top" style="top: 100px; z-index: 10;">
-                    <a href="#terms" class="list-group-item list-group-item-action">
-                        <i class="bi bi-file-earmark-text text-warning me-2"></i>Điều khoản dịch vụ
-                    </a>
-                    <a href="#shipping" class="list-group-item list-group-item-action">
-                        <i class="bi bi-truck text-warning me-2"></i>Chính sách vận chuyển
-                    </a>
-                    <a href="#return" class="list-group-item list-group-item-action">
-                        <i class="bi bi-arrow-repeat text-warning me-2"></i>Chính sách đổi trả
-                    </a>
-                    <a href="#warranty" class="list-group-item list-group-item-action">
-                        <i class="bi bi-shield-check text-warning me-2"></i>Chính sách bảo hành
-                    </a>
-                    <a href="#privacy" class="list-group-item list-group-item-action">
-                        <i class="bi bi-lock text-warning me-2"></i>Chính sách bảo mật
-                    </a>
-                </div>
-            </div>
+        {# Check if any policy content exists #}
+        {% set terms = get_setting('terms_of_service', '') %}
+        {% set shipping = get_setting('shipping_policy', '') %}
+        {% set return_pol = get_setting('return_policy', '') %}
+        {% set warranty = get_setting('warranty_policy', '') %}
+        {% set privacy = get_setting('privacy_policy', '') %}
 
-            <!-- Policy Content -->
-            <div class="col-lg-9">
-                <!-- ✅ ĐIỀU KHOẢN DỊCH VỤ -->
-                <div class="card shadow-sm border-0 mb-4" id="terms">
-                    <div class="card-header bg-warning">
-                        <h3 class="mb-0">
-                            <i class="bi bi-file-earmark-text me-2"></i>Điều khoản dịch vụ
-                        </h3>
-                    </div>
-                    <div class="card-body">
-                        {% set terms = get_setting('terms_of_service', '') %}
-                        {% if terms %}
-                            {{ terms | safe }}
-                        {% else %}
-                            <p>Chào mừng bạn đến với {{ get_setting('website_name', 'Hoangvn') }}. Khi sử dụng dịch vụ của chúng tôi, bạn đồng ý với các điều khoản sau:</p>
-                            <h6 class="fw-bold mt-3">1. Điều khoản chung</h6>
-                            <ul>
-                                <li>Bạn phải từ 18 tuổi trở lên để sử dụng dịch vụ</li>
-                                <li>Thông tin cá nhân phải chính xác và đầy đủ</li>
-                                <li>Không sử dụng dịch vụ cho mục đích bất hợp pháp</li>
-                            </ul>
+        {% set has_any_policy = terms or shipping or return_pol or warranty or privacy %}
 
-                            <h6 class="fw-bold mt-3">2. Quyền và nghĩa vụ của khách hàng</h6>
-                            <ul>
-                                <li>Được cung cấp thông tin đầy đủ về sản phẩm/dịch vụ</li>
-                                <li>Được bảo vệ thông tin cá nhân theo luật định</li>
-                                <li>Tuân thủ quy định khi sử dụng sản phẩm/dịch vụ</li>
-                                <li>Thanh toán đầy đủ các khoản phí phát sinh</li>
-                            </ul>
-
-                            <h6 class="fw-bold mt-3">3. Quyền và nghĩa vụ của {{ get_setting('website_name', 'Hoangvn') }}</h6>
-                            <ul>
-                                <li>Cung cấp sản phẩm/dịch vụ đúng chất lượng cam kết</li>
-                                <li>Bảo mật thông tin khách hàng</li>
-                                <li>Hỗ trợ khách hàng kịp thời</li>
-                                <li>Từ chối phục vụ nếu phát hiện hành vi vi phạm</li>
-                            </ul>
-
-                            <h6 class="fw-bold mt-3">4. Giới hạn trách nhiệm</h6>
-                            <p>Chúng tôi không chịu trách nhiệm cho:</p>
-                            <ul>
-                                <li>Thiệt hại do sử dụng sai mục đích</li>
-                                <li>Lỗi từ bên thứ ba (vận chuyển, thanh toán...)</li>
-                                <li>Trường hợp bất khả kháng</li>
-                            </ul>
-
-                            <div class="alert alert-info mt-3">
-                                <i class="bi bi-info-circle-fill me-2"></i>
-                                Điều khoản có thể được cập nhật mà không cần báo trước. Vui lòng kiểm tra thường xuyên.
-                            </div>
-                        {% endif %}
-                    </div>
-                </div>
-            <!-- Policy Content -->
-            <div class="col-lg-9">
-                <!-- Chính sách vận chuyển -->
-                <div class="card shadow-sm border-0 mb-4" id="shipping">
-                    <div class="card-header bg-warning">
-                        <h3 class="mb-0">
-                            <i class="bi bi-truck me-2"></i>Chính sách vận chuyển
-                        </h3>
-                    </div>
-                    <div class="card-body">
-                        {% set shipping = get_setting('shipping_policy', '') %}
-                        {% if shipping %}
-                            {{ shipping | safe  }}
-                        {% else %}
-                            <p>Chúng tôi cung cấp dịch vụ vận chuyển toàn quốc với các hình thức:</p>
-                            <ul>
-                                <li><strong>Giao hàng tiêu chuẩn:</strong> 3-5 ngày làm việc</li>
-                                <li><strong>Giao hàng nhanh:</strong> 1-2 ngày làm việc</li>
-                                <li><strong>Miễn phí vận chuyển:</strong> Cho đơn hàng trên 500.000đ</li>
-                                <li><strong>Giao hàng COD:</strong> Thanh toán khi nhận hàng</li>
-                            </ul>
-                            <p class="text-muted mb-0">
-                                <i class="bi bi-info-circle"></i>
-                                Thời gian giao hàng có thể thay đổi tùy theo khu vực và điều kiện vận chuyển.
+        {% if not has_any_policy %}
+            <!-- No policies available message -->
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <div class="card shadow-sm border-0 text-center py-5">
+                        <div class="card-body">
+                            <i class="bi bi-file-earmark-text text-muted" style="font-size: 4rem;"></i>
+                            <h3 class="mt-3 mb-2">Chưa có chính sách nào</h3>
+                            <p class="text-muted mb-4">
+                                Các chính sách của chúng tôi đang được cập nhật.
+                                Vui lòng quay lại sau hoặc liên hệ với chúng tôi để biết thêm chi tiết.
                             </p>
-                        {% endif %}
-                    </div>
-                </div>
-
-                <!-- Chính sách đổi trả -->
-                <div class="card shadow-sm border-0 mb-4" id="return">
-                    <div class="card-header bg-warning">
-                        <h3 class="mb-0">
-                            <i class="bi bi-arrow-repeat me-2"></i>Chính sách đổi trả
-                        </h3>
-                    </div>
-                    <div class="card-body">
-                        {% set return_pol = get_setting('return_policy', '') %}
-                        {% if return_pol %}
-                            {{ return_pol | safe }}
-                        {% else %}
-                            <p>Khách hàng có thể đổi trả sản phẩm trong vòng <strong>7 ngày</strong> kể từ ngày nhận hàng nếu:</p>
-                            <ul>
-                                <li>Sản phẩm còn nguyên tem mác, hộp, phụ kiện đi kèm</li>
-                                <li>Không có dấu hiệu đã qua sử dụng</li>
-                                <li>Có hóa đơn mua hàng hoặc phiếu giao hàng</li>
-                                <li>Sản phẩm bị lỗi do nhà sản xuất</li>
-                            </ul>
-                            <div class="alert alert-warning">
-                                <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                                <strong>Lưu ý:</strong> Chi phí vận chuyển đổi trả do khách hàng chịu (trừ trường hợp sản phẩm lỗi).
+                            <div class="d-flex gap-2 justify-content-center flex-wrap">
+                                <a href="tel:{{ get_setting('hotline', '0123456789') }}"
+                                   class="btn btn-warning">
+                                    <i class="bi bi-telephone-fill me-2"></i>
+                                    {{ get_setting('hotline', '0123 456 789') }}
+                                </a>
+                                <a href="{{ url_for('main.contact') }}"
+                                   class="btn btn-outline-warning">
+                                    <i class="bi bi-envelope me-2"></i>
+                                    Liên hệ với chúng tôi
+                                </a>
                             </div>
-                        {% endif %}
-                    </div>
-                </div>
-
-                <!-- Chính sách bảo hành -->
-                <div class="card shadow-sm border-0 mb-4" id="warranty">
-                    <div class="card-header bg-warning">
-                        <h3 class="mb-0">
-                            <i class="bi bi-shield-check me-2"></i>Chính sách bảo hành
-                        </h3>
-                    </div>
-                    <div class="card-body">
-                        {% set warranty = get_setting('warranty_policy', '') %}
-                        {% if warranty %}
-                            {{ warranty | safe  }}
-                        {% else %}
-                            <p>Tất cả sản phẩm đều được bảo hành chính hãng theo tiêu chuẩn nhà sản xuất:</p>
-                            <ul>
-                                <li><strong>Bảo hành 12 tháng</strong> cho lỗi kỹ thuật, lỗi nhà sản xuất</li>
-                                <li><strong>Đổi mới trong 30 ngày đầu</strong> nếu sản phẩm có lỗi nghiêm trọng</li>
-                                <li><strong>Hỗ trợ kỹ thuật miễn phí</strong> trọn đời sản phẩm</li>
-                                <li><strong>Bảo trì định kỳ</strong> với chi phí ưu đãi</li>
-                            </ul>
-                            <div class="alert alert-info">
-                                <i class="bi bi-info-circle-fill me-2"></i>
-                                Để được bảo hành, vui lòng giữ <strong>phiếu bảo hành</strong> và <strong>hóa đơn mua hàng</strong>.
-                            </div>
-                        {% endif %}
-                    </div>
-                </div>
-
-                <!-- Chính sách bảo mật -->
-                <div class="card shadow-sm border-0 mb-4" id="privacy">
-                    <div class="card-header bg-warning">
-                        <h3 class="mb-0">
-                            <i class="bi bi-lock me-2"></i>Chính sách bảo mật
-                        </h3>
-                    </div>
-                    <div class="card-body">
-                        {% set privacy = get_setting('privacy_policy', '') %}
-                        {% if privacy %}
-                            {{ privacy | safe  }}
-                        {% else %}
-                            <p>Chúng tôi cam kết bảo vệ thông tin cá nhân của khách hàng:</p>
-                            <ul>
-                                <li><strong>Không chia sẻ thông tin</strong> cho bên thứ ba mà không có sự đồng ý</li>
-                                <li><strong>Mã hóa dữ liệu thanh toán</strong> bằng công nghệ SSL 256-bit</li>
-                                <li><strong>Bảo vệ quyền riêng tư</strong> tuyệt đối theo quy định pháp luật</li>
-                                <li><strong>Chỉ sử dụng thông tin</strong> cho mục đích xử lý đơn hàng và hỗ trợ khách hàng</li>
-                            </ul>
-                            <div class="bg-light p-3 rounded">
-                                <h6 class="fw-bold mb-2">Thông tin chúng tôi thu thập:</h6>
-                                <p class="mb-0 small">
-                                    Họ tên, email, số điện thoại, địa chỉ giao hàng và thông tin thanh toán
-                                    (được mã hóa và bảo mật tuyệt đối).
-                                </p>
-                            </div>
-                        {% endif %}
-                    </div>
-                </div>
-
-                <!-- CTA Section -->
-                <div class="card shadow-sm border-0 bg-light">
-                    <div class="card-body text-center py-4">
-                        <h5 class="fw-bold mb-3">Bạn còn thắc mắc về chính sách?</h5>
-                        <p class="text-muted mb-4">Liên hệ ngay với chúng tôi để được giải đáp chi tiết</p>
-                        <div class="d-flex gap-2 justify-content-center flex-wrap">
-                            <a href="tel:{{ get_setting('hotline', '0123456789') }}"
-                               class="btn btn-warning">
-                                <i class="bi bi-telephone-fill me-2"></i>
-                                {{ get_setting('hotline', '0123 456 789') }}
-                            </a>
-                            <a href="{{ url_for('main.contact') }}"
-                               class="btn btn-outline-warning">
-                                <i class="bi bi-envelope me-2"></i>
-                                Gửi câu hỏi
-                            </a>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
+        {% else %}
+            <div class="row">
+                <!-- Sidebar Navigation -->
+                <div class="col-lg-3 mb-4">
+                    <div class="list-group sticky-top" style="top: 100px; z-index: 10;">
+                        {% if terms %}
+                        <a href="#terms" class="list-group-item list-group-item-action">
+                            <i class="bi bi-file-earmark-text text-warning me-2"></i>Điều khoản dịch vụ
+                        </a>
+                        {% endif %}
+
+                        {% if shipping %}
+                        <a href="#shipping" class="list-group-item list-group-item-action">
+                            <i class="bi bi-truck text-warning me-2"></i>Chính sách vận chuyển
+                        </a>
+                        {% endif %}
+
+                        {% if return_pol %}
+                        <a href="#return" class="list-group-item list-group-item-action">
+                            <i class="bi bi-arrow-repeat text-warning me-2"></i>Chính sách đổi trả
+                        </a>
+                        {% endif %}
+
+                        {% if warranty %}
+                        <a href="#warranty" class="list-group-item list-group-item-action">
+                            <i class="bi bi-shield-check text-warning me-2"></i>Chính sách bảo hành
+                        </a>
+                        {% endif %}
+
+                        {% if privacy %}
+                        <a href="#privacy" class="list-group-item list-group-item-action">
+                            <i class="bi bi-lock text-warning me-2"></i>Chính sách bảo mật
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Policy Content -->
+                <div class="col-lg-9">
+                    <!-- ✅ ĐIỀU KHOẢN DỊCH VỤ -->
+                    {% if terms %}
+                    <div class="card shadow-sm border-0 mb-4" id="terms">
+                        <div class="card-header bg-warning">
+                            <h3 class="mb-0">
+                                <i class="bi bi-file-earmark-text me-2"></i>Điều khoản dịch vụ
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            {{ terms | safe }}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Chính sách vận chuyển -->
+                    {% if shipping %}
+                    <div class="card shadow-sm border-0 mb-4" id="shipping">
+                        <div class="card-header bg-warning">
+                            <h3 class="mb-0">
+                                <i class="bi bi-truck me-2"></i>Chính sách vận chuyển
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            {{ shipping | safe }}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Chính sách đổi trả -->
+                    {% if return_pol %}
+                    <div class="card shadow-sm border-0 mb-4" id="return">
+                        <div class="card-header bg-warning">
+                            <h3 class="mb-0">
+                                <i class="bi bi-arrow-repeat me-2"></i>Chính sách đổi trả
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            {{ return_pol | safe }}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Chính sách bảo hành -->
+                    {% if warranty %}
+                    <div class="card shadow-sm border-0 mb-4" id="warranty">
+                        <div class="card-header bg-warning">
+                            <h3 class="mb-0">
+                                <i class="bi bi-shield-check me-2"></i>Chính sách bảo hành
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            {{ warranty | safe }}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Chính sách bảo mật -->
+                    {% if privacy %}
+                    <div class="card shadow-sm border-0 mb-4" id="privacy">
+                        <div class="card-header bg-warning">
+                            <h3 class="mb-0">
+                                <i class="bi bi-lock me-2"></i>Chính sách bảo mật
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            {{ privacy | safe }}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- CTA Section -->
+                    <div class="card shadow-sm border-0 bg-light">
+                        <div class="card-body text-center py-4">
+                            <h5 class="fw-bold mb-3">Bạn còn thắc mắc về chính sách?</h5>
+                            <p class="text-muted mb-4">Liên hệ ngay với chúng tôi để được giải đáp chi tiết</p>
+                            <div class="d-flex gap-2 justify-content-center flex-wrap">
+                                <a href="tel:{{ get_setting('hotline', '0123456789') }}"
+                                   class="btn btn-warning">
+                                    <i class="bi bi-telephone-fill me-2"></i>
+                                    {{ get_setting('hotline', '0123 456 789') }}
+                                </a>
+                                <a href="{{ url_for('main.contact') }}"
+                                   class="btn btn-outline-warning">
+                                    <i class="bi bi-envelope me-2"></i>
+                                    Gửi câu hỏi
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
     </div>
 </section>
 
